@@ -12,7 +12,7 @@ describe('Customer', database([Customer], function () {
                 { firstName: 'Pesho', lastName: 'Stanchev' },
                 { firstName: 'Stancho', lastName: 'Stanchev' },
             ],
-            paymentMethods: [{ display: 'ase', 'type': 'Pigeon'}]
+            paymentMethods: [{ kind: 'CreditCard' }],
         });
 
         customer.save();

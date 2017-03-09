@@ -7,12 +7,15 @@
     "author": "Ivan Kerin <ikerin@gmail.com>",
     "license": "MIT",
     "dependencies": {
+        "async": "^2.1.5",
+        "braintree-as-promised": "^0.4.0",
         "mongoose": "^4.8.4"
     },
     "scripts": {
         "test": "node_modules/.bin/mocha"
     },
     "devDependencies": {
+        "braintree": "^2.0.2",
         "dotenv": "^4.0.0",
         "mocha": "^3.2.0"
     }
