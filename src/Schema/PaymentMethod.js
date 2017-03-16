@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 const ProcessorItem = require('./ProcessorItem');
 
 const PaymentMethod = new Schema({
-    id: String,
+    _id: String,
     processor: {
         type: ProcessorItem,
         default: ProcessorItem,
@@ -16,9 +16,8 @@ const PaymentMethod = new Schema({
     updatedAt: Date,
     kind: {
         type: String,
-        required: true,
     },
-}, { discriminatorKey: 'kind', _id: false });
+}, { discriminatorKey: 'kind' });
 
 const CreditCard = new Schema({
     maskedNumber: String,
@@ -26,10 +25,14 @@ const CreditCard = new Schema({
     cardholderName: String,
     expirationMonth: String,
     expirationYear: String,
+    countryOfIssuance: String,
+    issuingBank: String,
 }, { _id: false });
 
 const PayPalAccount = new Schema({
     email: String,
+    name: String,
+    payerId: String,
 }, { _id: false });
 
 const ApplePayCard = new Schema({
@@ -40,8 +43,10 @@ const ApplePayCard = new Schema({
 }, { _id: false });
 
 const AndroidPayCard = new Schema({
-    sourceDescription: String,
-    cardType: String,
+    sourceCardLast4: String,
+    virtualCardLast4: String,
+    sourceCardType: String,
+    virtualCardType: String,
     expirationMonth: String,
     expirationYear: String,
 }, { _id: false });

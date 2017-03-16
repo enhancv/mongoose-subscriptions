@@ -1,6 +1,5 @@
 const Customer = require('../Customer');
 const ProcessorItem = require('../Schema/ProcessorItem');
-const fp = require('lodash/fp');
 const { firstName, lastName, fullName } = require('../utils');
 
 function processorFields (customer) {
@@ -31,25 +30,36 @@ function fields (result) {
     return response;
 }
 
-function save (gateway, customer) {
-    const fields = processorFields(customer);
+function save (processor, customer) {
+    const data = processorFields(customer);
 
-    if (customer.processor.state === ProcessorItem.CHANGED) {
-        return gateway.customer.update(customer.processor.id, fields);
-    } else if (customer.processor.state === ProcessorItem.INITIAL) {
-        return gateway.customer.create(fields);
-    } else {
-        return Promise.resolve(null);
-    }
+    return new Promise ((resolve, reject) => {
+        function callback (err, result) {
+            if (err) {
+                reject(err);
+            } else if (result.success) {
+                processor.emit('event', 'Customer Saved', result);
+                resolve(Object.assign(customer, fields(result)));
+            } else {
+                reject(new Error(result.message));
+            }
+        }
+
+        if (customer.processor.state === ProcessorItem.CHANGED) {
+            processor.emit('event', 'Updating customer');
+            processor.gateway.customer.update(customer.processor.id, data, callback);
+        } else if (customer.processor.state === ProcessorItem.INITIAL) {
+            processor.emit('event', 'Creating customer');
+            processor.gateway.customer.create(data, callback);
+        } else {
+            resolve(customer);
+        }
+    });
 }
 
-function customer (gateway, customer) {
-    return save(gateway, customer).then(result => result ? Object.assign(customer, fields(result)) : customer);
-}
-
-customer.fields = fields;
-customer.processorFields = processorFields;
-customer.save = save;
-
-module.exports = customer;
+module.exports = {
+    fields: fields,
+    processorFields: processorFields,
+    save: save,
+};
 

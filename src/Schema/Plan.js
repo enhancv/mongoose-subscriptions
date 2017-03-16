@@ -3,20 +3,50 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const ProcessorItem = require('./ProcessorItem');
-const set = require('lodash/fp/set');
 
 const Plan = new Schema({
     processor: {
         type: ProcessorItem,
         default: ProcessorItem,
     },
-    name: String,
-    price: Number,
-    currency: String,
+    name: {
+        type: String,
+        required: true,
+    },
+    price: {
+        type: Number,
+        required: true,
+    },
+    currency: {
+        type: String,
+        required: true,
+        match: /[A-Za-z]{3}/,
+    },
     description: String,
     createdAt: Date,
     updatedAt: Date,
-    billingFrequency: String,
+    level: {
+        type: Number,
+        default: 1,
+    },
+    billingFrequency: {
+        type: Number,
+        required: true,
+    },
 });
+
+Plan.statics.sync = function sync (processor) {
+    return processor.plans()
+        .then(plans => {
+            return Promise.all(plans.map((plan) => {
+                return this
+                    .findOne({ 'processor.id': plan.processor.id })
+                    .then((existing) => {
+                        return (existing ? Object.assign(existing, plan) : new (this)(plan)).save();
+                    });
+            }))
+        });
+}
+
 
 module.exports = Plan;

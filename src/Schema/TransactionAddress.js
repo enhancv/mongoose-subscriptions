@@ -2,14 +2,8 @@
 
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const ProcessorItem = require('./ProcessorItem');
 
-const Address = new Schema({
-    _id: String,
-    processor: {
-        type: ProcessorItem,
-        default: ProcessorItem,
-    },
+const TransactionAddress = new Schema({
     company: String,
     name: String,
     country: String,
@@ -19,6 +13,6 @@ const Address = new Schema({
     postalCode: String,
     createdAt: Date,
     updatedAt: Date,
-});
+}, { _id: false });
 
-module.exports = Address;
+module.exports = TransactionAddress;

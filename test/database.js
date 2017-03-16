@@ -1,11 +1,9 @@
 'use strict';
 
+require('./dotenv');
 const mongoose = require('mongoose');
-const path = require('path');
-const dotenv = require('dotenv');
 
 mongoose.Promise = global.Promise;
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
 mongoose.connect(process.env.MONGO_URI);
 
 function clearModels(models) {

@@ -1,43 +1,38 @@
-const addressProcessor = require('./address');
-const customerProcessor = require('./customer');
-const paymentMethodProcessor = require('./paymentMethod');
-const subscriptionProcessor = require('./subscription');
-const transactionProcessor = require('./transaction');
-const set = require('lodash/fp/set');
+const EventEmitter = require('events');
+const plan = require('./plan');
+const customer = require('./customer');
+const address = require('./address');
+const paymentMethod = require('./paymentMethod');
+const subscription = require('./subscription');
+const transaction = require('./transaction');
 
-function sync (gateway, customer) {
-    return customer
-        .markChanged()
-        .save()
-        .then(customer => {
-            console.log('CUSTOMER');
+class BraintreeProcessor extends EventEmitter {
+    constructor (gateway) {
+        super();
+        this.gateway = gateway;
+    }
 
-            return customerProcessor(gateway, customer)
-        })
-        .then(customer => {
-            console.log('ADDRESSES');
+    saveMultiple (saveOne, customer, itemsName) {
+        return Promise
+            .all(customer[itemsName].map(item => saveOne(this, customer, item)))
+            .then(items => Object.assign(customer, { [itemsName]: items }))
+    }
 
-            return Promise
-                .all(customer.addresses.map(address => addressProcessor(gateway, customer, address)))
-                .then((addresses) => set('addresses', addresses, customer));
-        }).then(customer => {
-            console.log('PAYMENT METHODS');
+    save (customerObject) {
+        return customer.save(this, customerObject)
+            .then(customerObject => this.saveMultiple(address.save, customerObject, 'addresses'))
+            .then(customerObject => this.saveMultiple(paymentMethod.save, customerObject, 'paymentMethods'))
+            .then(customerObject => this.saveMultiple(subscription.save, customerObject, 'subscriptions'))
+            .then(customerObject => transaction.all(this, customerObject));
+    }
 
-            return Promise
-                .all(customer.paymentMethods.map(paymentMethod => paymentMethodProcessor(gateway, customer, paymentMethod)))
-                .then((paymentMethods) => set('paymentMethods', paymentMethods, customer));
-        }).then(customer => {
-            console.log('SUBSCRIPTIONS');
+    cancelSubscription (customerObject, subscription) {
+        return plan.cancel(this, customerObject, subscription);
+    }
 
-            return Promise
-                .all(customer.subscriptions.map(subscription => subscriptionProcessor(gateway, customer, subscription)))
-                .then((subscriptions) => set('subscriptions', subscriptions, customer));
-        }).then(customer => {
-            console.log('TRANSACTIONS');
-            return transactionProcessor.sync(gateway, customer).then(transactions => set('transactions', transactions, customer))
-        });
+    plans () {
+        return plan.all(this);
+    }
 }
 
-module.exports = {
-    sync: sync,
-}
+module.exports = BraintreeProcessor;

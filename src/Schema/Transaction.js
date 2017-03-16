@@ -3,29 +3,30 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const ProcessorItem = require('./ProcessorItem');
-const Address = require('./Address');
+const TransactionAddress = require('./TransactionAddress');
 const TransactionCustomer = require('./TransactionCustomer');
 const TransactionStatus = require('./TransactionStatus');
 const Descriptor = require('./Descriptor');
 
 const Transaction = new Schema({
-    id: String,
+    _id: String,
     processor: {
         type: ProcessorItem,
         default: ProcessorItem,
     },
+    kind: String,
     amount: Number,
     currency: String,
+    subscriptionId: String,
     planProcessorId: String,
-    refundTransactionId: String,
-    billing: Address,
+    refundedTransactionId: String,
+    billing: TransactionAddress,
     descriptor: Descriptor,
     customer: TransactionCustomer,
-    paymentInstrumentType: String,
     status: String,
     createdAt: Date,
     updatedAt: Date,
     statusHistory: [TransactionStatus],
-}, { _id: false });
+}, { descriminatorKey: 'kind' });
 
 module.exports = Transaction;

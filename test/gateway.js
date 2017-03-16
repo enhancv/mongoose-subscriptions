@@ -1,8 +1,8 @@
 'use strict';
 
+require('./dotenv');
+
 const braintree = require('braintree');
-const promised = require('braintree-as-promised');
-const dotenv = require('dotenv');
 
 const gateway = braintree.connect({
     environment: braintree.Environment.Sandbox,
@@ -11,4 +11,4 @@ const gateway = braintree.connect({
     privateKey: process.env.BRAINTREE_PRIVATE_KEY
 });
 
-module.exports = promised(gateway);
+module.exports = gateway;

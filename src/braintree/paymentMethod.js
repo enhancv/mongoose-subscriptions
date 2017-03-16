@@ -1,17 +1,21 @@
 const Customer = require('../Customer');
 const ProcessorItem = require('../Schema/ProcessorItem');
 const braintree = require('braintree');
+const { fullName } = require('../utils');
 
 function processorFields (customer, paymentMethod) {
-    const billingAddressId = ProcessorItem.findProcessorId(customer.addresses, paymentMethod.billingAddressId);
 
-    const response = {
-        billingAddressId: billingAddressId,
-    };
+    const response = {};
+
+    if (paymentMethod.billingAddressId) {
+        const billingAddress = customer.addresses.id(paymentMethod.billingAddressId);
+        response.billingAddressId = billingAddress.processor.id;
+    }
 
     if (paymentMethod.nonce) {
         response.paymentMethodNonce = paymentMethod.nonce;
     }
+
     if (customer.defaultPaymentMethodId === paymentMethod.id) {
         response.options = { makeDefault: true };
     }
@@ -27,6 +31,8 @@ function fields (result) {
         response = {
             kind: 'CreditCard',
             maskedNumber: paymentMethod.maskedNumber,
+            countryOfIssuance: paymentMethod.countryOfIssuance,
+            issuingBank: paymentMethod.issuingBank,
             cardType: paymentMethod.cardType,
             cardholderName: paymentMethod.cardholderName,
             expirationMonth: paymentMethod.expirationMonth,
@@ -35,6 +41,8 @@ function fields (result) {
     } else if (paymentMethod instanceof braintree.PayPalAccount) {
         response = {
             kind: 'PayPalAccount',
+            name: fullName(paymentMethod.payerInfo.firstName, paymentMethod.payerInfo.lastName),
+            payerId: paymentMethod.payerInfo.payerId,
             email: paymentMethod.email,
         };
     } else if (paymentMethod instanceof braintree.ApplePayCard) {
@@ -48,8 +56,10 @@ function fields (result) {
     } else if (paymentMethod instanceof braintree.AndroidPayCard) {
         response = {
             kind: 'AndroidPayCard',
-            cardType: paymentMethod.cardType,
-            sourceDescription: paymentMethod.sourceDescription,
+            sourceCardLast4: paymentMethod.sourceCardLast4,
+            virtualCardLast4: paymentMethod.virtualCardLast4,
+            sourceCardType: paymentMethod.sourceCardType,
+            virtualCardType: paymentMethod.virtualCardType,
             expirationMonth: paymentMethod.expirationMonth,
             expirationYear: paymentMethod.expirationYear,
         };
@@ -67,28 +77,36 @@ function fields (result) {
     return response;
 }
 
-function save (gateway, customer, paymentMethod, index) {
-    const fields = processorFields(customer, paymentMethod);
+function save (processor, customer, paymentMethod) {
+    const data = processorFields(customer, paymentMethod);
 
-    if (paymentMethod.processor.state === ProcessorItem.CHANGED) {
-        return gateway.paymentMethod.update(paymentMethod.processor.id, fields);
-    } else if (paymentMethod.processor.state === ProcessorItem.INITIAL) {
-        fields.customerId = customer.processor.id;
-        return gateway.paymentMethod.create(fields);
-    } else {
-        return Promise.resolve(null);
-    }
+    return new Promise((resolve, reject) => {
+        function callback (err, result) {
+            if (err) {
+                reject(err);
+            } else if (result.success) {
+                processor.emit('event', 'Payment Method Saved', result);
+                resolve(Object.assign(paymentMethod, fields(result), { nonce: null }));
+            } else {
+                reject(new Error(result.message));
+            }
+        }
+
+        if (paymentMethod.processor.state === ProcessorItem.CHANGED) {
+            processor.emit('event', 'Updating payment method');
+            processor.gateway.paymentMethod.update(paymentMethod.processor.id, data, callback);
+        } else if (paymentMethod.processor.state === ProcessorItem.INITIAL) {
+            data.customerId = customer.processor.id;
+            processor.emit('event', 'Creating payment method');
+            processor.gateway.paymentMethod.create(data, callback);
+        } else {
+            resolve(paymentMethod);
+        }
+    });
 }
 
-function paymentMethod (gateway, customer, paymentMethod) {
-    ProcessorItem.validateIsSaved(customer);
-
-    return save(gateway, customer, paymentMethod).then(result => result ? Object.assign(paymentMethod, fields(result)) : paymentMethod);
+module.exports = {
+    fields: fields,
+    processorFields: processorFields,
+    save: save,
 }
-
-paymentMethod.fields = fields;
-paymentMethod.processorFields = processorFields;
-paymentMethod.save = save;
-
-module.exports = paymentMethod;
-

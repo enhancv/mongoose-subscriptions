@@ -1,5 +1,4 @@
 const ProcessorItem = require('../Schema/ProcessorItem');
-const Plan = require('../Plan');
 
 function fields (braintreePlan) {
     return {
@@ -17,23 +16,19 @@ function fields (braintreePlan) {
     };
 }
 
-function sync (gateway) {
-    return gateway.plan.all()
-        .then((result) => {
-            return Promise.all(result.plans.map((braintreePlan) => {
-                return Plan
-                    .findOne({ 'processor.id': braintreePlan.id })
-                    .then(existing => {
-                        const plan = existing || new Plan({ processor: { id: braintreePlan.id }});
-                        Object.assign(plan, fields(braintreePlan));
-
-                        return plan.save();
-                    });
-            }));
+function all (processor) {
+    return new Promise((resolve, reject) => {
+        processor.gateway.plan.all((err, result) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(result.plans.map(braintreePlan => fields(braintreePlan)));
+            }
         });
+    });
 }
 
 module.exports = {
-    sync: sync,
     fields: fields,
-}
+    all: all,
+};

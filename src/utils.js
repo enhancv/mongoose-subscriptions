@@ -1,26 +1,38 @@
 'use strict';
 
-const head = require('lodash/fp/head');
-const words = require('lodash/fp/words');
-const capitalize = require('lodash/fp/capitalize');
-const join = require('lodash/fp/join');
-const tail = require('lodash/fp/tail');
-const trim = require('lodash/fp/trim');
-
 function firstName (fullName) {
-    return capitalize(head(words(fullName)));
+    return fullName ? fullName.substr(0, fullName.indexOf(' ')) : '';
 }
 
 function lastName (fullName) {
-    return join(' ', tail(words(fullName)));
+    return fullName ? fullName.substr(fullName.indexOf(' ') + 1).trim() : '';
 }
 
 function fullName (firstName, lastName) {
-    return trim(firstName + ' ' + lastName);
+    return (firstName + ' ' + lastName).trim();
+}
+
+function capitalize (string) {
+    return string ? string.charAt(0).toUpperCase() + string.slice(1) : '';
+}
+
+function originalValue (schema, options) {
+    function saveOriginalNamed (item) {
+        this.original = {};
+
+        options.fields.forEach(name => {
+            this.original[name] = item.toObject()[name];
+        });
+    }
+
+    schema.post('init', saveOriginalNamed);
+    schema.post('save', saveOriginalNamed);
 }
 
 module.exports = {
     firstName: firstName,
+    originalValue: originalValue,
+    capitalize: capitalize,
     lastName: lastName,
     fullName: fullName,
 };
