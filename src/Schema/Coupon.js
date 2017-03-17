@@ -1,6 +1,8 @@
 'use strict';
 
 const mongoose = require('mongoose');
+const CouponAmount = require('./Coupon/Amount');
+const CouponPercent = require('./Coupon/Percent');
 const Schema = mongoose.Schema;
 
 const Coupon = new Schema({
@@ -10,30 +12,21 @@ const Coupon = new Schema({
         type: Number,
         min: 1,
     },
-    kind: String,
     createdAt: Date,
     updatedAt: Date,
     startAt: Date,
     expireAt: Date,
-    usedCount: Number,
-    usedCountMax: Number,
+    usedCount: {
+        type: Number,
+        default: 0,
+        min: 0,
+    },
+    usedCountMax: {
+        type: Number,
+        min: 0,
+        default: Infinity,
+    }
 });
-
-const CouponAmount = new Schema({
-    amount: Number,
-});
-
-CouponAmount.methods.amount = function (subscription) {
-    return this.amount;
-}
-
-const CouponPercent = new Schema({
-    percent: Number,
-});
-
-CouponPercent.methods.amount = function (subscription) {
-    return subscription.plan.price * this.percent / 100;
-}
 
 Coupon.CouponAmount = CouponAmount;
 Coupon.CouponPercent = CouponPercent;

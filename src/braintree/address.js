@@ -1,5 +1,6 @@
 const Customer = require('../Customer');
 const ProcessorItem = require('../Schema/ProcessorItem');
+const Event = require('./Event');
 const { firstName, lastName, fullName } = require('../utils');
 
 function processorFields (address) {
@@ -44,7 +45,7 @@ function save (processor, customer, address) {
             if (err) {
                 reject(err);
             } else if (result.success) {
-                processor.emit('event', 'Address Saved', result);
+                processor.emit('event', new Event(Event.ADDRESS, Event.SAVED, result));
                 resolve(Object.assign(address, fields(result)));
             } else {
                 reject(new Error(result.message));
@@ -52,11 +53,11 @@ function save (processor, customer, address) {
         }
 
         if (address.processor.state === ProcessorItem.CHANGED) {
-            processor.emit('event', 'Updating address');
+            processor.emit('event', new Event(Event.ADDRESS, Event.UPDATING, data));
             processor.gateway.address.update(customer.processor.id, address.processor.id, data, callback);
         } else if (address.processor.state === ProcessorItem.INITIAL) {
             data.customerId = customer.processor.id;
-            processor.emit('event', 'Creating address');
+            processor.emit('event', new Event(Event.ADDRESS, Event.CREATING, data));
             processor.gateway.address.create(data, callback);
         } else {
             resolve(address);

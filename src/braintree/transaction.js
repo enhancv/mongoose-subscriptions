@@ -1,7 +1,12 @@
 const ProcessorItem = require('../Schema/ProcessorItem');
+const Event = require('./Event');
 const address = require('./address');
 const Plan = require('../Plan');
 const { fullName } = require('../utils');
+
+function filedsDiscount (discount) {
+    braintreeTransaction
+}
 
 function fields (customer, braintreeTransaction) {
     const subscription = customer.subscriptions.find(sub => sub.processor.id === braintreeTransaction.subscriptionId);
@@ -33,10 +38,17 @@ function fields (customer, braintreeTransaction) {
         } : null,
         createdAt: braintreeTransaction.createdAt,
         updatedAt: braintreeTransaction.updatedAt,
+        discounts: braintreeTransaction.discounts.map(discount => {
+            return {
+                __t: discount.id,
+                amount: discount.amount,
+                name: discount.name,
+            }
+        })
     };
 
     if (braintreeTransaction.paymentInstrumentType === 'credit_card') {
-        result.kind = 'TransactionCreditCard';
+        result.__t = 'TransactionCreditCard';
         result.maskedNumber = braintreeTransaction.creditCard.maskedNumber;
         result.countryOfIssuance = braintreeTransaction.creditCard.countryOfIssuance;
         result.issuingBank = braintreeTransaction.creditCard.issuingBank;
@@ -45,18 +57,18 @@ function fields (customer, braintreeTransaction) {
         result.expirationMonth = braintreeTransaction.creditCard.expirationMonth;
         result.expirationYear = braintreeTransaction.creditCard.expirationYear;
     } else if (braintreeTransaction.paymentInstrumentType === 'paypal_account') {
-        result.kind = 'TransactionPayPalAccount';
+        result.__t = 'TransactionPayPalAccount';
         result.name = fullName(braintreeTransaction.paypalAccount.payerFirstName, braintreeTransaction.paypalAccount.payerLastName);
         result.payerId = braintreeTransaction.paypalAccount.payerId;
         result.email = braintreeTransaction.paypalAccount.payerEmail;
     } else if (braintreeTransaction.paymentInstrumentType === 'apple_pay_card') {
-        result.kind = 'TransactionApplePayCard';
+        result.__t = 'TransactionApplePayCard';
         result.cardType = braintreeTransaction.applePayCard.cardType;
         result.paymentInstrumentName = braintreeTransaction.applePayCard.paymentInstrumentName;
         result.expirationMonth = braintreeTransaction.applePayCard.expirationMonth;
         result.expirationYear = braintreeTransaction.applePayCard.expirationYear;
     } else if (braintreeTransaction.paymentInstrumentType === 'android_pay_card') {
-        result.kind = 'AndroidPayCard',
+        result.__t = 'AndroidPayCard',
         result.sourceCardLast4 = braintreeTransaction.androidPayCard.sourceCardLast4;
         result.virtualCardLast4 = braintreeTransaction.androidPayCard.virtualCardLast4;
         result.sourceCardType = braintreeTransaction.androidPayCard.sourceCardType;
@@ -72,6 +84,7 @@ function all (processor, customer) {
     ProcessorItem.validateIsSaved(customer);
 
     return new Promise((resolve, reject) => {
+        processor.emit('event', new Event(Event.TRANSACTION, Event.LOADING));
         processor.gateway.transaction.search(
             function (search) {
                 return search.customerId().is(customer.processor.id);
@@ -80,6 +93,7 @@ function all (processor, customer) {
                 if (err) {
                     reject(err);
                 } else {
+                    processor.emit('event', new Event(Event.TRANSACTION, Event.LOADED, braintreeTransactions));
                     const length = braintreeTransactions.length();
                     let current = 0;
 

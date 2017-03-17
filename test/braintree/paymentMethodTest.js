@@ -27,13 +27,13 @@ describe('braintreePaymentMethod', function () {
             paymentMethods: [
                 {
                     _id: 'three',
-                    kind: 'CreditCard',
+                    __t: 'CreditCard',
                     billingAddressId: 'one',
                     processor: { id: 'gpjt3m', state: 'saved' },
                 },
                 {
                     _id: 'four',
-                    kind: 'PayPalAccount',
+                    __t: 'PayPalAccount',
                     billingAddressId: 'one',
                     processor: { id: 'test-token', state: 'saved' },
                 },
@@ -115,7 +115,7 @@ describe('braintreePaymentMethod', function () {
         const fields = braintreePaymentMethod.fields({ creditCard: paymentMethod, paymentMethod: paymentMethod });
 
         const expected = {
-            kind: 'CreditCard',
+            __t: 'CreditCard',
             maskedNumber: '4111111******1111',
             countryOfIssuance: 'GBR',
             issuingBank: 'HSBC Bank PLC',
@@ -151,7 +151,7 @@ describe('braintreePaymentMethod', function () {
         const fields = braintreePaymentMethod.fields({ payPalAccount: paymentMethod, paymentMethod: paymentMethod });
 
         const expected = {
-            kind: 'PayPalAccount',
+            __t: 'PayPalAccount',
             email: 'test@example.com',
             name: 'Pesho Peshev',
             payerId: 'H80319283012',
@@ -182,7 +182,7 @@ describe('braintreePaymentMethod', function () {
         const fields = braintreePaymentMethod.fields({ applePayCard: paymentMethod, paymentMethod: paymentMethod });
 
         const expected = {
-            kind: 'ApplePayCard',
+            __t: 'ApplePayCard',
             paymentInstrumentName: 'Visa1111',
             cardType: 'Apple Pay - Visa',
             expirationMonth: '12',
@@ -214,7 +214,7 @@ describe('braintreePaymentMethod', function () {
         const fields = braintreePaymentMethod.fields({ androidPayCard: paymentMethod, paymentMethod: paymentMethod });
 
         const expected = {
-            kind: 'AndroidPayCard',
+            __t: 'AndroidPayCard',
             sourceCardLast4: '1111',
             virtualCardLast4: '1111',
             sourceCardType: 'Visa',
@@ -246,8 +246,9 @@ describe('braintreePaymentMethod', function () {
 
         return braintreePaymentMethod.save(processor, this.customer, this.customer.paymentMethods[0])
             .then(address => {
-                assert.ok(gateway.paymentMethod.create.calledOnce);
-                assert.ok(gateway.paymentMethod.create.calledWith(sinon.match.has('customerId', '64601260')));
+                sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('objectName', 'paymentMethod').and(sinon.match.has('action', 'saved')));
+                sinon.assert.calledOnce(gateway.paymentMethod.create);
+                sinon.assert.calledWith(gateway.paymentMethod.create, sinon.match.has('customerId', '64601260'));
                 assert.deepEqual(address.processor.toObject(), { id: 'gpjt3m', state: ProcessorItem.SAVED });
             });
     });
@@ -267,8 +268,9 @@ describe('braintreePaymentMethod', function () {
 
         return braintreePaymentMethod.save(processor, this.customer, this.customer.paymentMethods[0])
             .then(paymentMethod => {
-                assert.ok(gateway.paymentMethod.update.calledOnce);
-                assert.ok(gateway.paymentMethod.update.calledWith('gpjt3m', sinon.match.object));
+                sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('objectName', 'paymentMethod').and(sinon.match.has('action', 'saved')));
+                sinon.assert.calledOnce(gateway.paymentMethod.update);
+                sinon.assert.calledWith(gateway.paymentMethod.update, 'gpjt3m', sinon.match.object);
                 assert.deepEqual('Pesho Peshev', paymentMethod.cardholderName);
             });
     });
@@ -290,7 +292,28 @@ describe('braintreePaymentMethod', function () {
 
         return braintreePaymentMethod.save(processor, this.customer, this.customer.paymentMethods[0])
             .catch(error => {
+                sinon.assert.neverCalledWith(processor.emit, 'event', sinon.match.has('action', 'saved'));
                 assert.equal(error, apiError);
+            });
+    });
+
+    it('save should send a rejection on api result failure', function () {
+        const gateway = {
+            paymentMethod: {
+                update: sinon.stub().callsArgWith(2, null, { success: false, message: 'some error' }),
+            }
+        };
+        const processor = {
+            gateway: gateway,
+            emit: sinon.spy(),
+        };
+
+        this.customer.paymentMethods[0].processor.state = ProcessorItem.CHANGED;
+
+        return braintreePaymentMethod.save(processor, this.customer, this.customer.paymentMethods[0])
+            .catch(error => {
+                sinon.assert.neverCalledWith(processor.emit, 'event', sinon.match.has('action', 'saved'));
+                assert.equal(error.message, 'some error');
             });
     });
 });

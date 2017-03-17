@@ -6,7 +6,12 @@ const ProcessorItem = require('./ProcessorItem');
 const TransactionAddress = require('./TransactionAddress');
 const TransactionCustomer = require('./TransactionCustomer');
 const TransactionStatus = require('./TransactionStatus');
+const TransactionDiscount = require('./TransactionDiscount');
 const Descriptor = require('./Descriptor');
+const CreditCard = require('./Transaction/CreditCard');
+const PayPalAccount = require('./Transaction/PayPalAccount');
+const ApplePayCard = require('./Transaction/ApplePayCard');
+const AndroidPayCard = require('./Transaction/AndroidPayCard');
 
 const Transaction = new Schema({
     _id: String,
@@ -14,19 +19,24 @@ const Transaction = new Schema({
         type: ProcessorItem,
         default: ProcessorItem,
     },
-    kind: String,
     amount: Number,
     currency: String,
     subscriptionId: String,
     planProcessorId: String,
     refundedTransactionId: String,
     billing: TransactionAddress,
+    discounts: [TransactionDiscount],
     descriptor: Descriptor,
     customer: TransactionCustomer,
     status: String,
     createdAt: Date,
     updatedAt: Date,
     statusHistory: [TransactionStatus],
-}, { descriminatorKey: 'kind' });
+});
+
+Transaction.CreditCard = CreditCard;
+Transaction.PayPalAccount = PayPalAccount;
+Transaction.ApplePayCard = ApplePayCard;
+Transaction.AndroidPayCard = AndroidPayCard;
 
 module.exports = Transaction;

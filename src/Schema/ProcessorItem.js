@@ -3,6 +3,7 @@
 const mongoose = require('mongoose');
 const find = require('lodash/fp/find');
 const get = require('lodash/fp/get');
+
 const Schema = mongoose.Schema;
 
 const INITIAL = 'inital';

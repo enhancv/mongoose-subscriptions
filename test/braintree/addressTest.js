@@ -113,8 +113,9 @@ describe('braintreeAddress', function () {
 
         return braintreeAddress.save(processor, this.customer, this.customer.addresses[0])
             .then(address => {
-                assert.ok(gateway.address.create.calledOnce);
-                assert.ok(gateway.address.create.calledWith(sinon.match.has('customerId', '64601260')));
+                sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('objectName', 'address').and(sinon.match.has('action', 'saved')));
+                sinon.assert.calledOnce(gateway.address.create);
+                sinon.assert.calledWith(gateway.address.create, sinon.match.has('customerId', '64601260'));
                 assert.deepEqual(address.processor.toObject(), { id: 'test-id', state: ProcessorItem.SAVED });
             });
     });
@@ -134,8 +135,9 @@ describe('braintreeAddress', function () {
 
         return braintreeAddress.save(processor, this.customer, this.customer.addresses[0])
             .then(address => {
-                assert.ok(gateway.address.update.calledOnce);
-                assert.ok(gateway.address.update.calledWith('64601260', 'test-id', sinon.match.object));
+                sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('objectName', 'address').and(sinon.match.has('action', 'saved')));
+                sinon.assert.calledOnce(gateway.address.update);
+                sinon.assert.calledWith(gateway.address.update, '64601260', 'test-id', sinon.match.object);
                 assert.deepEqual('Example company', address.company);
             });
     });
@@ -157,7 +159,28 @@ describe('braintreeAddress', function () {
 
         return braintreeAddress.save(processor, this.customer, this.customer.addresses[0])
             .catch(error => {
+                sinon.assert.neverCalledWith(processor.emit, 'event', sinon.match.has('action', 'saved'));
                 assert.equal(error, apiError);
+            });
+    });
+
+    it('save should send a rejection on api result failure', function () {
+        const gateway = {
+            address: {
+                update: sinon.stub().callsArgWith(3, null, { success: false, message: 'some error' }),
+            }
+        };
+        const processor = {
+            gateway: gateway,
+            emit: sinon.spy(),
+        };
+
+        this.customer.addresses[0].processor.state = ProcessorItem.CHANGED;
+
+        return braintreeAddress.save(processor, this.customer, this.customer.addresses[0])
+            .catch(error => {
+                sinon.assert.neverCalledWith(processor.emit, 'event', sinon.match.has('action', 'saved'));
+                assert.equal(error.message, 'some error');
             });
     });
 });

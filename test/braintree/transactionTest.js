@@ -24,7 +24,7 @@ describe('braintreeTransaction', function () {
             paymentMethods: [
                 {
                     _id: 'three',
-                    kind: 'CreditCard',
+                    __t: 'CreditCard',
                     billingAddressId: 'one',
                     processor: { id: 'gpjt3m', state: 'saved' },
                 },
@@ -279,6 +279,13 @@ describe('braintreeTransaction', function () {
                 email: 'marinov1002@example.com',
                 phone: '+359887111111',
             },
+            discounts: [
+                {
+                    amount: 0.00,
+                    __t: "promocode",
+                    name: "Signup promocode",
+                }
+            ],
             currency: 'USD',
             status: 'settled',
             statusHistory: [
@@ -318,7 +325,7 @@ describe('braintreeTransaction', function () {
             },
             createdAt: '2016-08-31T10:39:00Z',
             updatedAt: '2016-08-31T14:03:31Z',
-            kind: 'TransactionPayPalAccount',
+            __t: 'TransactionPayPalAccount',
             name: 'Pesho Peshev',
             payerId: 'HX2WMHJKFDF902',
             email: 'f0rceman@example.com',
@@ -520,6 +527,7 @@ describe('braintreeTransaction', function () {
                     transactionSource: ''
                 }
             ],
+            discounts: [],
             descriptor: {
                 name: null,
                 phone: null,
@@ -527,7 +535,7 @@ describe('braintreeTransaction', function () {
             },
             createdAt: '2016-08-03T13:09:58Z',
             updatedAt: '2016-08-03T23:40:08Z',
-            kind: 'TransactionCreditCard',
+            __t: 'TransactionCreditCard',
             maskedNumber: '411111******1111',
             countryOfIssuance: 'GBR',
             issuingBank: 'HSBC Bank PLC',
@@ -567,8 +575,8 @@ describe('braintreeTransaction', function () {
 
         return braintreeTransaction.all(processor, this.customer)
             .then(customer => {
-                assert.ok(gateway.transaction.search.calledOnce);
-                assert.ok(result.each.calledOnce);
+                sinon.assert.calledOnce(gateway.transaction.search);
+                sinon.assert.calledOnce(result.each);
                 assert.equal(this.fieldsPayPal.processor.id, customer.transactions[0].processor.id);
             });
     });

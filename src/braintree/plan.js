@@ -1,4 +1,5 @@
 const ProcessorItem = require('../Schema/ProcessorItem');
+const Event = require('./Event');
 
 function fields (braintreePlan) {
     return {
@@ -18,10 +19,12 @@ function fields (braintreePlan) {
 
 function all (processor) {
     return new Promise((resolve, reject) => {
+        processor.emit('event', new Event(Event.PLAN, Event.LOADEDING));
         processor.gateway.plan.all((err, result) => {
             if (err) {
                 reject(err);
             } else {
+                processor.emit('event', new Event(Event.PLAN, Event.LOADED, result));
                 resolve(result.plans.map(braintreePlan => fields(braintreePlan)));
             }
         });

@@ -30,15 +30,16 @@ Customer.path('paymentMethods').discriminator('PayPalAccount', PaymentMethod.Pay
 Customer.path('paymentMethods').discriminator('ApplePayCard', PaymentMethod.ApplePayCard);
 Customer.path('paymentMethods').discriminator('AndroidPayCard', PaymentMethod.AndroidPayCard);
 
-Customer.path('transactions').discriminator('TransactionCreditCard', PaymentMethod.CreditCard);
-Customer.path('transactions').discriminator('TransactionPayPalAccount', PaymentMethod.PayPalAccount);
-Customer.path('transactions').discriminator('TransactionApplePayCard', PaymentMethod.ApplePayCard);
-Customer.path('transactions').discriminator('TransactionAndroidPayCard', PaymentMethod.AndroidPayCard);
+Customer.path('transactions').discriminator('TransactionCreditCard', Transaction.CreditCard);
+Customer.path('transactions').discriminator('TransactionPayPalAccount', Transaction.PayPalAccount);
+Customer.path('transactions').discriminator('TransactionApplePayCard', Transaction.ApplePayCard);
+Customer.path('transactions').discriminator('TransactionAndroidPayCard', Transaction.AndroidPayCard);
 
 Customer.methods.markChanged = function () {
     if (this.processor.id && this.isModified('name email phone ipAddress defaultPaymentMethodId')) {
         this.processor.state = ProcessorItem.CHANGED;
     }
+
     ['addresses', 'subscriptions', 'paymentMethods'].forEach(collectionName => {
         this[collectionName].forEach((item, index) => {
             if (this.processor.id && this.isModified(`${collectionName}[${index}]`)) {
@@ -58,10 +59,7 @@ Customer.methods.cancel = function cancel (processor, id) {
 Customer.methods.saveProcessor = function saveProcessor (processor) {
     this.markChanged();
 
-    return processor.save(this).then(customer => {
-        // Diff old discounts with new discounts to find out Coupons to update
-        return customer.save();
-    });
+    return processor.save(this).then(customer => customer.save());
 }
 
 Customer.methods.activeSubscriptions = function activeSubscriptions (activeDate) {
@@ -77,7 +75,5 @@ Customer.methods.activeSubscriptions = function activeSubscriptions (activeDate)
 Customer.methods.subscription = function subscription (activeDate) {
     return this.activeSubscriptions(activeDate)[0];
 }
-
-Customer.plugin(originalValue, { fields: ['transactions', 'subscriptions', 'paymentMethods', 'addresses'] });
 
 module.exports = Customer;

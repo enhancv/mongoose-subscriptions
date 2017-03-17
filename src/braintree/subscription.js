@@ -1,5 +1,6 @@
 const Customer = require('../Customer');
 const ProcessorItem = require('../Schema/ProcessorItem');
+const Event = require('./Event');
 
 function processorFieldsDiscounts (originalDiscounts, discounts) {
     const result = {};
@@ -8,7 +9,7 @@ function processorFieldsDiscounts (originalDiscounts, discounts) {
         .filter(discount => discount.processor.id)
         .map(discount => {
             return {
-                existingId: discount.kind,
+                existingId: discount.__t,
                 amount: discount.amount,
                 numberOfBillingCycles: discount.numberOfBillingCycles,
             };
@@ -22,7 +23,7 @@ function processorFieldsDiscounts (originalDiscounts, discounts) {
         .filter(discount => !discount.processor.id)
         .map(discount => {
             return {
-                inheritedFromId: discount.kind,
+                inheritedFromId: discount.__t,
                 amount: discount.amount,
                 numberOfBillingCycles: discount.numberOfBillingCycles,
             };
@@ -33,7 +34,7 @@ function processorFieldsDiscounts (originalDiscounts, discounts) {
     }
 
     const remove = originalDiscounts
-        .filter(original => original.processor.id && !discounts.find(discount => original.kind === discount.kind))
+        .filter(original => original.processor.id && !discounts.find(discount => original.__t === discount.__t))
         .map(discount => discount.processor.id);
 
     if (remove.length) {
@@ -77,9 +78,9 @@ function processorFields (customer, subscription) {
 
 function fieldsDiscounts (originalDiscounts, resultDiscounts) {
     return resultDiscounts.map(discount => {
-        const original = originalDiscounts.find(original => original.processor.id === discount.id || original.kind === discount.id);
+        const original = originalDiscounts.find(original => original.processor.id === discount.id || original.__t === discount.id);
         const newDiscount = {
-            kind: 'DiscountAmount',
+            __t: 'DiscountAmount',
             amount: discount.amount,
             numberOfBillingCycles: discount.numberOfBillingCycles,
         }
@@ -93,18 +94,20 @@ function fieldsDiscounts (originalDiscounts, resultDiscounts) {
 
 function fields (originalDiscounts, result) {
     const subscription = result.subscription;
+    const discounts = fieldsDiscounts(originalDiscounts, subscription.discounts);
     const response = {
         processor: {
             id: subscription.id,
             state: ProcessorItem.SAVED,
         },
         planProcessorId: subscription.planId,
-        discounts: fieldsDiscounts(originalDiscounts, subscription.discounts),
+        discounts: discounts,
         createdAt: subscription.createdAt,
         updatedAt: subscription.updatedAt,
         paidThroughDate: subscription.paidThroughDate,
         descriptor: subscription.descriptor,
         status: subscription.status,
+        price: subscription.price,
         firstBillingDate: subscription.firstBillingDate,
         nextBillingDate: subscription.nextBillingDate,
     };
@@ -132,7 +135,7 @@ function save (processor, customer, subscription) {
             if (err) {
                 reject(err);
             } else if (result.success) {
-                processor.emit('event', 'Subscription Saved');
+                processor.emit('event', new Event(Event.SUBSCRIPTION, Event.SAVED, result));
                 resolve(Object.assign(subscription, fields(subscription.discounts, result)));
             } else {
                 reject(new Error(result.message));
@@ -142,10 +145,10 @@ function save (processor, customer, subscription) {
         if (subscription.processor.state === ProcessorItem.LOCAL) {
             resolve(subscription);
         } else if (subscription.processor.state === ProcessorItem.CHANGED) {
-            processor.emit('event', 'Updating subscription');
+            processor.emit('event', new Event(Event.SUBSCRIPTION, Event.UPDATING, data));
             processor.gateway.subscription.update(subscription.processor.id, data, callback);
         } else if (subscription.processor.state === ProcessorItem.INITIAL) {
-            processor.emit('event', 'Creating subscription');
+            processor.emit('event', new Event(Event.SUBSCRIPTION, Event.CREATING, data));
             processor.gateway.subscription.create(data, callback);
         } else {
             resolve(subscription);

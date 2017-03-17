@@ -85,7 +85,7 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
             paymentMethods: [
                 {
                     _id: 'three',
-                    kind: 'CreditCard',
+                    __t: 'CreditCard',
                     billingAddressId: 'one',
                     processor: { id: 'gpjt3m', state: 'saved' },
                 },
@@ -102,17 +102,20 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
                     },
                     discounts: [
                         {
-                            processor: { id: 'DiscountAmount', state: 'saved' },
-                            kind: 'DiscountAmount',
+                            processor: {
+                                id: 'DiscountAmount',
+                                state: 'saved',
+                            },
+                            __t: 'DiscountAmount',
                             amount: 20,
                             numberOfBillingCycles: 2,
                             name: 'Test',
                         },
                         {
                             processor: {},
-                            kind: 'DiscountCoupon',
-                            amount: 20,
-                            coupon: 'test',
+                            __t: 'DiscountPercent',
+                            amount: 10,
+                            percent: 20,
                             numberOfBillingCycles: 1,
                             name: 'Test',
                         },
@@ -127,7 +130,7 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
     it('processorFieldsDiscounts when deleting', function () {
         const originalDiscounts = [{
             processor: { id: 'DiscountAmount', state: 'saved' },
-            kind: 'DiscountAmount',
+            __t: 'DiscountAmount',
             amount: 10,
             numberOfBillingCycles: 1,
             name: 'Test',
@@ -146,7 +149,7 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
 
         const newDiscount = {
             processor: {},
-            kind: 'DiscountAmount',
+            __t: 'DiscountAmount',
             numberOfBillingCycles: 1,
             amount: 20,
             name: 'Test2',
@@ -169,7 +172,7 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
     it('processorFieldsDiscounts when updating', function () {
         const originalDiscounts = [{
             processor: { id: 'DiscountAmount', state: 'saved' },
-            kind: 'DiscountAmount',
+            __t: 'DiscountAmount',
             amount: 10,
             numberOfBillingCycles: 1,
             name: 'Test',
@@ -177,7 +180,7 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
 
         const discounts = [{
             processor: { id: 'DiscountAmount', state: 'saved' },
-            kind: 'DiscountAmount',
+            __t: 'DiscountAmount',
             amount: 20,
             numberOfBillingCycles: 2,
             name: 'Test',
@@ -200,14 +203,14 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
         const originalDiscounts = [
             {
                 processor: { id: 'DiscountAmount', state: 'saved' },
-                kind: 'DiscountAmount',
+                __t: 'DiscountAmount',
                 amount: 10,
                 numberOfBillingCycles: 1,
                 name: 'Test',
             },
             {
                 processor: { id: 'PercentDiscount', state: 'saved' },
-                kind: 'PercentDiscount',
+                __t: 'PercentDiscount',
                 amount: 7,
                 percent: 5,
                 numberOfBillingCycles: 1,
@@ -218,14 +221,14 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
         const discounts = [
             {
                 processor: { id: 'DiscountAmount', state: 'saved' },
-                kind: 'DiscountAmount',
+                __t: 'DiscountAmount',
                 amount: 20,
                 numberOfBillingCycles: 2,
                 name: 'Test',
             },
             {
                 processor: {},
-                kind: 'DiscountCoupon',
+                __t: 'DiscountCoupon',
                 amount: 20,
                 coupon: 'test',
                 numberOfBillingCycles: 1,
@@ -276,8 +279,8 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
                     ],
                     add: [
                         {
-                            inheritedFromId: 'DiscountCoupon',
-                            amount: 20,
+                            inheritedFromId: 'DiscountPercent',
+                            amount: 10,
                             numberOfBillingCycles: 1,
                         },
                     ],
@@ -292,14 +295,14 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
         const originalDiscounts = [
             {
                 processor: { id: 'DiscountAmount', state: 'saved' },
-                kind: 'DiscountAmount',
+                __t: 'DiscountAmount',
                 amount: 20,
                 numberOfBillingCycles: 2,
                 name: 'Test',
             },
             {
                 processor: {},
-                kind: 'DiscountCoupon',
+                __t: 'DiscountCoupon',
                 amount: 20,
                 coupon: 'test',
                 numberOfBillingCycles: 1,
@@ -340,14 +343,14 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
         const expected = [
             {
                 processor: { id: 'DiscountAmount', state: 'saved' },
-                kind: 'DiscountAmount',
+                __t: 'DiscountAmount',
                 amount: 20,
                 numberOfBillingCycles: 2,
                 name: 'Test',
             },
             {
                 processor: { id: 'DiscountCoupon', state: 'saved' },
-                kind: 'DiscountCoupon',
+                __t: 'DiscountCoupon',
                 amount: 20,
                 coupon: 'test',
                 numberOfBillingCycles: 1,
@@ -355,7 +358,7 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
             },
             {
                 processor: { id: 'DiscountPercent', state: 'saved' },
-                kind: 'DiscountAmount',
+                __t: 'DiscountAmount',
                 amount: '2.00',
                 numberOfBillingCycles: 1,
             },
@@ -370,7 +373,7 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
         const originalDiscounts = [
             {
                 processor: {},
-                kind: 'DiscountAmount',
+                __t: 'DiscountAmount',
                 amount: 20,
                 numberOfBillingCycles: 2,
                 name: 'Test',
@@ -385,12 +388,13 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
             [
                 {
                     processor: { id: 'DiscountAmount', state: 'saved' },
-                    kind: 'DiscountAmount',
+                    __t: 'DiscountAmount',
                     amount: 20,
                     numberOfBillingCycles: 2,
                     name: 'Test'
                 }
             ],
+            price: 14.9,
             planProcessorId: 'monthly',
             createdAt: '2016-09-29T16:12:26Z',
             updatedAt: '2016-09-30T12:25:18Z',
@@ -426,7 +430,8 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
             .save()
             .then(customer => braintreeSubscription.save(processor, customer, customer.subscriptions[0]))
             .then(subscription => {
-                assert.ok(gateway.subscription.create.calledOnce);
+                sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('objectName', 'subscription').and(sinon.match.has('action', 'saved')));
+                sinon.assert.calledOnce(gateway.subscription.create);
                 assert.deepEqual(subscription.processor.toObject(), { id: 'gzsxjb', state: 'saved' });
             });
     });
@@ -448,7 +453,8 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
             .save()
             .then(customer => braintreeSubscription.save(processor, customer, customer.subscriptions[0]))
             .then(subscription => {
-                assert.ok(gateway.subscription.update.calledWith('gzsxjb'));
+                sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('objectName', 'subscription').and(sinon.match.has('action', 'saved')));
+                sinon.assert.calledWith(gateway.subscription.update, 'gzsxjb');
                 assert.deepEqual(new Date("2016-10-28"), subscription.paidThroughDate);
             });
     });
@@ -472,7 +478,30 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
             .save()
             .then(customer => braintreeSubscription.save(processor, customer, customer.subscriptions[0]))
             .catch(error => {
+                sinon.assert.neverCalledWith(processor.emit, 'event', sinon.match.has('action', 'saved'));
                 assert.equal(error, apiError);
+            });
+    });
+
+    it('save should send a rejection on api result failure', function () {
+        const gateway = {
+            subscription: {
+                update: sinon.stub().callsArgWith(2, null, { success: false, message: 'some error' }),
+            },
+        };
+        const processor = {
+            gateway: gateway,
+            emit: sinon.spy(),
+        };
+
+        this.customer.subscriptions[0].processor.state = ProcessorItem.CHANGED;
+
+        return this.customer
+            .save()
+            .then(customer => braintreeSubscription.save(processor, customer, customer.subscriptions[0]))
+            .catch(error => {
+                sinon.assert.neverCalledWith(processor.emit, 'event', sinon.match.has('action', 'saved'));
+                assert.equal(error.message, 'some error');
             });
     });
 }));

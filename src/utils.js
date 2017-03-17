@@ -27,6 +27,18 @@ function originalValue (schema, options) {
 
     schema.post('init', saveOriginalNamed);
     schema.post('save', saveOriginalNamed);
+
+    schema.methods.added = function (name) {
+        return this[name].filter(item => !this.original[name].id(item._id));
+    }
+
+    schema.methods.removed = function (name) {
+        return this.original[name].filter(item => !this[name].id(item._id));
+    }
+
+    schema.methods.updated = function (name) {
+        return this[name].filter(item => this.original[name].id(item._id));
+    }
 }
 
 module.exports = {
