@@ -7,7 +7,7 @@ const DiscountAmount = require('./Discount/Amount');
 const DiscountPercent = require('./Discount/Percent');
 const DiscountInviter = require('./Discount/Inviter');
 const DiscountCoupon = require('./Discount/Coupon');
-const originalValue = require('../utils').originalValue;
+const originals = require('mongoose-originals');
 
 const Discount = new Schema({
     amount: Number,
@@ -32,6 +32,6 @@ Discount.DiscountPercent = DiscountPercent;
 Discount.DiscountInviter = DiscountInviter;
 Discount.DiscountCoupon = DiscountCoupon;
 
-Discount.plugin(originalValue, { fields: ['processor'] })
+Discount.plugin(originals, { fields: ['processor'] })
 
 module.exports = Discount;

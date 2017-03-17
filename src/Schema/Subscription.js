@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const ProcessorItem = require('./ProcessorItem');
 const Descriptor = require('./Descriptor');
-const originalValue = require('../utils').originalValue;
+const originals = require('mongoose-originals');
 const Discount = require('./Discount');
 
 const Subscription = new Schema({
@@ -47,7 +47,7 @@ Subscription.methods.addDiscounts = function find (callback) {
     return this;
 };
 
-Subscription.plugin(originalValue, { fields: ['discounts'] });
+Subscription.plugin(originals, { fields: ['discounts'] });
 
 Subscription.path('discounts').discriminator('DiscountAmount', Discount.DiscountAmount);
 Subscription.path('discounts').discriminator('DiscountPercent', Discount.DiscountPercent);

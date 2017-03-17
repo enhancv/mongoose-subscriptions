@@ -1,4 +1,3 @@
-const Customer = require('../Customer');
 const ProcessorItem = require('../Schema/ProcessorItem');
 const Event = require('./Event');
 const { firstName, lastName, fullName } = require('../utils');

@@ -3,10 +3,10 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const ProcessorItem = require('./ProcessorItem');
-const TransactionAddress = require('./TransactionAddress');
-const TransactionCustomer = require('./TransactionCustomer');
-const TransactionStatus = require('./TransactionStatus');
-const TransactionDiscount = require('./TransactionDiscount');
+const TransactionAddress = require('./Transaction/Address');
+const TransactionCustomer = require('./Transaction/Customer');
+const TransactionStatus = require('./Transaction/Status');
+const TransactionDiscount = require('./Transaction/Discount');
 const Descriptor = require('./Descriptor');
 const CreditCard = require('./Transaction/CreditCard');
 const PayPalAccount = require('./Transaction/PayPalAccount');
@@ -34,9 +34,14 @@ const Transaction = new Schema({
     statusHistory: [TransactionStatus],
 });
 
-Transaction.CreditCard = CreditCard;
-Transaction.PayPalAccount = PayPalAccount;
-Transaction.ApplePayCard = ApplePayCard;
-Transaction.AndroidPayCard = AndroidPayCard;
+Transaction.TransactionCreditCard = CreditCard;
+Transaction.TransactionPayPalAccount = PayPalAccount;
+Transaction.TransactionApplePayCard = ApplePayCard;
+Transaction.TransactionAndroidPayCard = AndroidPayCard;
+
+Transaction.TransactionAddress = TransactionAddress;
+Transaction.TransactionCustomer = TransactionCustomer;
+Transaction.TransactionStatus = TransactionStatus;
+Transaction.TransactionDiscount = TransactionDiscount;
 
 module.exports = Transaction;

@@ -7,7 +7,6 @@ const PaymentMethod = require('./PaymentMethod');
 const Subscription = require('./Subscription');
 const Transaction = require('./Transaction');
 const ProcessorItem = require('./ProcessorItem');
-const originalValue = require('../utils').originalValue;
 
 const Customer = new Schema({
     processor: {
@@ -30,10 +29,10 @@ Customer.path('paymentMethods').discriminator('PayPalAccount', PaymentMethod.Pay
 Customer.path('paymentMethods').discriminator('ApplePayCard', PaymentMethod.ApplePayCard);
 Customer.path('paymentMethods').discriminator('AndroidPayCard', PaymentMethod.AndroidPayCard);
 
-Customer.path('transactions').discriminator('TransactionCreditCard', Transaction.CreditCard);
-Customer.path('transactions').discriminator('TransactionPayPalAccount', Transaction.PayPalAccount);
-Customer.path('transactions').discriminator('TransactionApplePayCard', Transaction.ApplePayCard);
-Customer.path('transactions').discriminator('TransactionAndroidPayCard', Transaction.AndroidPayCard);
+Customer.path('transactions').discriminator('TransactionCreditCard', Transaction.TransactionCreditCard);
+Customer.path('transactions').discriminator('TransactionPayPalAccount', Transaction.TransactionPayPalAccount);
+Customer.path('transactions').discriminator('TransactionApplePayCard', Transaction.TransactionApplePayCard);
+Customer.path('transactions').discriminator('TransactionAndroidPayCard', Transaction.TransactionAndroidPayCard);
 
 Customer.methods.markChanged = function () {
     if (this.processor.id && this.isModified('name email phone ipAddress defaultPaymentMethodId')) {
@@ -52,8 +51,11 @@ Customer.methods.markChanged = function () {
 }
 
 Customer.methods.cancel = function cancel (processor, id) {
-    const subscription = ProcessorItem.find(this.subscriptions, id);
-    return processor.cancelSubscription(this, subscription);
+    return processor.cancelSubscription(this, this.subscriptions.id(id));
+}
+
+Customer.methods.refund = function refund (processor, id) {
+    return processor.refundTransaction(this, this.transactions.id(id));
 }
 
 Customer.methods.saveProcessor = function saveProcessor (processor) {

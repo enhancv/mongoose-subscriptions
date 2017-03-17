@@ -80,6 +80,27 @@ function fields (customer, braintreeTransaction) {
     return result;
 }
 
+function refund (gateway, customer, transaction, amount) {
+    ProcessorItem.validateIsSaved(customer);
+    ProcessorItem.validateIsSaved(transaction);
+
+    return new Promise((resolve, reject) => {
+        function callback (err, result) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(fields(customer, result));
+            }
+        }
+
+        if (amount) {
+            gateway.transaction.refund(transaction.processor.id, amount, callback);
+        } else {
+            gateway.transaction.refund(transaction.processor.id, callback);
+        }
+    });
+}
+
 function all (processor, customer) {
     ProcessorItem.validateIsSaved(customer);
 
@@ -120,4 +141,5 @@ function all (processor, customer) {
 module.exports = {
     all: all,
     fields: fields,
+    refund: refund,
 };

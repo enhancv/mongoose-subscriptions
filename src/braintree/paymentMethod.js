@@ -1,4 +1,3 @@
-const Customer = require('../Customer');
 const ProcessorItem = require('../Schema/ProcessorItem');
 const braintree = require('braintree');
 const Event = require('./Event');

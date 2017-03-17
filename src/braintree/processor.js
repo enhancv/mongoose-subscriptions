@@ -26,8 +26,12 @@ class BraintreeProcessor extends EventEmitter {
             .then(customerObject => transaction.all(this, customerObject));
     }
 
-    cancelSubscription (customerObject, subscription) {
-        return plan.cancel(this, customerObject, subscription);
+    cancelSubscription (customerObject, subscriptionObject) {
+        return subscription.cancel(this, customerObject, subscriptionObject);
+    }
+
+    refundTransaction (customerObject, transactionObject, amount) {
+        return transaction.refund(this, customerObject, transactionObject, amount);
     }
 
     plans () {
