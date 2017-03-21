@@ -21,9 +21,18 @@ const Transaction = new Schema({
     },
     amount: Number,
     currency: String,
-    subscriptionId: String,
-    planProcessorId: String,
-    refundedTransactionId: String,
+    subscriptionId: {
+        type: String,
+        default: null,
+    },
+    planProcessorId: {
+        type: String,
+        default: null,
+    },
+    refundedTransactionId: {
+        type: String,
+        default: null,
+    },
     billing: TransactionAddress,
     discounts: [TransactionDiscount],
     descriptor: Descriptor,

@@ -1,6 +1,7 @@
 'use strict';
 
 const mongoose = require('mongoose');
+const shortid = require('shortid');
 const Schema = mongoose.Schema;
 const ProcessorItem = require('./ProcessorItem');
 const CreditCard = require('./PaymentMethod/CreditCard');
@@ -9,12 +10,18 @@ const ApplePayCard = require('./PaymentMethod/ApplePayCard');
 const AndroidPayCard = require('./PaymentMethod/AndroidPayCard');
 
 const PaymentMethod = new Schema({
-    _id: String,
+    _id: {
+        type: String,
+        default: shortid.generate,
+    },
     processor: {
         type: ProcessorItem,
         default: ProcessorItem,
     },
-    nonce: String,
+    nonce: {
+        type: String,
+        default: null,
+    },
     billingAddressId: String,
     createdAt: Date,
     updatedAt: Date,

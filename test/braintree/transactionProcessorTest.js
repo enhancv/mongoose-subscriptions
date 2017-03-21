@@ -258,7 +258,6 @@ describe('transactionProcessor', function () {
             _id: '7jflk342',
             processor: { id: '7jflk342', state: 'saved' },
             amount: '14.90',
-            refundedTransactionId: undefined,
             subscriptionId: 'four',
             planProcessorId: 'monthly',
             billing: {
@@ -488,7 +487,6 @@ describe('transactionProcessor', function () {
             amount: '14.90',
             refundedTransactionId: 'ey46ey2b',
             subscriptionId: 'four',
-            planProcessorId: null,
             billing: {
                 processor: {
                     id: 'dz',
@@ -540,11 +538,9 @@ describe('transactionProcessor', function () {
             countryOfIssuance: 'GBR',
             issuingBank: 'HSBC Bank PLC',
             cardType: 'Visa',
-            cardholderName: null,
             expirationMonth: '07',
             expirationYear: '2018',
         };
-
     });
 
     it('fields should map result data into a model', function () {
@@ -555,48 +551,5 @@ describe('transactionProcessor', function () {
     it('fields should map credit card transaction data into a model', function () {
         const fields = transactionProcessor.fields(this.customer, this.transactionCreditCardRefunded);
         assert.deepEqual(fields, this.fieldsCreditCardRefunded);
-    });
-
-    it('Should call transaction endpoint to load and convert transactions', function () {
-        const result = {
-            length: sinon.stub().returns(1),
-            each: sinon.stub().callsArgWith(0, null, this.transactionPayPal),
-        };
-
-        const gateway = {
-            transaction: {
-                search: sinon.stub().callsArgWith(1, null, result),
-            },
-        };
-        const processor = {
-            gateway: gateway,
-            emit: sinon.spy(),
-        };
-
-        return transactionProcessor.all(processor, this.customer)
-            .then(customer => {
-                sinon.assert.calledOnce(gateway.transaction.search);
-                sinon.assert.calledOnce(result.each);
-                assert.equal(this.fieldsPayPal.processor.id, customer.transactions[0].processor.id);
-            });
-    });
-
-    it('plan load should send a rejection on api error', function () {
-        const apiError = new Error('error');
-
-        const gateway = {
-            transaction: {
-                search: sinon.stub().callsArgWith(1, apiError),
-            }
-        };
-        const processor = {
-            gateway: gateway,
-            emit: sinon.spy(),
-        };
-
-        return transactionProcessor.all(processor, this.customer)
-            .catch(error => {
-                assert.equal(error, apiError);
-            });
     });
 });

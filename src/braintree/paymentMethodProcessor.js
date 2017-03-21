@@ -1,33 +1,25 @@
-const ProcessorItem = require('../Schema/ProcessorItem');
+const ProcessorItem = require('../').Schema.ProcessorItem;
 const braintree = require('braintree');
 const Event = require('./Event');
 const name = require('./name');
+const { get, pickBy, identity, curry } = require('lodash/fp');
 
 function processorFields (customer, paymentMethod) {
 
-    const response = {};
-
-    if (paymentMethod.billingAddressId) {
-        const billingAddress = customer.addresses.id(paymentMethod.billingAddressId);
-        response.billingAddressId = billingAddress.processor.id;
+    const response = {
+        billingAddressId: paymentMethod.billingAddressId ? get('processor.id', customer.addresses.id(paymentMethod.billingAddressId)) : null,
+        paymentMethodNonce: paymentMethod.nonce,
+        options: customer.defaultPaymentMethodId === paymentMethod.id ? { makeDefault: true } : null,
     }
 
-    if (paymentMethod.nonce) {
-        response.paymentMethodNonce = paymentMethod.nonce;
-    }
-
-    if (customer.defaultPaymentMethodId === paymentMethod.id) {
-        response.options = { makeDefault: true };
-    }
-
-    return response;
+    return pickBy(identity, response);
 }
 
-function fields (paymentMethod) {
-    let response = { };
+function fields (customer, paymentMethod) {
+    const response = {};
 
     if (paymentMethod instanceof braintree.CreditCard) {
-        response = {
+        Object.assign(response, {
             __t: 'CreditCard',
             maskedNumber: paymentMethod.maskedNumber,
             countryOfIssuance: paymentMethod.countryOfIssuance,
@@ -36,24 +28,24 @@ function fields (paymentMethod) {
             cardholderName: paymentMethod.cardholderName,
             expirationMonth: paymentMethod.expirationMonth,
             expirationYear: paymentMethod.expirationYear,
-        };
+        });
     } else if (paymentMethod instanceof braintree.PayPalAccount) {
-        response = {
+        Object.assign(response, {
             __t: 'PayPalAccount',
             name: name.full(paymentMethod.payerInfo.firstName, paymentMethod.payerInfo.lastName),
             payerId: paymentMethod.payerInfo.payerId,
             email: paymentMethod.email,
-        };
+        });
     } else if (paymentMethod instanceof braintree.ApplePayCard) {
-        response = {
+        Object.assign(response, {
             __t: 'ApplePayCard',
             cardType: paymentMethod.cardType,
             paymentInstrumentName: paymentMethod.paymentInstrumentName,
             expirationMonth: paymentMethod.expirationMonth,
             expirationYear: paymentMethod.expirationYear,
-        };
+        });
     } else if (paymentMethod instanceof braintree.AndroidPayCard) {
-        response = {
+        Object.assign(response, {
             __t: 'AndroidPayCard',
             sourceCardLast4: paymentMethod.sourceCardLast4,
             virtualCardLast4: paymentMethod.virtualCardLast4,
@@ -61,7 +53,7 @@ function fields (paymentMethod) {
             virtualCardType: paymentMethod.virtualCardType,
             expirationMonth: paymentMethod.expirationMonth,
             expirationYear: paymentMethod.expirationYear,
-        };
+        });
     }
 
     Object.assign(response, {
@@ -69,11 +61,12 @@ function fields (paymentMethod) {
             id: paymentMethod.token,
             state: ProcessorItem.SAVED,
         },
+        billingAddressId: ProcessorItem.getId(get('billingAddress.id', paymentMethod), customer.addresses),
         createdAt: paymentMethod.createdAt,
         updatedAt: paymentMethod.updatedAt,
     });
 
-    return response;
+    return pickBy(identity, response);
 }
 
 function save (processor, customer, paymentMethod) {
@@ -85,7 +78,9 @@ function save (processor, customer, paymentMethod) {
                 reject(err);
             } else if (result.success) {
                 processor.emit('event', new Event(Event.PAYMENT_METHOD, Event.SAVED, result));
-                resolve(Object.assign(paymentMethod, fields(result.paymentMethod), { nonce: null }));
+                Object.assign(paymentMethod, fields(customer, result.paymentMethod), { nonce: null });
+
+                resolve(customer);
             } else {
                 reject(new Error(result.message));
             }
@@ -105,7 +100,7 @@ function save (processor, customer, paymentMethod) {
 }
 
 module.exports = {
-    fields: fields,
-    processorFields: processorFields,
+    fields: curry(fields),
+    processorFields: curry(processorFields),
     save: save,
 }

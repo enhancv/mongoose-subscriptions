@@ -112,7 +112,7 @@ describe('paymentMethodProcessor', function () {
             updatedAt: '2016-09-30T12:25:18Z',
         });
 
-        const fields = paymentMethodProcessor.fields(paymentMethod);
+        const fields = paymentMethodProcessor.fields(this.customer, paymentMethod);
 
         const expected = {
             __t: 'CreditCard',
@@ -148,7 +148,7 @@ describe('paymentMethodProcessor', function () {
             updatedAt: '2016-09-30T12:25:18Z',
         });
 
-        const fields = paymentMethodProcessor.fields(paymentMethod);
+        const fields = paymentMethodProcessor.fields(this.customer, paymentMethod);
 
         const expected = {
             __t: 'PayPalAccount',
@@ -179,7 +179,7 @@ describe('paymentMethodProcessor', function () {
             updatedAt: '2016-09-30T12:25:18Z',
         });
 
-        const fields = paymentMethodProcessor.fields(paymentMethod);
+        const fields = paymentMethodProcessor.fields(this.customer, paymentMethod);
 
         const expected = {
             __t: 'ApplePayCard',
@@ -211,7 +211,7 @@ describe('paymentMethodProcessor', function () {
             updatedAt: '2016-09-30T12:25:18Z',
         });
 
-        const fields = paymentMethodProcessor.fields(paymentMethod);
+        const fields = paymentMethodProcessor.fields(this.customer, paymentMethod);
 
         const expected = {
             __t: 'AndroidPayCard',
@@ -245,11 +245,13 @@ describe('paymentMethodProcessor', function () {
         this.customer.paymentMethods[0].processor = { id: null, state: ProcessorItem.INITIAL };
 
         return paymentMethodProcessor.save(processor, this.customer, this.customer.paymentMethods[0])
-            .then(address => {
+            .then(customer => {
+                const paymentMethod = this.customer.paymentMethods[0];
+
                 sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('name', 'paymentMethod').and(sinon.match.has('action', 'saved')));
                 sinon.assert.calledOnce(gateway.paymentMethod.create);
                 sinon.assert.calledWith(gateway.paymentMethod.create, sinon.match.has('customerId', '64601260'));
-                assert.deepEqual(address.processor.toObject(), { id: 'gpjt3m', state: ProcessorItem.SAVED });
+                assert.deepEqual(paymentMethod.processor.toObject(), { id: 'gpjt3m', state: ProcessorItem.SAVED });
             });
     });
 
@@ -267,7 +269,9 @@ describe('paymentMethodProcessor', function () {
         this.customer.paymentMethods[0].processor.state = ProcessorItem.CHANGED;
 
         return paymentMethodProcessor.save(processor, this.customer, this.customer.paymentMethods[0])
-            .then(paymentMethod => {
+            .then(customer => {
+                const paymentMethod = this.customer.paymentMethods[0];
+
                 sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('name', 'paymentMethod').and(sinon.match.has('action', 'saved')));
                 sinon.assert.calledOnce(gateway.paymentMethod.update);
                 sinon.assert.calledWith(gateway.paymentMethod.update, 'gpjt3m', sinon.match.object);

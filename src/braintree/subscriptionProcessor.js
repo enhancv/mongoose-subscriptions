@@ -1,78 +1,52 @@
-const ProcessorItem = require('../Schema/ProcessorItem');
+const ProcessorItem = require('../').Schema.ProcessorItem;
 const Event = require('./Event');
+const transactionProcessor = require('./transactionProcessor');
+const { pick, pickBy, identity, flow, filter, map, negate, get, isEmpty, concat, differenceBy, curry } = require('lodash/fp');
 
 function processorFieldsDiscounts (originalDiscounts, discounts) {
-    const result = {};
+    const response = {
+        update: flow(
+                filter(get('processor.id')),
+                map(item => {
+                    return {
+                        existingId: item.__t,
+                        amount: item.amount,
+                        numberOfBillingCycles: item.numberOfBillingCycles,
+                    }
+                })
+            )(discounts),
+        add: flow(
+                filter(negate(get('processor.id'))),
+                map(item => {
+                    return {
+                        inheritedFromId: item.__t,
+                        amount: item.amount,
+                        numberOfBillingCycles: item.numberOfBillingCycles,
+                    }
+                })
+            )(discounts),
+        remove: flow(
+                filter(get('processor.id')),
+                filter(original => !discounts.find(item => original.__t === item.__t)),
+                map(get('processor.id'))
+            )(originalDiscounts),
+    };
 
-    const update = discounts
-        .filter(discount => discount.processor.id)
-        .map(discount => {
-            return {
-                existingId: discount.__t,
-                amount: discount.amount,
-                numberOfBillingCycles: discount.numberOfBillingCycles,
-            };
-        });
-
-    if (update.length) {
-        result.update = update;
-    }
-
-    const add = discounts
-        .filter(discount => !discount.processor.id)
-        .map(discount => {
-            return {
-                inheritedFromId: discount.__t,
-                amount: discount.amount,
-                numberOfBillingCycles: discount.numberOfBillingCycles,
-            };
-        });
-
-    if (add.length) {
-        result.add = add;
-    }
-
-    const remove = originalDiscounts
-        .filter(original => original.processor.id && !discounts.find(discount => original.__t === discount.__t))
-        .map(discount => discount.processor.id);
-
-    if (remove.length) {
-        result.remove = remove;
-    }
-
-    return result;
+    return pickBy(negate(isEmpty), response);
 }
 
 function processorFields (customer, subscription) {
-    if (!subscription.plan.processor.id) {
-        throw new Error('Subscription must have a plan with id');
-    }
-
-    const result = { planId: subscription.plan.processor.id };
     const paymentMethod = customer.paymentMethods.id(subscription.paymentMethodId);
+    ProcessorItem.validateIsSaved(subscription.plan);
 
-    if (paymentMethod) {
-        if (!paymentMethod.processor.id) {
-            throw new Error('Must be valid payment method with token');
-        }
-        result.paymentMethodToken = paymentMethod.processor.id;
-    }
+    const response = {
+        planId: subscription.plan.processor.id,
+        paymentMethodToken: paymentMethod ? ProcessorItem.validateIsSaved(paymentMethod).processor.id : null,
+        descriptor: pick(['name', 'phone', 'url'], subscription.descriptor),
+        discounts: processorFieldsDiscounts(subscription.original.discounts, subscription.discounts),
+    };
 
-    if (subscription.descriptor) {
-        result.descriptor = {
-            name: subscription.descriptor.name,
-            phone: subscription.descriptor.phone,
-            url: subscription.descriptor.url,
-        };
-    }
-
-    const discounts = processorFieldsDiscounts(subscription.original.discounts, subscription.discounts);
-
-    if (Object.keys(discounts).length) {
-        result.discounts = discounts;
-    }
-
-    return result;
+    return pickBy(identity, response);
 }
 
 function fieldsDiscounts (originalDiscounts, resultDiscounts) {
@@ -91,35 +65,33 @@ function fieldsDiscounts (originalDiscounts, resultDiscounts) {
     });
 }
 
-function fields (originalDiscounts, subscription) {
-    const discounts = fieldsDiscounts(originalDiscounts, subscription.discounts);
+function fields (customer, originalDiscounts, subscription) {
     const response = {
         processor: {
             id: subscription.id,
             state: ProcessorItem.SAVED,
         },
         planProcessorId: subscription.planId,
-        discounts: discounts,
         createdAt: subscription.createdAt,
         updatedAt: subscription.updatedAt,
         paidThroughDate: subscription.paidThroughDate,
         descriptor: subscription.descriptor,
         status: subscription.status,
         price: subscription.price,
-        statusHistory: subscription.statusHistory.map(status => {
-            return {
-                timestamp: status.timestamp,
-                status: status.status,
-            }
-        }),
+        statusHistory: map(pick(['timestamp', 'status']), subscription.statusHistory),
+        discounts: fieldsDiscounts(originalDiscounts, subscription.discounts),
         firstBillingDate: subscription.firstBillingDate,
         nextBillingDate: subscription.nextBillingDate,
+        paymentMethodId: ProcessorItem.getId(subscription.paymentMethodToken, customer.paymentMethods),
     };
 
-    return response;
+    return pickBy(identity, response);
 }
 
 function cancel (processor, customer, subscription) {
+    ProcessorItem.validateIsSaved(customer);
+    ProcessorItem.validateIsSaved(subscription);
+
     return new Promise((resolve, reject) => {
         processor.emit('event', new Event(Event.SUBSCRIPTION, Event.CANCELING, subscription));
         processor.gateway.subscription.cancel(subscription.processor.id, (err, result) => {
@@ -127,7 +99,9 @@ function cancel (processor, customer, subscription) {
                 reject(err);
             } else {
                 processor.emit('event', new Event(Event.SUBSCRIPTION, Event.CANCELED, result));
-                resolve(Object.assign(subscription, fields(subscription.discounts, result.subscription)));
+                Object.assign(subscription, fields(customer, subscription.discounts, result.subscription))
+
+                resolve(customer);
             }
         })
     });
@@ -142,7 +116,15 @@ function save (processor, customer, subscription) {
                 reject(err);
             } else if (result.success) {
                 processor.emit('event', new Event(Event.SUBSCRIPTION, Event.SAVED, result));
-                resolve(Object.assign(subscription, fields(subscription.discounts, result.subscription)));
+
+                Object.assign(subscription, fields(customer, subscription.discounts, result.subscription));
+
+                const transactions = map(transactionProcessor.fields(customer), result.subscription.transactions);
+                const newTransactions = differenceBy(get('_id'), transactions, customer.transactions);
+
+                customer.transactions = concat(customer.transactions, newTransactions);
+
+                resolve(customer);
             } else {
                 reject(new Error(result.message));
             }
@@ -164,9 +146,9 @@ function save (processor, customer, subscription) {
 
 module.exports = {
     processorFieldsDiscounts: processorFieldsDiscounts,
-    processorFields: processorFields,
+    processorFields: curry(processorFields),
     fieldsDiscounts: fieldsDiscounts,
-    fields: fields,
+    fields: curry(fields),
     cancel: cancel,
     save: save,
 };

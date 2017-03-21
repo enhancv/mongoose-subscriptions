@@ -112,7 +112,8 @@ describe('addressProcessor', function () {
         this.customer.addresses[0].processor = { id: null, state: ProcessorItem.INITIAL };
 
         return addressProcessor.save(processor, this.customer, this.customer.addresses[0])
-            .then(address => {
+            .then(customer => {
+                const address = this.customer.addresses[0];
                 sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('name', 'address').and(sinon.match.has('action', 'saved')));
                 sinon.assert.calledOnce(gateway.address.create);
                 sinon.assert.calledWith(gateway.address.create, sinon.match.has('customerId', '64601260'));
@@ -134,7 +135,8 @@ describe('addressProcessor', function () {
         this.customer.addresses[0].processor.state = ProcessorItem.CHANGED;
 
         return addressProcessor.save(processor, this.customer, this.customer.addresses[0])
-            .then(address => {
+            .then(customer => {
+                const address = this.customer.addresses[0];
                 sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('name', 'address').and(sinon.match.has('action', 'saved')));
                 sinon.assert.calledOnce(gateway.address.update);
                 sinon.assert.calledWith(gateway.address.update, '64601260', 'test-id', sinon.match.object);

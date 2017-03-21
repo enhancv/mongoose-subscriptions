@@ -26,6 +26,12 @@ ProcessorItem.validateIsSaved = function (item) {
     if (!item || !item.processor || !item.processor.id || item.processor.state !== SAVED) {
         throw new Error('Mongoose item not saved to processor');
     }
+    return item;
+}
+
+ProcessorItem.getId = function find (processorId, collection) {
+    const item = processorId ? collection.find(item => item.processor.id === processorId) : null;
+    return item ? item._id : null;
 }
 
 module.exports = ProcessorItem;

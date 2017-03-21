@@ -1,6 +1,7 @@
-const ProcessorItem = require('../Schema/ProcessorItem');
+const ProcessorItem = require('../').Schema.ProcessorItem;
 const Event = require('./Event');
 const name = require('./name');
+const { curry } = require('lodash/fp');
 
 function processorFields (address) {
     return {
@@ -44,7 +45,9 @@ function save (processor, customer, address) {
                 reject(err);
             } else if (result.success) {
                 processor.emit('event', new Event(Event.ADDRESS, Event.SAVED, result));
-                resolve(Object.assign(address, fields(result.address)));
+                Object.assign(address, fields(result.address));
+
+                resolve(customer);
             } else {
                 reject(new Error(result.message));
             }
@@ -64,8 +67,8 @@ function save (processor, customer, address) {
 }
 
 module.exports = {
-    fields: fields,
-    processorFields: processorFields,
+    fields: curry(fields),
+    processorFields: curry(processorFields),
     save: save,
 };
 

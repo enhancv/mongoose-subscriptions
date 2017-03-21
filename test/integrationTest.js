@@ -6,21 +6,23 @@ const braintree = require('braintree');
 const database = require('./database');
 const gateway = require('./gateway');
 const Schema = require('mongoose').Schema;
-const Customer = require('../src/Customer');
-const DiscountCoupon = require('../src/Schema/Discount/Coupon');
-const Plan = require('../src/Plan');
-const Coupon = require('../src/Coupon');
-const BraintreeProcessor = require('../src/braintree/processor')
+const Customer = require('../src').Customer;
+const DiscountCoupon = require('../src').Schema.Discount.DiscountCoupon;
+const Plan = require('../src').Plan;
+const Coupon = require('../src').Coupon;
+const BraintreeProcessor = require('../src/braintree/processor');
 const processor = new BraintreeProcessor(gateway);
-
-processor.on('event', (event) => console.log(event.name, event.action));
 
 describe('Customer', database([Customer, Plan, Coupon], function () {
     it('Should be able to instantiate a Customer', function () {
         this.timeout(20000);
 
+        const eventSpy = sinon.spy();
         let plan = null;
         let coupon = null;
+        let originalCustomer = null;
+
+        processor.on('event', eventSpy);
 
         return Plan.sync(processor)
             .then(plans => {
@@ -249,7 +251,7 @@ describe('Customer', database([Customer, Plan, Coupon], function () {
                             }
                         );
 
-                        return customer.cancel(processor, 'four');
+                        return customer.cancelProcessor(processor, 'four');
                     })
                     .then(customer => {
                         const subscription = customer.subscriptions[0];
@@ -279,10 +281,10 @@ describe('Customer', database([Customer, Plan, Coupon], function () {
                         });
                     }).then(customer => {
                         const transaction = customer.transactions[0];
-                        return customer.refund(processor, transaction._id, 3.5);
+                        return customer.refundProcessor(processor, transaction._id, 3.5);
                     }).then(customer => {
-                        const transactionOriginal = customer.transactions[0];
-                        const transactionRefund = customer.transactions[1];
+                        const transactionRefund = customer.transactions[0];
+                        const transactionOriginal = customer.transactions[1];
 
                         sinon.assert.match(
                             transactionRefund,
@@ -317,10 +319,10 @@ describe('Customer', database([Customer, Plan, Coupon], function () {
                             }
                         );
 
-                        return customer.refund(processor, transactionOriginal._id);
+                        return customer.refundProcessor(processor, transactionOriginal._id);
                     }).then(customer => {
-                        const transactionOriginal = customer.transactions[0];
-                        const transactionRefund = customer.transactions[2];
+                        const transactionRefund = customer.transactions[0];
+                        const transactionOriginal = customer.transactions[2];
 
                         sinon.assert.match(
                             transactionRefund,
@@ -354,7 +356,48 @@ describe('Customer', database([Customer, Plan, Coupon], function () {
                                 }
                             }
                         );
-                        // return customer.load(processor);
+                        originalCustomer = customer;
+                        const newCustomer = new Customer({ processor: { id: customer.processor.id, state: 'saved' } });
+                        return newCustomer.loadProcessor(processor);
+                    }).then(newCustomer => {
+                        assert.equal(newCustomer.paymentMethods[0].billingAddressId, newCustomer.addresses[0]._id);
+                        assert.equal(newCustomer.subscriptions[0].paymentMethodId, newCustomer.paymentMethods[0]._id);
+                        assert.equal(newCustomer.subscriptions[0].processor.id, originalCustomer.subscriptions[0].processor.id);
+                        assert.equal(newCustomer.paymentMethods[0].processor.id, originalCustomer.paymentMethods[0].processor.id);
+
+                        assert.deepEqual(
+                            newCustomer.transactions.map(item => item._id),
+                            originalCustomer.transactions.map(item => item._id),
+                            'Should have the same transactions and in the same order'
+                        );
+
+                        const events = [
+                            { name: 'plan', action: 'loading' },
+                            { name: 'plan', action: 'loaded' },
+                            { name: 'customer', action: 'creating' },
+                            { name: 'customer', action: 'saved' },
+                            { name: 'address', action: 'creating' },
+                            { name: 'address', action: 'saved' },
+                            { name: 'paymentMethod', action: 'creating' },
+                            { name: 'paymentMethod', action: 'saved' },
+                            { name: 'subscription', action: 'creating' },
+                            { name: 'subscription', action: 'saved' },
+                            { name: 'subscription', action: 'canceling' },
+                            { name: 'subscription', action: 'canceled' },
+                            { name: 'transaction', action: 'refund' },
+                            { name: 'transaction', action: 'refund' },
+                            { name: 'transaction', action: 'refund' },
+                            { name: 'transaction', action: 'refund' },
+                            { name: 'customer', action: 'loading' },
+                            { name: 'customer', action: 'loaded' },
+                        ];
+
+                        events.forEach((event, index) => {
+                            assert.ok(
+                                eventSpy.getCall(index).calledWithMatch(event),
+                                'Emmited event ' + event.name + ' with action ' + event.action + ' on call ' + index
+                            );
+                        })
                     });
             });
     });

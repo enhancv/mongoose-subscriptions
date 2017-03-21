@@ -1,6 +1,7 @@
 'use strict';
 
 const mongoose = require('mongoose');
+const shortid = require('shortid');
 const Schema = mongoose.Schema;
 const ProcessorItem = require('./ProcessorItem');
 const Descriptor = require('./Descriptor');
@@ -9,7 +10,10 @@ const Discount = require('./Discount');
 const Status = require('./Status');
 
 const Subscription = new Schema({
-    _id: String,
+    _id: {
+        type: String,
+        default: shortid.generate,
+    },
     processor: {
         type: ProcessorItem,
         default: ProcessorItem,

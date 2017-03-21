@@ -1,17 +1,11 @@
-const ProcessorItem = require('../Schema/ProcessorItem');
+const ProcessorItem = require('../').Schema.ProcessorItem;
 const Event = require('./Event');
 const addressProcessor = require('./addressProcessor');
-const Plan = require('../Plan');
 const name = require('./name');
-
-function filedsDiscount (discount) {
-    braintreeTransaction
-}
+const { curry, pick, map, pickBy, identity } = require('lodash/fp');
 
 function fields (customer, braintreeTransaction) {
-    const subscription = customer.subscriptions.find(sub => sub.processor.id === braintreeTransaction.subscriptionId);
-
-    const result = {
+    const response = {
         _id: braintreeTransaction.id,
         processor: {
             id: braintreeTransaction.id,
@@ -19,7 +13,7 @@ function fields (customer, braintreeTransaction) {
         },
         amount: braintreeTransaction.amount,
         refundedTransactionId: braintreeTransaction.refundedTransactionId,
-        subscriptionId: subscription ? subscription.id : null,
+        subscriptionId: ProcessorItem.getId(braintreeTransaction.subscriptionId, customer.subscriptions),
         planProcessorId: braintreeTransaction.planId,
         billing: braintreeTransaction.billing ? addressProcessor.fields(braintreeTransaction.billing) : null,
         customer: braintreeTransaction.customer ? {
@@ -31,53 +25,57 @@ function fields (customer, braintreeTransaction) {
         currency: braintreeTransaction.currencyIsoCode,
         status: braintreeTransaction.status,
         statusHistory: braintreeTransaction.statusHistory,
-        descriptor: braintreeTransaction.descriptor ? {
-            name: braintreeTransaction.descriptor.name,
-            phone: braintreeTransaction.descriptor.phone,
-            url: braintreeTransaction.descriptor.url,
-        } : null,
+        descriptor: pick(['name', 'phone', 'url'], braintreeTransaction.descriptor),
         createdAt: braintreeTransaction.createdAt,
         updatedAt: braintreeTransaction.updatedAt,
-        discounts: braintreeTransaction.discounts ? braintreeTransaction.discounts.map(discount => {
+        discounts: map(discount => {
             return {
                 __t: discount.id,
                 amount: discount.amount,
                 name: discount.name,
             }
-        }) : null,
+        }, braintreeTransaction.discounts),
     };
 
     if (braintreeTransaction.paymentInstrumentType === 'credit_card') {
-        result.__t = 'TransactionCreditCard';
-        result.maskedNumber = braintreeTransaction.creditCard.maskedNumber;
-        result.countryOfIssuance = braintreeTransaction.creditCard.countryOfIssuance;
-        result.issuingBank = braintreeTransaction.creditCard.issuingBank;
-        result.cardType = braintreeTransaction.creditCard.cardType;
-        result.cardholderName = braintreeTransaction.creditCard.cardholderName;
-        result.expirationMonth = braintreeTransaction.creditCard.expirationMonth;
-        result.expirationYear = braintreeTransaction.creditCard.expirationYear;
+        Object.assign(response, {
+            __t: 'TransactionCreditCard',
+            maskedNumber: braintreeTransaction.creditCard.maskedNumber,
+            countryOfIssuance: braintreeTransaction.creditCard.countryOfIssuance,
+            issuingBank: braintreeTransaction.creditCard.issuingBank,
+            cardType: braintreeTransaction.creditCard.cardType,
+            cardholderName: braintreeTransaction.creditCard.cardholderName,
+            expirationMonth: braintreeTransaction.creditCard.expirationMonth,
+            expirationYear: braintreeTransaction.creditCard.expirationYear,
+        });
     } else if (braintreeTransaction.paymentInstrumentType === 'paypal_account') {
-        result.__t = 'TransactionPayPalAccount';
-        result.name = name.full(braintreeTransaction.paypalAccount.payerFirstName, braintreeTransaction.paypalAccount.payerLastName);
-        result.payerId = braintreeTransaction.paypalAccount.payerId;
-        result.email = braintreeTransaction.paypalAccount.payerEmail;
+        Object.assign(response, {
+            __t: 'TransactionPayPalAccount',
+            name: name.full(braintreeTransaction.paypalAccount.payerFirstName, braintreeTransaction.paypalAccount.payerLastName),
+            payerId: braintreeTransaction.paypalAccount.payerId,
+            email: braintreeTransaction.paypalAccount.payerEmail,
+        });
     } else if (braintreeTransaction.paymentInstrumentType === 'apple_pay_card') {
-        result.__t = 'TransactionApplePayCard';
-        result.cardType = braintreeTransaction.applePayCard.cardType;
-        result.paymentInstrumentName = braintreeTransaction.applePayCard.paymentInstrumentName;
-        result.expirationMonth = braintreeTransaction.applePayCard.expirationMonth;
-        result.expirationYear = braintreeTransaction.applePayCard.expirationYear;
+        Object.assign(response, {
+            __t: 'TransactionApplePayCard',
+            cardType: braintreeTransaction.applePayCard.cardType,
+            paymentInstrumentName: braintreeTransaction.applePayCard.paymentInstrumentName,
+            expirationMonth: braintreeTransaction.applePayCard.expirationMonth,
+            expirationYear: braintreeTransaction.applePayCard.expirationYear,
+        });
     } else if (braintreeTransaction.paymentInstrumentType === 'android_pay_card') {
-        result.__t = 'AndroidPayCard',
-        result.sourceCardLast4 = braintreeTransaction.androidPayCard.sourceCardLast4;
-        result.virtualCardLast4 = braintreeTransaction.androidPayCard.virtualCardLast4;
-        result.sourceCardType = braintreeTransaction.androidPayCard.sourceCardType;
-        result.virtualCardType = braintreeTransaction.androidPayCard.virtualCardType;
-        result.expirationMonth = braintreeTransaction.androidPayCard.expirationMonth;
-        result.expirationYear = braintreeTransaction.androidPayCard.expirationYear;
+        Object.assign(response, {
+            __t: 'AndroidPayCard',
+            sourceCardLast4: braintreeTransaction.androidPayCard.sourceCardLast4,
+            virtualCardLast4: braintreeTransaction.androidPayCard.virtualCardLast4,
+            sourceCardType: braintreeTransaction.androidPayCard.sourceCardType,
+            virtualCardType: braintreeTransaction.androidPayCard.virtualCardType,
+            expirationMonth: braintreeTransaction.androidPayCard.expirationMonth,
+            expirationYear: braintreeTransaction.androidPayCard.expirationYear,
+        });
     }
 
-    return result;
+    return pickBy(identity, response);
 }
 
 function refund (processor, customer, transaction, amount) {
@@ -90,7 +88,9 @@ function refund (processor, customer, transaction, amount) {
                 reject(err);
             } else if (result.success) {
                 processor.emit('event', new Event(Event.TRANSACTION, Event.REFUNDED, result));
-                resolve(fields(customer, result.transaction));
+
+                customer.transactions.unshift(fields(customer, result.transaction));
+                resolve(customer);
             } else {
                 reject(new Error(result.message));
             }
@@ -106,45 +106,7 @@ function refund (processor, customer, transaction, amount) {
     });
 }
 
-function all (processor, customer) {
-    ProcessorItem.validateIsSaved(customer);
-
-    return new Promise((resolve, reject) => {
-        processor.emit('event', new Event(Event.TRANSACTION, Event.LOADING));
-        processor.gateway.transaction.search(
-            function (search) {
-                return search.customerId().is(customer.processor.id);
-            },
-            function (err, braintreeTransactions) {
-                if (err) {
-                    reject(err);
-                } else {
-                    processor.emit('event', new Event(Event.TRANSACTION, Event.LOADED, braintreeTransactions));
-                    const length = braintreeTransactions.length();
-                    let current = 0;
-
-                    const transactions = [];
-
-                    braintreeTransactions.each((err, braintreeTransaction) => {
-                        if (err) {
-                            reject(err);
-                        } else {
-                            transactions.push(fields(customer, braintreeTransaction));
-                            current += 1;
-                            if (current >= length) {
-                                customer.transactions = transactions;
-                                resolve(customer);
-                            }
-                        }
-                    });
-                }
-            }
-        );
-    });
-}
-
 module.exports = {
-    all: all,
-    fields: fields,
+    fields: curry(fields),
     refund: refund,
 };

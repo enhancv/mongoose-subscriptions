@@ -68,7 +68,7 @@ describe('subscriptionProcessor', database([Customer, Plan], function () {
                 nextBillingDate: "2016-10-29",
                 numberOfBillingCycles: null,
                 paidThroughDate: "2016-10-28",
-                paymentMethodToken: "m75ch56",
+                paymentMethodToken: "gpjt3m",
                 planId: "monthly",
                 price: "14.90",
                 status: "Active",
@@ -402,7 +402,7 @@ describe('subscriptionProcessor', database([Customer, Plan], function () {
             }
         ];
 
-        const fields = subscriptionProcessor.fields(originalDiscounts, this.subscriptionResult.subscription);
+        const fields = subscriptionProcessor.fields(this.customer, originalDiscounts, this.subscriptionResult.subscription);
 
         const expected = {
             processor: { id: 'gzsxjb', state: 'saved' },
@@ -421,8 +421,8 @@ describe('subscriptionProcessor', database([Customer, Plan], function () {
             createdAt: '2016-09-29T16:12:26Z',
             updatedAt: '2016-09-30T12:25:18Z',
             paidThroughDate: '2016-10-28',
-            descriptor:
-            {
+            paymentMethodId: 'three',
+            descriptor: {
                 name: 'Enhancv*Pro Plan',
                 phone: '0888415433',
                 url: 'enhancv.com'
@@ -461,7 +461,9 @@ describe('subscriptionProcessor', database([Customer, Plan], function () {
         return this.customer
             .save()
             .then(customer => subscriptionProcessor.save(processor, customer, customer.subscriptions[0]))
-            .then(subscription => {
+            .then(customer => {
+                const subscription = this.customer.subscriptions[0];
+
                 sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('name', 'subscription').and(sinon.match.has('action', 'saved')));
                 sinon.assert.calledOnce(gateway.subscription.create);
                 assert.deepEqual(subscription.processor.toObject(), { id: 'gzsxjb', state: 'saved' });
@@ -484,7 +486,9 @@ describe('subscriptionProcessor', database([Customer, Plan], function () {
         return this.customer
             .save()
             .then(customer => subscriptionProcessor.save(processor, customer, customer.subscriptions[0]))
-            .then(subscription => {
+            .then(customer => {
+                const subscription = this.customer.subscriptions[0];
+
                 sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('name', 'subscription').and(sinon.match.has('action', 'saved')));
                 sinon.assert.calledWith(gateway.subscription.update, 'gzsxjb');
                 assert.deepEqual(new Date("2016-10-28"), subscription.paidThroughDate);

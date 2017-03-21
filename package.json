@@ -9,8 +9,10 @@
     "dependencies": {
         "async": "^2.1.5",
         "braintree-as-promised": "^0.4.0",
+        "lodash": "^4.17.4",
         "mongoose": "^4.8.4",
-        "mongoose-originals": "^1.0.0"
+        "mongoose-originals": "^1.0.0",
+        "shortid": "^2.2.8"
     },
     "scripts": {
         "test": "node_modules/.bin/mocha --recursive"
