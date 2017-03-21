@@ -1,12 +1,12 @@
 const ProcessorItem = require('../Schema/ProcessorItem');
 const Event = require('./Event');
-const { firstName, lastName, fullName } = require('../utils');
+const name = require('./name');
 
 function processorFields (address) {
     return {
         company: address.company,
-        firstName: firstName(address.name),
-        lastName: lastName(address.name),
+        firstName: name.first(address.name),
+        lastName: name.last(address.name),
         countryCodeAlpha2: address.country,
         locality: address.locality,
         streetAddress: address.streetAddress,
@@ -15,14 +15,13 @@ function processorFields (address) {
     };
 }
 
-function fields (result) {
-    const address = result.address;
+function fields (address) {
     const response = {
         processor: {
             id: address.id,
             state: ProcessorItem.SAVED,
         },
-        name: fullName(address.firstName, address.lastName),
+        name: name.full(address.firstName, address.lastName),
         company: address.company,
         createdAt: address.createdAt,
         updatedAt: address.updatedAt,
@@ -45,7 +44,7 @@ function save (processor, customer, address) {
                 reject(err);
             } else if (result.success) {
                 processor.emit('event', new Event(Event.ADDRESS, Event.SAVED, result));
-                resolve(Object.assign(address, fields(result)));
+                resolve(Object.assign(address, fields(result.address)));
             } else {
                 reject(new Error(result.message));
             }

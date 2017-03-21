@@ -5,9 +5,9 @@ const sinon = require('sinon');
 const braintree = require('braintree');
 const Customer = require('../../src/Customer');
 const ProcessorItem = require('../../src/Schema/ProcessorItem');
-const braintreeAddress = require('../../src/braintree/address');
+const addressProcessor = require('../../src/braintree/addressProcessor');
 
-describe('braintreeAddress', function () {
+describe('addressProcessor', function () {
 
     beforeEach(function () {
         this.customer = new Customer({
@@ -60,7 +60,7 @@ describe('braintreeAddress', function () {
             postalCode: '1000',
         };
 
-        const fields = braintreeAddress.processorFields(address);
+        const fields = addressProcessor.processorFields(address);
 
         const expected = {
             company: 'Example company',
@@ -77,7 +77,7 @@ describe('braintreeAddress', function () {
     });
 
     it('fields should map result data into a model', function () {
-        const fields = braintreeAddress.fields(this.addressResult);
+        const fields = addressProcessor.fields(this.addressResult.address);
 
         const expected = {
             processor: {
@@ -111,9 +111,9 @@ describe('braintreeAddress', function () {
 
         this.customer.addresses[0].processor = { id: null, state: ProcessorItem.INITIAL };
 
-        return braintreeAddress.save(processor, this.customer, this.customer.addresses[0])
+        return addressProcessor.save(processor, this.customer, this.customer.addresses[0])
             .then(address => {
-                sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('objectName', 'address').and(sinon.match.has('action', 'saved')));
+                sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('name', 'address').and(sinon.match.has('action', 'saved')));
                 sinon.assert.calledOnce(gateway.address.create);
                 sinon.assert.calledWith(gateway.address.create, sinon.match.has('customerId', '64601260'));
                 assert.deepEqual(address.processor.toObject(), { id: 'test-id', state: ProcessorItem.SAVED });
@@ -133,9 +133,9 @@ describe('braintreeAddress', function () {
 
         this.customer.addresses[0].processor.state = ProcessorItem.CHANGED;
 
-        return braintreeAddress.save(processor, this.customer, this.customer.addresses[0])
+        return addressProcessor.save(processor, this.customer, this.customer.addresses[0])
             .then(address => {
-                sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('objectName', 'address').and(sinon.match.has('action', 'saved')));
+                sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('name', 'address').and(sinon.match.has('action', 'saved')));
                 sinon.assert.calledOnce(gateway.address.update);
                 sinon.assert.calledWith(gateway.address.update, '64601260', 'test-id', sinon.match.object);
                 assert.deepEqual('Example company', address.company);
@@ -157,7 +157,7 @@ describe('braintreeAddress', function () {
 
         this.customer.addresses[0].processor.state = ProcessorItem.CHANGED;
 
-        return braintreeAddress.save(processor, this.customer, this.customer.addresses[0])
+        return addressProcessor.save(processor, this.customer, this.customer.addresses[0])
             .catch(error => {
                 sinon.assert.neverCalledWith(processor.emit, 'event', sinon.match.has('action', 'saved'));
                 assert.equal(error, apiError);
@@ -177,7 +177,7 @@ describe('braintreeAddress', function () {
 
         this.customer.addresses[0].processor.state = ProcessorItem.CHANGED;
 
-        return braintreeAddress.save(processor, this.customer, this.customer.addresses[0])
+        return addressProcessor.save(processor, this.customer, this.customer.addresses[0])
             .catch(error => {
                 sinon.assert.neverCalledWith(processor.emit, 'event', sinon.match.has('action', 'saved'));
                 assert.equal(error.message, 'some error');

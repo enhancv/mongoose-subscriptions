@@ -3,9 +3,9 @@
 const assert = require('assert');
 const sinon = require('sinon');
 const ProcessorItem = require('../../src/Schema/ProcessorItem');
-const braintreePlan = require('../../src/braintree/plan');
+const planProcessor = require('../../src/braintree/planProcessor');
 
-describe('braintreePlan', function () {
+describe('planProcessor', function () {
 
     beforeEach(function () {
         this.planResult = {
@@ -35,7 +35,7 @@ describe('braintreePlan', function () {
     });
 
     it('fields should map result data into a model', function () {
-        const fields = braintreePlan.fields(this.planResult);
+        const fields = planProcessor.fields(this.planResult);
 
         assert.deepEqual(fields, this.planModel);
     });
@@ -52,7 +52,7 @@ describe('braintreePlan', function () {
             emit: sinon.spy(),
         };
 
-        return braintreePlan.all(processor)
+        return planProcessor.all(processor)
             .then(plans => {
                 assert.ok(gateway.plan.all.calledOnce);
                 assert.deepEqual(plans, [this.planModel]);;
@@ -72,7 +72,7 @@ describe('braintreePlan', function () {
             emit: sinon.spy(),
         };
 
-        return braintreePlan.all(processor)
+        return planProcessor.all(processor)
             .catch(error => {
                 assert.equal(error, apiError);
             });

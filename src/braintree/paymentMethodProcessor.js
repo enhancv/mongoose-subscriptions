@@ -1,7 +1,7 @@
 const ProcessorItem = require('../Schema/ProcessorItem');
 const braintree = require('braintree');
 const Event = require('./Event');
-const { fullName } = require('../utils');
+const name = require('./name');
 
 function processorFields (customer, paymentMethod) {
 
@@ -23,8 +23,7 @@ function processorFields (customer, paymentMethod) {
     return response;
 }
 
-function fields (result) {
-    const paymentMethod = result.paymentMethod;
+function fields (paymentMethod) {
     let response = { };
 
     if (paymentMethod instanceof braintree.CreditCard) {
@@ -41,7 +40,7 @@ function fields (result) {
     } else if (paymentMethod instanceof braintree.PayPalAccount) {
         response = {
             __t: 'PayPalAccount',
-            name: fullName(paymentMethod.payerInfo.firstName, paymentMethod.payerInfo.lastName),
+            name: name.full(paymentMethod.payerInfo.firstName, paymentMethod.payerInfo.lastName),
             payerId: paymentMethod.payerInfo.payerId,
             email: paymentMethod.email,
         };
@@ -86,7 +85,7 @@ function save (processor, customer, paymentMethod) {
                 reject(err);
             } else if (result.success) {
                 processor.emit('event', new Event(Event.PAYMENT_METHOD, Event.SAVED, result));
-                resolve(Object.assign(paymentMethod, fields(result), { nonce: null }));
+                resolve(Object.assign(paymentMethod, fields(result.paymentMethod), { nonce: null }));
             } else {
                 reject(new Error(result.message));
             }

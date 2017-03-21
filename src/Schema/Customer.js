@@ -51,11 +51,15 @@ Customer.methods.markChanged = function () {
 }
 
 Customer.methods.cancel = function cancel (processor, id) {
-    return processor.cancelSubscription(this, this.subscriptions.id(id));
+    return processor.cancelSubscription(this, id);
 }
 
-Customer.methods.refund = function refund (processor, id) {
-    return processor.refundTransaction(this, this.transactions.id(id));
+Customer.methods.refund = function refund (processor, id, amount) {
+    return processor.refundTransaction(this, id, amount);
+}
+
+Customer.methods.load = function load (processor) {
+    return processor.load(this);
 }
 
 Customer.methods.saveProcessor = function saveProcessor (processor) {

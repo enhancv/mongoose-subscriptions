@@ -4,9 +4,9 @@ const assert = require('assert');
 const sinon = require('sinon');
 const Customer = require('../../src/Customer');
 const ProcessorItem = require('../../src/Schema/ProcessorItem');
-const braintreeTransaction = require('../../src/braintree/transaction');
+const transactionProcessor = require('../../src/braintree/transactionProcessor');
 
-describe('braintreeTransaction', function () {
+describe('transactionProcessor', function () {
     beforeEach(function () {
         this.customer = new Customer({
             name: 'Pesho',
@@ -263,7 +263,7 @@ describe('braintreeTransaction', function () {
             planProcessorId: 'monthly',
             billing: {
                 processor: { id: null, state: 'saved' },
-                name: 'null null',
+                name: '',
                 company: null,
                 createdAt: undefined,
                 updatedAt: undefined,
@@ -548,12 +548,12 @@ describe('braintreeTransaction', function () {
     });
 
     it('fields should map result data into a model', function () {
-        const fields = braintreeTransaction.fields(this.customer, this.transactionPayPal);
+        const fields = transactionProcessor.fields(this.customer, this.transactionPayPal);
         assert.deepEqual(fields, this.fieldsPayPal);
     });
 
     it('fields should map credit card transaction data into a model', function () {
-        const fields = braintreeTransaction.fields(this.customer, this.transactionCreditCardRefunded);
+        const fields = transactionProcessor.fields(this.customer, this.transactionCreditCardRefunded);
         assert.deepEqual(fields, this.fieldsCreditCardRefunded);
     });
 
@@ -573,7 +573,7 @@ describe('braintreeTransaction', function () {
             emit: sinon.spy(),
         };
 
-        return braintreeTransaction.all(processor, this.customer)
+        return transactionProcessor.all(processor, this.customer)
             .then(customer => {
                 sinon.assert.calledOnce(gateway.transaction.search);
                 sinon.assert.calledOnce(result.each);
@@ -594,7 +594,7 @@ describe('braintreeTransaction', function () {
             emit: sinon.spy(),
         };
 
-        return braintreeTransaction.all(processor, this.customer)
+        return transactionProcessor.all(processor, this.customer)
             .catch(error => {
                 assert.equal(error, apiError);
             });

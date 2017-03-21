@@ -8,9 +8,9 @@ const braintree = require('braintree');
 const Plan = require('../../src/Plan');
 const Customer = require('../../src/Customer');
 const ProcessorItem = require('../../src/Schema/ProcessorItem');
-const braintreeSubscription = require('../../src/braintree/subscription');
+const subscriptionProcessor = require('../../src/braintree/subscriptionProcessor');
 
-describe('braintreeSubscription', database([Customer, Plan], function () {
+describe('subscriptionProcessor', database([Customer, Plan], function () {
 
     beforeEach(function () {
         this.subscriptionResult = {
@@ -34,6 +34,28 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
                         neverExpires: false,
                         numberOfBillingCycles: 1,
                         quantity: 1,
+                    },
+                ],
+                "statusHistory" : [
+                    {
+                        "timestamp" : "2016-11-02T18:30:25Z",
+                        "status" : "Canceled",
+                        "user" : "kerin@enhancv.com",
+                        "subscriptionSource" : "api",
+                        "balance" : "0.00",
+                        "price" : "14.90",
+                        "currencyIsoCode" : "USD",
+                        "planId" : "monthly"
+                    },
+                    {
+                        "timestamp" : "2016-10-05T11:37:40Z",
+                        "status" : "Active",
+                        "user" : null,
+                        "subscriptionSource" : "recurring",
+                        "balance" : "0.00",
+                        "price" : "14.90",
+                        "currencyIsoCode" : "USD",
+                        "planId" : "monthly"
                     },
                 ],
                 failureCount: 0,
@@ -141,7 +163,7 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
             remove: [ 'DiscountAmount' ]
         };
 
-        assert.deepEqual(braintreeSubscription.processorFieldsDiscounts(originalDiscounts, discounts), expected);
+        assert.deepEqual(subscriptionProcessor.processorFieldsDiscounts(originalDiscounts, discounts), expected);
     });
 
     it('processorFieldsDiscounts when adding', function () {
@@ -166,7 +188,7 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
             ],
         };
 
-        assert.deepEqual(braintreeSubscription.processorFieldsDiscounts(originalDiscounts, discounts), expected);
+        assert.deepEqual(subscriptionProcessor.processorFieldsDiscounts(originalDiscounts, discounts), expected);
     });
 
     it('processorFieldsDiscounts when updating', function () {
@@ -196,7 +218,7 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
             ],
         };
 
-        assert.deepEqual(braintreeSubscription.processorFieldsDiscounts(originalDiscounts, discounts), expected);
+        assert.deepEqual(subscriptionProcessor.processorFieldsDiscounts(originalDiscounts, discounts), expected);
     });
 
     it('processorFieldsDiscounts when modifing everything', function () {
@@ -254,12 +276,12 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
             remove: ['PercentDiscount'],
         };
 
-        assert.deepEqual(braintreeSubscription.processorFieldsDiscounts(originalDiscounts, discounts), expected);
+        assert.deepEqual(subscriptionProcessor.processorFieldsDiscounts(originalDiscounts, discounts), expected);
     });
 
     it('processorFields should map models to braintree data', function () {
         return this.customer.save().then(customer => {
-            const fields = braintreeSubscription.processorFields(customer, customer.subscriptions[0]);
+            const fields = subscriptionProcessor.processorFields(customer, customer.subscriptions[0]);
 
             const expected = {
                 planId: 'test1',
@@ -364,7 +386,7 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
             },
         ];
 
-        const fields = braintreeSubscription.fieldsDiscounts(originalDiscounts, resultDiscounts);
+        const fields = subscriptionProcessor.fieldsDiscounts(originalDiscounts, resultDiscounts);
 
         assert.deepEqual(fields, expected);
     });
@@ -380,7 +402,7 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
             }
         ];
 
-        const fields = braintreeSubscription.fields(originalDiscounts, this.subscriptionResult);
+        const fields = subscriptionProcessor.fields(originalDiscounts, this.subscriptionResult.subscription);
 
         const expected = {
             processor: { id: 'gzsxjb', state: 'saved' },
@@ -406,6 +428,16 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
                 url: 'enhancv.com'
             },
             status: 'Active',
+            statusHistory: [
+                {
+                    timestamp: "2016-11-02T18:30:25Z",
+                    status: "Canceled",
+                },
+                {
+                    timestamp: "2016-10-05T11:37:40Z",
+                    status: "Active",
+                },
+            ],
             firstBillingDate: '2016-09-29',
             nextBillingDate: '2016-10-29',
         };
@@ -428,9 +460,9 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
 
         return this.customer
             .save()
-            .then(customer => braintreeSubscription.save(processor, customer, customer.subscriptions[0]))
+            .then(customer => subscriptionProcessor.save(processor, customer, customer.subscriptions[0]))
             .then(subscription => {
-                sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('objectName', 'subscription').and(sinon.match.has('action', 'saved')));
+                sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('name', 'subscription').and(sinon.match.has('action', 'saved')));
                 sinon.assert.calledOnce(gateway.subscription.create);
                 assert.deepEqual(subscription.processor.toObject(), { id: 'gzsxjb', state: 'saved' });
             });
@@ -451,9 +483,9 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
 
         return this.customer
             .save()
-            .then(customer => braintreeSubscription.save(processor, customer, customer.subscriptions[0]))
+            .then(customer => subscriptionProcessor.save(processor, customer, customer.subscriptions[0]))
             .then(subscription => {
-                sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('objectName', 'subscription').and(sinon.match.has('action', 'saved')));
+                sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('name', 'subscription').and(sinon.match.has('action', 'saved')));
                 sinon.assert.calledWith(gateway.subscription.update, 'gzsxjb');
                 assert.deepEqual(new Date("2016-10-28"), subscription.paidThroughDate);
             });
@@ -476,7 +508,7 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
 
         return this.customer
             .save()
-            .then(customer => braintreeSubscription.save(processor, customer, customer.subscriptions[0]))
+            .then(customer => subscriptionProcessor.save(processor, customer, customer.subscriptions[0]))
             .catch(error => {
                 sinon.assert.neverCalledWith(processor.emit, 'event', sinon.match.has('action', 'saved'));
                 assert.equal(error, apiError);
@@ -498,7 +530,7 @@ describe('braintreeSubscription', database([Customer, Plan], function () {
 
         return this.customer
             .save()
-            .then(customer => braintreeSubscription.save(processor, customer, customer.subscriptions[0]))
+            .then(customer => subscriptionProcessor.save(processor, customer, customer.subscriptions[0]))
             .catch(error => {
                 sinon.assert.neverCalledWith(processor.emit, 'event', sinon.match.has('action', 'saved'));
                 assert.equal(error.message, 'some error');

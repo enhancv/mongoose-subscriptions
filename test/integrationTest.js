@@ -13,13 +13,11 @@ const Coupon = require('../src/Coupon');
 const BraintreeProcessor = require('../src/braintree/processor')
 const processor = new BraintreeProcessor(gateway);
 
-// processor.on('event', (name, data) => {
-//     console.log(name, data);
-// })
+processor.on('event', (event) => console.log(event.name, event.action));
 
 describe('Customer', database([Customer, Plan, Coupon], function () {
     it('Should be able to instantiate a Customer', function () {
-        this.timeout(160000);
+        this.timeout(20000);
 
         let plan = null;
         let coupon = null;
@@ -250,6 +248,113 @@ describe('Customer', database([Customer, Plan, Coupon], function () {
                                 }
                             }
                         );
+
+                        return customer.cancel(processor, 'four');
+                    })
+                    .then(customer => {
+                        const subscription = customer.subscriptions[0];
+                        const transaction = customer.transactions[0];
+
+                        assert.equal(subscription.status, 'Canceled');
+                        assert.equal(subscription.statusHistory.length, 2);
+
+                        sinon.assert.match(subscription.statusHistory[0], {
+                            timestamp: sinon.match.date,
+                            status: 'Canceled',
+                        });
+
+                        sinon.assert.match(subscription.statusHistory[1], {
+                            timestamp: sinon.match.date,
+                            status: 'Active',
+                        });
+
+                        return new Promise((resolve, reject) => {
+                            gateway.testing.settle(transaction.processor.id, (err, settleResult) => {
+                                if (err) {
+                                    reject(err);
+                                } else {
+                                    resolve(customer);
+                                }
+                            });
+                        });
+                    }).then(customer => {
+                        const transaction = customer.transactions[0];
+                        return customer.refund(processor, transaction._id, 3.5);
+                    }).then(customer => {
+                        const transactionOriginal = customer.transactions[0];
+                        const transactionRefund = customer.transactions[1];
+
+                        sinon.assert.match(
+                            transactionRefund,
+                            {
+                                _id: sinon.match.string,
+                                amount: 3.5,
+                                refundedTransactionId: transactionOriginal._id,
+                                subscriptionId: 'four',
+                                planProcessorId: null,
+                                billing: {
+                                    name: 'Pesho Peshev Stoevski',
+                                    company: 'Example company',
+                                    country: 'BG',
+                                    locality: 'Sofia',
+                                    streetAddress: 'Tsarigradsko Shose 4',
+                                    extendedAddress: 'floor 3',
+                                    postalCode: '1000'
+                                },
+                                customer: {
+                                    phone: '+35988911111',
+                                    name: 'Pesho Peshev',
+                                    email: 'seer@example.com',
+                                },
+                                currency: 'USD',
+                                status: 'submitted_for_settlement',
+                                createdAt: sinon.match.date,
+                                updatedAt: sinon.match.date,
+                                processor: {
+                                    id: sinon.match.string,
+                                    state: 'saved',
+                                }
+                            }
+                        );
+
+                        return customer.refund(processor, transactionOriginal._id);
+                    }).then(customer => {
+                        const transactionOriginal = customer.transactions[0];
+                        const transactionRefund = customer.transactions[2];
+
+                        sinon.assert.match(
+                            transactionRefund,
+                            {
+                                _id: sinon.match.string,
+                                amount: 9.91,
+                                refundedTransactionId: transactionOriginal._id,
+                                subscriptionId: 'four',
+                                planProcessorId: null,
+                                billing: {
+                                    name: 'Pesho Peshev Stoevski',
+                                    company: 'Example company',
+                                    country: 'BG',
+                                    locality: 'Sofia',
+                                    streetAddress: 'Tsarigradsko Shose 4',
+                                    extendedAddress: 'floor 3',
+                                    postalCode: '1000'
+                                },
+                                customer: {
+                                    phone: '+35988911111',
+                                    name: 'Pesho Peshev',
+                                    email: 'seer@example.com',
+                                },
+                                currency: 'USD',
+                                status: 'submitted_for_settlement',
+                                createdAt: sinon.match.date,
+                                updatedAt: sinon.match.date,
+                                processor: {
+                                    id: sinon.match.string,
+                                    state: 'saved',
+                                }
+                            }
+                        );
+                        // return customer.load(processor);
                     });
             });
     });

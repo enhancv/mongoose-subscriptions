@@ -5,9 +5,9 @@ const sinon = require('sinon');
 const braintree = require('braintree');
 const Customer = require('../../src/Customer');
 const ProcessorItem = require('../../src/Schema/ProcessorItem');
-const braintreePaymentMethod = require('../../src/braintree/paymentMethod');
+const paymentMethodProcessor = require('../../src/braintree/paymentMethodProcessor');
 
-describe('braintreePaymentMethod', function () {
+describe('paymentMethodProcessor', function () {
 
     beforeEach(function () {
         this.customer = new Customer({
@@ -61,7 +61,7 @@ describe('braintreePaymentMethod', function () {
     it('processorFields should map models to braintree data', function () {
         this.customer.paymentMethods[0].nonce = braintree.Test.Nonces.Transactable;
 
-        const fields = braintreePaymentMethod.processorFields(this.customer, this.customer.paymentMethods[0]);
+        const fields = paymentMethodProcessor.processorFields(this.customer, this.customer.paymentMethods[0]);
 
         const expected = {
             billingAddressId: 'test-id',
@@ -75,7 +75,7 @@ describe('braintreePaymentMethod', function () {
     });
 
     it('processorFields should map models to braintree data without nonce', function () {
-        const fields = braintreePaymentMethod.processorFields(this.customer, this.customer.paymentMethods[0]);
+        const fields = paymentMethodProcessor.processorFields(this.customer, this.customer.paymentMethods[0]);
 
         const expected = {
             billingAddressId: 'test-id',
@@ -88,7 +88,7 @@ describe('braintreePaymentMethod', function () {
     });
 
     it('processorFields should map models to braintree data non default', function () {
-        const fields = braintreePaymentMethod.processorFields(this.customer, this.customer.paymentMethods[1]);
+        const fields = paymentMethodProcessor.processorFields(this.customer, this.customer.paymentMethods[1]);
 
         const expected = {
             billingAddressId: 'test-id',
@@ -112,7 +112,7 @@ describe('braintreePaymentMethod', function () {
             updatedAt: '2016-09-30T12:25:18Z',
         });
 
-        const fields = braintreePaymentMethod.fields({ creditCard: paymentMethod, paymentMethod: paymentMethod });
+        const fields = paymentMethodProcessor.fields(paymentMethod);
 
         const expected = {
             __t: 'CreditCard',
@@ -148,7 +148,7 @@ describe('braintreePaymentMethod', function () {
             updatedAt: '2016-09-30T12:25:18Z',
         });
 
-        const fields = braintreePaymentMethod.fields({ payPalAccount: paymentMethod, paymentMethod: paymentMethod });
+        const fields = paymentMethodProcessor.fields(paymentMethod);
 
         const expected = {
             __t: 'PayPalAccount',
@@ -179,7 +179,7 @@ describe('braintreePaymentMethod', function () {
             updatedAt: '2016-09-30T12:25:18Z',
         });
 
-        const fields = braintreePaymentMethod.fields({ applePayCard: paymentMethod, paymentMethod: paymentMethod });
+        const fields = paymentMethodProcessor.fields(paymentMethod);
 
         const expected = {
             __t: 'ApplePayCard',
@@ -211,7 +211,7 @@ describe('braintreePaymentMethod', function () {
             updatedAt: '2016-09-30T12:25:18Z',
         });
 
-        const fields = braintreePaymentMethod.fields({ androidPayCard: paymentMethod, paymentMethod: paymentMethod });
+        const fields = paymentMethodProcessor.fields(paymentMethod);
 
         const expected = {
             __t: 'AndroidPayCard',
@@ -244,9 +244,9 @@ describe('braintreePaymentMethod', function () {
 
         this.customer.paymentMethods[0].processor = { id: null, state: ProcessorItem.INITIAL };
 
-        return braintreePaymentMethod.save(processor, this.customer, this.customer.paymentMethods[0])
+        return paymentMethodProcessor.save(processor, this.customer, this.customer.paymentMethods[0])
             .then(address => {
-                sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('objectName', 'paymentMethod').and(sinon.match.has('action', 'saved')));
+                sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('name', 'paymentMethod').and(sinon.match.has('action', 'saved')));
                 sinon.assert.calledOnce(gateway.paymentMethod.create);
                 sinon.assert.calledWith(gateway.paymentMethod.create, sinon.match.has('customerId', '64601260'));
                 assert.deepEqual(address.processor.toObject(), { id: 'gpjt3m', state: ProcessorItem.SAVED });
@@ -266,9 +266,9 @@ describe('braintreePaymentMethod', function () {
 
         this.customer.paymentMethods[0].processor.state = ProcessorItem.CHANGED;
 
-        return braintreePaymentMethod.save(processor, this.customer, this.customer.paymentMethods[0])
+        return paymentMethodProcessor.save(processor, this.customer, this.customer.paymentMethods[0])
             .then(paymentMethod => {
-                sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('objectName', 'paymentMethod').and(sinon.match.has('action', 'saved')));
+                sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('name', 'paymentMethod').and(sinon.match.has('action', 'saved')));
                 sinon.assert.calledOnce(gateway.paymentMethod.update);
                 sinon.assert.calledWith(gateway.paymentMethod.update, 'gpjt3m', sinon.match.object);
                 assert.deepEqual('Pesho Peshev', paymentMethod.cardholderName);
@@ -290,7 +290,7 @@ describe('braintreePaymentMethod', function () {
 
         this.customer.paymentMethods[0].processor.state = ProcessorItem.CHANGED;
 
-        return braintreePaymentMethod.save(processor, this.customer, this.customer.paymentMethods[0])
+        return paymentMethodProcessor.save(processor, this.customer, this.customer.paymentMethods[0])
             .catch(error => {
                 sinon.assert.neverCalledWith(processor.emit, 'event', sinon.match.has('action', 'saved'));
                 assert.equal(error, apiError);
@@ -310,7 +310,7 @@ describe('braintreePaymentMethod', function () {
 
         this.customer.paymentMethods[0].processor.state = ProcessorItem.CHANGED;
 
-        return braintreePaymentMethod.save(processor, this.customer, this.customer.paymentMethods[0])
+        return paymentMethodProcessor.save(processor, this.customer, this.customer.paymentMethods[0])
             .catch(error => {
                 sinon.assert.neverCalledWith(processor.emit, 'event', sinon.match.has('action', 'saved'));
                 assert.equal(error.message, 'some error');

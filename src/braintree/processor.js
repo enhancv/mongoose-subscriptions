@@ -1,10 +1,10 @@
 const EventEmitter = require('events');
-const plan = require('./plan');
-const customer = require('./customer');
-const address = require('./address');
-const paymentMethod = require('./paymentMethod');
-const subscription = require('./subscription');
-const transaction = require('./transaction');
+const planProcessor = require('./planProcessor');
+const customerProcessor = require('./customerProcessor');
+const addressProcessor = require('./addressProcessor');
+const paymentMethodProcessor = require('./paymentMethodProcessor');
+const subscriptionProcessor = require('./subscriptionProcessor');
+const transactionProcessor = require('./transactionProcessor');
 
 class BraintreeProcessor extends EventEmitter {
     constructor (gateway) {
@@ -18,24 +18,45 @@ class BraintreeProcessor extends EventEmitter {
             .then(items => Object.assign(customer, { [itemsName]: items }))
     }
 
-    save (customerObject) {
-        return customer.save(this, customerObject)
-            .then(customerObject => this.saveMultiple(address.save, customerObject, 'addresses'))
-            .then(customerObject => this.saveMultiple(paymentMethod.save, customerObject, 'paymentMethods'))
-            .then(customerObject => this.saveMultiple(subscription.save, customerObject, 'subscriptions'))
-            .then(customerObject => transaction.all(this, customerObject));
+    updateOne (saveOne, customer, itemsName, itemsId) {
+        const item = customer[itemsName].id(itemsId);
+        const index = customer[itemsName].indexOf(item);
+
+        return saveOne(this, customer, item)
+            .then(item => {
+                customer[itemsName][index] = item;
+                return customer;
+            });
     }
 
-    cancelSubscription (customerObject, subscriptionObject) {
-        return subscription.cancel(this, customerObject, subscriptionObject);
+    load (customer) {
+        return customerProcessor.load(this, customer);
+            // .then(customerObject => transaction.all(this, customerObject));
     }
 
-    refundTransaction (customerObject, transactionObject, amount) {
-        return transaction.refund(this, customerObject, transactionObject, amount);
+    save (customer) {
+        return customerProcessor.save(this, customer)
+            .then(customer => this.saveMultiple(addressProcessor.save, customer, 'addresses'))
+            .then(customer => this.saveMultiple(paymentMethodProcessor.save, customer, 'paymentMethods'))
+            .then(customer => this.saveMultiple(subscriptionProcessor.save, customer, 'subscriptions'))
+            .then(customer => transactionProcessor.all(this, customer));
+    }
+
+    cancelSubscription (customer, subscriptionId) {
+        return this.updateOne(subscriptionProcessor.cancel, customer, 'subscriptions', subscriptionId);
+    }
+
+    refundTransaction (customer, transactionId, amount) {
+        return transactionProcessor.refund(this, customer, customer.transactions.id(transactionId), amount)
+            .then(transaction => {
+                customer.transactions.push(transaction);
+
+                return customer;
+            });
     }
 
     plans () {
-        return plan.all(this);
+        return planProcessor.all(this);
     }
 }
 

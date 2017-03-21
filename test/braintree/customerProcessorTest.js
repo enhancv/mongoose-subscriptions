@@ -5,9 +5,9 @@ const sinon = require('sinon');
 const braintree = require('braintree');
 const Customer = require('../../src/Customer');
 const ProcessorItem = require('../../src/Schema/ProcessorItem');
-const braintreeCustomer = require('../../src/braintree/customer');
+const customerProcessor = require('../../src/braintree/customerProcessor');
 
-describe('braintreeCustomer', function () {
+describe('customerProcessor', function () {
 
     beforeEach(function () {
         this.customer = new Customer({
@@ -45,7 +45,7 @@ describe('braintreeCustomer', function () {
             defaultPaymentMethodId: 'three',
         };
 
-        const fields = braintreeCustomer.processorFields(customer);
+        const fields = customerProcessor.processorFields(customer);
 
         const expected = {
             firstName: 'Pesho',
@@ -61,7 +61,7 @@ describe('braintreeCustomer', function () {
     });
 
     it('fields should map result data into a model', function () {
-        const fields = braintreeCustomer.fields(this.customerResult);
+        const fields = customerProcessor.fields(this.customerResult.customer);
 
         const expected = {
             processor: {
@@ -90,9 +90,9 @@ describe('braintreeCustomer', function () {
 
         this.customer.processor = { id: null, state: ProcessorItem.INITIAL };
 
-        return braintreeCustomer.save(processor, this.customer)
+        return customerProcessor.save(processor, this.customer)
             .then(customer => {
-                sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('objectName', 'customer').and(sinon.match.has('action', 'saved')));
+                sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('name', 'customer').and(sinon.match.has('action', 'saved')));
                 sinon.assert.calledOnce(gateway.customer.create);
                 sinon.assert.calledWith(gateway.customer.create, sinon.match.object);
                 assert.deepEqual(customer.processor.toObject(), { id: '64601260', state: ProcessorItem.SAVED });
@@ -112,9 +112,9 @@ describe('braintreeCustomer', function () {
 
         this.customer.processor.state = ProcessorItem.CHANGED;
 
-        return braintreeCustomer.save(processor, this.customer)
+        return customerProcessor.save(processor, this.customer)
             .then(customer => {
-                sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('objectName', 'customer').and(sinon.match.has('action', 'saved')));
+                sinon.assert.calledWith(processor.emit, 'event', sinon.match.has('name', 'customer').and(sinon.match.has('action', 'saved')));
                 sinon.assert.calledOnce(gateway.customer.update);
                 sinon.assert.calledWith(gateway.customer.update, '64601260', sinon.match.object);
                 assert.deepEqual('Pesho Peshev', customer.name);
@@ -136,7 +136,7 @@ describe('braintreeCustomer', function () {
 
         this.customer.processor.state = ProcessorItem.CHANGED;
 
-        return braintreeCustomer.save(processor, this.customer)
+        return customerProcessor.save(processor, this.customer)
             .catch(error => {
                 sinon.assert.neverCalledWith(processor.emit, 'event', sinon.match.has('action', 'saved'));
                 assert.equal(error, apiError);
@@ -156,7 +156,7 @@ describe('braintreeCustomer', function () {
 
         this.customer.processor.state = ProcessorItem.CHANGED;
 
-        return braintreeCustomer.save(processor, this.customer)
+        return customerProcessor.save(processor, this.customer)
             .catch(error => {
                 sinon.assert.neverCalledWith(processor.emit, 'event', sinon.match.has('action', 'saved'));
                 sinon.assert.match(error, { message: 'some error' });

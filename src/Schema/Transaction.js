@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 const ProcessorItem = require('./ProcessorItem');
 const TransactionAddress = require('./Transaction/Address');
 const TransactionCustomer = require('./Transaction/Customer');
-const TransactionStatus = require('./Transaction/Status');
+const Status = require('./Status');
 const TransactionDiscount = require('./Transaction/Discount');
 const Descriptor = require('./Descriptor');
 const CreditCard = require('./Transaction/CreditCard');
@@ -31,7 +31,7 @@ const Transaction = new Schema({
     status: String,
     createdAt: Date,
     updatedAt: Date,
-    statusHistory: [TransactionStatus],
+    statusHistory: [Status],
 });
 
 Transaction.TransactionCreditCard = CreditCard;
@@ -41,7 +41,6 @@ Transaction.TransactionAndroidPayCard = AndroidPayCard;
 
 Transaction.TransactionAddress = TransactionAddress;
 Transaction.TransactionCustomer = TransactionCustomer;
-Transaction.TransactionStatus = TransactionStatus;
 Transaction.TransactionDiscount = TransactionDiscount;
 
 module.exports = Transaction;

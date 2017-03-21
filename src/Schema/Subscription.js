@@ -6,6 +6,7 @@ const ProcessorItem = require('./ProcessorItem');
 const Descriptor = require('./Descriptor');
 const originals = require('mongoose-originals');
 const Discount = require('./Discount');
+const Status = require('./Status');
 
 const Subscription = new Schema({
     _id: String,
@@ -26,6 +27,7 @@ const Subscription = new Schema({
     paidThroughDate: Date,
     status: String,
     price: Number,
+    statusHistory: [Status],
     descriptor: Descriptor,
     trialDuration: Number,
     trialDurationUnit: {

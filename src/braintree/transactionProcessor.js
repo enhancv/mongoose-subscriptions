@@ -1,8 +1,8 @@
 const ProcessorItem = require('../Schema/ProcessorItem');
 const Event = require('./Event');
-const address = require('./address');
+const addressProcessor = require('./addressProcessor');
 const Plan = require('../Plan');
-const { fullName } = require('../utils');
+const name = require('./name');
 
 function filedsDiscount (discount) {
     braintreeTransaction
@@ -21,13 +21,13 @@ function fields (customer, braintreeTransaction) {
         refundedTransactionId: braintreeTransaction.refundedTransactionId,
         subscriptionId: subscription ? subscription.id : null,
         planProcessorId: braintreeTransaction.planId,
-        billing: address.fields({ address: braintreeTransaction.billing }),
-        customer: {
-            name: fullName(braintreeTransaction.customer.firstName, braintreeTransaction.customer.lastName),
+        billing: braintreeTransaction.billing ? addressProcessor.fields(braintreeTransaction.billing) : null,
+        customer: braintreeTransaction.customer ? {
+            name: name.full(braintreeTransaction.customer.firstName, braintreeTransaction.customer.lastName),
             phone: braintreeTransaction.customer.phone,
             company: braintreeTransaction.customer.company,
             email: braintreeTransaction.customer.email,
-        },
+        } : null,
         currency: braintreeTransaction.currencyIsoCode,
         status: braintreeTransaction.status,
         statusHistory: braintreeTransaction.statusHistory,
@@ -38,13 +38,13 @@ function fields (customer, braintreeTransaction) {
         } : null,
         createdAt: braintreeTransaction.createdAt,
         updatedAt: braintreeTransaction.updatedAt,
-        discounts: braintreeTransaction.discounts.map(discount => {
+        discounts: braintreeTransaction.discounts ? braintreeTransaction.discounts.map(discount => {
             return {
                 __t: discount.id,
                 amount: discount.amount,
                 name: discount.name,
             }
-        })
+        }) : null,
     };
 
     if (braintreeTransaction.paymentInstrumentType === 'credit_card') {
@@ -58,7 +58,7 @@ function fields (customer, braintreeTransaction) {
         result.expirationYear = braintreeTransaction.creditCard.expirationYear;
     } else if (braintreeTransaction.paymentInstrumentType === 'paypal_account') {
         result.__t = 'TransactionPayPalAccount';
-        result.name = fullName(braintreeTransaction.paypalAccount.payerFirstName, braintreeTransaction.paypalAccount.payerLastName);
+        result.name = name.full(braintreeTransaction.paypalAccount.payerFirstName, braintreeTransaction.paypalAccount.payerLastName);
         result.payerId = braintreeTransaction.paypalAccount.payerId;
         result.email = braintreeTransaction.paypalAccount.payerEmail;
     } else if (braintreeTransaction.paymentInstrumentType === 'apple_pay_card') {
@@ -80,7 +80,7 @@ function fields (customer, braintreeTransaction) {
     return result;
 }
 
-function refund (gateway, customer, transaction, amount) {
+function refund (processor, customer, transaction, amount) {
     ProcessorItem.validateIsSaved(customer);
     ProcessorItem.validateIsSaved(transaction);
 
@@ -88,15 +88,20 @@ function refund (gateway, customer, transaction, amount) {
         function callback (err, result) {
             if (err) {
                 reject(err);
+            } else if (result.success) {
+                processor.emit('event', new Event(Event.TRANSACTION, Event.REFUNDED, result));
+                resolve(fields(customer, result.transaction));
             } else {
-                resolve(fields(customer, result));
+                reject(new Error(result.message));
             }
         }
 
+        processor.emit('event', new Event(Event.TRANSACTION, Event.REFUND, amount));
+
         if (amount) {
-            gateway.transaction.refund(transaction.processor.id, amount, callback);
+            processor.gateway.transaction.refund(transaction.processor.id, amount, callback);
         } else {
-            gateway.transaction.refund(transaction.processor.id, callback);
+            processor.gateway.transaction.refund(transaction.processor.id, callback);
         }
     });
 }

@@ -91,8 +91,7 @@ function fieldsDiscounts (originalDiscounts, resultDiscounts) {
     });
 }
 
-function fields (originalDiscounts, result) {
-    const subscription = result.subscription;
+function fields (originalDiscounts, subscription) {
     const discounts = fieldsDiscounts(originalDiscounts, subscription.discounts);
     const response = {
         processor: {
@@ -107,6 +106,12 @@ function fields (originalDiscounts, result) {
         descriptor: subscription.descriptor,
         status: subscription.status,
         price: subscription.price,
+        statusHistory: subscription.statusHistory.map(status => {
+            return {
+                timestamp: status.timestamp,
+                status: status.status,
+            }
+        }),
         firstBillingDate: subscription.firstBillingDate,
         nextBillingDate: subscription.nextBillingDate,
     };
@@ -114,13 +119,15 @@ function fields (originalDiscounts, result) {
     return response;
 }
 
-function cancel (gateway, customer, subscription) {
+function cancel (processor, customer, subscription) {
     return new Promise((resolve, reject) => {
-        gateway.subscription.cancel(subscription.processor.id, (err, result) => {
+        processor.emit('event', new Event(Event.SUBSCRIPTION, Event.CANCELING, subscription));
+        processor.gateway.subscription.cancel(subscription.processor.id, (err, result) => {
             if (err) {
                 reject(err);
             } else {
-                resolve(Object.assign(subscription, fields(subscription.discounts, result)));
+                processor.emit('event', new Event(Event.SUBSCRIPTION, Event.CANCELED, result));
+                resolve(Object.assign(subscription, fields(subscription.discounts, result.subscription)));
             }
         })
     });
@@ -135,7 +142,7 @@ function save (processor, customer, subscription) {
                 reject(err);
             } else if (result.success) {
                 processor.emit('event', new Event(Event.SUBSCRIPTION, Event.SAVED, result));
-                resolve(Object.assign(subscription, fields(subscription.discounts, result)));
+                resolve(Object.assign(subscription, fields(subscription.discounts, result.subscription)));
             } else {
                 reject(new Error(result.message));
             }
