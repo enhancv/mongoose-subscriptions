@@ -10,7 +10,7 @@ const Customer = require('../../src/Customer');
 const ProcessorItem = require('../../src/Schema/ProcessorItem');
 const subscriptionProcessor = require('../../src/braintree/subscriptionProcessor');
 
-describe('subscriptionProcessor', database([Customer, Plan], function () {
+describe('braintree/subscriptionProcessor', database([Customer, Plan], function () {
 
     beforeEach(function () {
         this.subscriptionResult = {

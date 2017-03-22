@@ -1,12 +1,12 @@
 'use strict';
 
 const assert = require('assert');
-const Coupon = require('../../src/Coupon');
-const Subscription = require('../../src/Subscription');
-const DiscountCoupon = require('../../src/Schema/Discount/Coupon');
-const Plan = require('../../src/Plan');
+const Coupon = require('../../../src/Coupon');
+const Subscription = require('../../../src/Subscription');
+const DiscountCoupon = require('../../../src/Schema/Discount/Coupon');
+const Plan = require('../../../src/Plan');
 
-describe('Discount', function () {
+describe('Discount/Coupon', function () {
     beforeEach(function() {
         const plan = new Plan({
             processor: { id: 'test1', state: 'saved' },

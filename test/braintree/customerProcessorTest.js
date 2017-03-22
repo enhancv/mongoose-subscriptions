@@ -7,7 +7,7 @@ const Customer = require('../../src/Customer');
 const ProcessorItem = require('../../src/Schema/ProcessorItem');
 const customerProcessor = require('../../src/braintree/customerProcessor');
 
-describe('customerProcessor', function () {
+describe('braintree/customerProcessor', function () {
 
     beforeEach(function () {
         this.customer = new Customer({

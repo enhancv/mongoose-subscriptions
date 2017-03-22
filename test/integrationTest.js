@@ -13,7 +13,7 @@ const Coupon = require('../src').Coupon;
 const BraintreeProcessor = require('../src/braintree/processor');
 const processor = new BraintreeProcessor(gateway);
 
-describe('Customer', database([Customer, Plan, Coupon], function () {
+describe('Customer Integration', database([Customer, Plan, Coupon], function () {
     it('Should be able to instantiate a Customer', function () {
         this.timeout(20000);
 

@@ -7,7 +7,7 @@ const Customer = require('../../src/Customer');
 const ProcessorItem = require('../../src/Schema/ProcessorItem');
 const paymentMethodProcessor = require('../../src/braintree/paymentMethodProcessor');
 
-describe('paymentMethodProcessor', function () {
+describe('braintree/paymentMethodProcessor', function () {
 
     beforeEach(function () {
         this.customer = new Customer({
