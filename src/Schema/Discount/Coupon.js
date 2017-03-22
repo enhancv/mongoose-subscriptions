@@ -15,9 +15,9 @@ const DiscountCoupon = new Schema({
     },
 }, { _id: false });
 
-DiscountCoupon.build = function (subscription, coupon) {
+DiscountCoupon.build = function (subscription, coupon, currentDate) {
     const amount = coupon.currentAmount(subscription);
-    const today = new Date();
+    const today = currentDate || new Date();
 
     if (coupon.usedCount >= coupon.usedCountMax) {
         return null;
@@ -27,7 +27,7 @@ DiscountCoupon.build = function (subscription, coupon) {
         return null;
     }
 
-    if (coupon.expiresAt && coupon.expiresAt > today) {
+    if (coupon.expireAt && coupon.expireAt < today) {
         return null;
     }
 
