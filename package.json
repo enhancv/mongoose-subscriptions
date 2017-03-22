@@ -13,7 +13,7 @@
         "shortid": "^2.2.8"
     },
     "scripts": {
-        "test": "node_modules/.bin/mocha --recursive"
+        "test": "node node_modules/mocha/bin/mocha --recursive"
     },
     "devDependencies": {
         "braintree": "^2.0.2",

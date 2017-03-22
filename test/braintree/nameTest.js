@@ -3,7 +3,7 @@
 const assert = require('assert');
 const name = require('../../src/braintree/name');
 
-describe('name', function () {
+describe('braintree/name', function () {
     it('last name', function () {
         assert.deepEqual(name.last('Pesho Peshev'), 'Peshev');
         assert.deepEqual(name.last('Pesho'), '');

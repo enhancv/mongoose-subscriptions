@@ -5,7 +5,7 @@ const sinon = require('sinon');
 const ProcessorItem = require('../../src/Schema/ProcessorItem');
 const planProcessor = require('../../src/braintree/planProcessor');
 
-describe('planProcessor', function () {
+describe('braintree/planProcessor', function () {
 
     beforeEach(function () {
         this.planResult = {
