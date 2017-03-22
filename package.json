@@ -1,14 +1,12 @@
 {
-    "name": "node-subscriptions",
+    "name": "mongoose-subscriptions",
     "version": "1.0.0",
     "description": "Processor agnostic payment subscription backend",
     "main": "src/index.js",
-    "repository": "git@github.com:enhancv/node-subscriptions.git",
+    "repository": "git@github.com:enhancv/mongoose-subscriptions.git",
     "author": "Ivan Kerin <ikerin@gmail.com>",
     "license": "MIT",
     "dependencies": {
-        "async": "^2.1.5",
-        "braintree-as-promised": "^0.4.0",
         "lodash": "^4.17.4",
         "mongoose": "^4.8.4",
         "mongoose-originals": "^1.0.0",

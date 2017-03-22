@@ -12,12 +12,6 @@ async@2.1.4:
   dependencies:
     lodash "^4.14.0"
 
-async@^2.1.5:
-  version "2.1.5"
-  resolved "https://registry.yarnpkg.com/async/-/async-2.1.5.tgz#e587c68580994ac67fc56ff86d3ac56bdbe810bc"
-  dependencies:
-    lodash "^4.14.0"
-
 balanced-match@^0.4.1:
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-0.4.2.tgz#cb3f3e3c732dc0f01ee70b403f302e61d7709838"
@@ -32,10 +26,6 @@ brace-expansion@^1.0.0:
   dependencies:
     balanced-match "^0.4.1"
     concat-map "0.0.1"
-
-braintree-as-promised@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/braintree-as-promised/-/braintree-as-promised-0.4.0.tgz#46a733ed3f72ff07ae1b0e38f9797c6fd17d7339"
 
 braintree@^2.0.2:
   version "2.0.2"
@@ -143,9 +133,9 @@ has-flag@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/has-flag/-/has-flag-1.0.0.tgz#9d9e793165ce017a00f00418c43f942a7b1d11fa"
 
-hooks-fixed@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/hooks-fixed/-/hooks-fixed-1.2.0.tgz#0d2772d4d7d685ff9244724a9f0b5b2559aac96b"
+hooks-fixed@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/hooks-fixed/-/hooks-fixed-2.0.0.tgz#a01d894d52ac7f6599bbb1f63dfc9c411df70cba"
 
 inflight@^1.0.4:
   version "1.0.6"
@@ -154,11 +144,7 @@ inflight@^1.0.4:
     once "^1.3.0"
     wrappy "1"
 
-inherits@2, inherits@~2.0.1:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.3.tgz#633c2c83e3da42a502f52466022480f4208261de"
-
-inherits@2.0.1:
+inherits@2, inherits@2.0.1, inherits@~2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.1.tgz#b17d08d326b4423e568eff719f91b0b1cbdf69f1"
 
@@ -261,19 +247,19 @@ mocha@^3.2.0:
     mkdirp "0.5.1"
     supports-color "3.1.2"
 
-mongodb-core@2.1.8:
-  version "2.1.8"
-  resolved "https://registry.yarnpkg.com/mongodb-core/-/mongodb-core-2.1.8.tgz#b33e0370d0a59d97b6cb1ec610527be9e95ca2c0"
+mongodb-core@2.1.9:
+  version "2.1.9"
+  resolved "https://registry.yarnpkg.com/mongodb-core/-/mongodb-core-2.1.9.tgz#85aa71ee4fb716196e06b787557bf139f801daf5"
   dependencies:
     bson "~1.0.4"
     require_optional "~1.0.0"
 
-mongodb@2.2.24:
-  version "2.2.24"
-  resolved "https://registry.yarnpkg.com/mongodb/-/mongodb-2.2.24.tgz#80f40d6ec5bdec0ddecf0f9ce0144e794c46449a"
+mongodb@2.2.25:
+  version "2.2.25"
+  resolved "https://registry.yarnpkg.com/mongodb/-/mongodb-2.2.25.tgz#d3b25dad00eda2bdfcbc996210ba082ac686a6b6"
   dependencies:
     es6-promise "3.2.1"
-    mongodb-core "2.1.8"
+    mongodb-core "2.1.9"
     readable-stream "2.1.5"
 
 mongoose-originals@^1.0.0:
@@ -283,17 +269,17 @@ mongoose-originals@^1.0.0:
     mongoose "^4.8.4"
 
 mongoose@^4.8.4:
-  version "4.8.4"
-  resolved "https://registry.yarnpkg.com/mongoose/-/mongoose-4.8.4.tgz#091ca76f404355120a0b497bad6cc2b7d21c83ae"
+  version "4.9.1"
+  resolved "https://registry.yarnpkg.com/mongoose/-/mongoose-4.9.1.tgz#e621d9e7356f46d1e39980a71063857405fa9099"
   dependencies:
     async "2.1.4"
     bson "~1.0.4"
-    hooks-fixed "1.2.0"
+    hooks-fixed "2.0.0"
     kareem "1.2.1"
-    mongodb "2.2.24"
+    mongodb "2.2.25"
     mpath "0.2.1"
     mpromise "0.5.5"
-    mquery "2.2.3"
+    mquery "2.3.0"
     ms "0.7.2"
     muri "1.2.1"
     regexp-clone "0.0.1"
@@ -307,9 +293,9 @@ mpromise@0.5.5:
   version "0.5.5"
   resolved "https://registry.yarnpkg.com/mpromise/-/mpromise-0.5.5.tgz#f5b24259d763acc2257b0a0c8c6d866fd51732e6"
 
-mquery@2.2.3:
-  version "2.2.3"
-  resolved "https://registry.yarnpkg.com/mquery/-/mquery-2.2.3.tgz#a4703b64fb6734fce51d784a4df095cabf1a8f57"
+mquery@2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/mquery/-/mquery-2.3.0.tgz#3d1717ad8958d0c99e42ea2461a109f3e5f3e458"
   dependencies:
     bluebird "2.10.2"
     debug "2.2.0"
