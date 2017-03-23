@@ -6,7 +6,7 @@ const Customer = main.Customer;
 const Plan = main.Plan;
 const DiscountInviter = main.Schema.Discount.DiscountInviter;
 
-describe('Discount/Inviter', function () {
+describe('Schema/Discount/Inviter', function () {
     beforeEach(function() {
         const plan = new Plan({
             processor: { id: 'test1', state: 'saved' },

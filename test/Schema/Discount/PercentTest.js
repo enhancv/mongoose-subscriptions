@@ -6,7 +6,7 @@ const Customer = main.Customer;
 const Plan = main.Plan;
 const DiscountPercent = main.Schema.Discount.DiscountPercent;
 
-describe('Discount/Percent', function () {
+describe('Schema/Discount/Percent', function () {
     beforeEach(function() {
         const plan = new Plan({
             processor: { id: 'test1', state: 'saved' },
