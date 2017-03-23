@@ -1,11 +1,12 @@
 'use strict';
 
 const assert = require('assert');
-const Subscription = require('../../../src/Subscription');
-const DiscountAmount = require('../../../src/Schema/Discount/Amount');
-const Plan = require('../../../src/Plan');
+const main = require('../../../src');
+const Customer = main.Customer;
+const Plan = main.Plan;
+const DiscountAmount = main.Schema.Discount.DiscountAmount;
 
-describe('Discount/Amount', function () {
+describe('Schema/Discount/Amount', function () {
     beforeEach(function() {
         const plan = new Plan({
             processor: { id: 'test1', state: 'saved' },
@@ -15,19 +16,25 @@ describe('Discount/Amount', function () {
             billingFrequency: 1,
         });
 
-        this.subscription = new Subscription({
-            _id: 'four',
-            plan: plan,
-            status: 'Active',
-            descriptor: {
-                name: 'Tst*Mytest',
-                phone: 8899039032,
-                url: 'example.com',
-            },
-            price: 19.90,
-            paymentMethodId: 'three',
-            processor: { id: 'gzsxjb', state: 'saved' },
+        this.customer = new Customer({
+            subscriptions: [
+                {
+                    _id: 'four',
+                    plan: plan,
+                    status: 'Active',
+                    descriptor: {
+                        name: 'Tst*Mytest',
+                        phone: 8899039032,
+                        url: 'example.com',
+                    },
+                    price: 19.90,
+                    paymentMethodId: 'three',
+                    processor: { id: 'gzsxjb', state: 'saved' },
+                }
+            ]
         });
+
+        this.subscription = this.customer.subscriptions[0];
     });
 
     it('discountAmount build should return discount with the amount when it is less than the price', function () {

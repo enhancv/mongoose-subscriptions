@@ -2,29 +2,47 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
-const braintree = require('braintree');
 const database = require('./database');
-const gateway = require('./gateway');
-const Schema = require('mongoose').Schema;
-const Customer = require('../src').Customer;
-const DiscountCoupon = require('../src').Schema.Discount.DiscountCoupon;
-const Plan = require('../src').Plan;
-const Coupon = require('../src').Coupon;
-const BraintreeProcessor = require('../src/braintree/processor');
-const processor = new BraintreeProcessor(gateway);
+const main = require('../src');
+const NullProcessor = require('../src/NullProcessor');
 
 describe('Customer Integration', database([Customer, Plan, Coupon], function () {
     it('Should be able to instantiate a Customer', function () {
-        this.timeout(20000);
-
-        const eventSpy = sinon.spy();
         let plan = null;
         let coupon = null;
-        let originalCustomer = null;
 
-        processor.on('event', eventSpy);
+        const processor = sinon.stub(new NullProcessor());
+        const newPlan = new Plan({
+            name: 'Test',
+            processor: {
+                id: 'test-plan-id',
+                state: 'saved',
+            },
+            currency: 'USD',
+            description: 'Test Descr',
+            createdAt: '2017-02-02',
+            updatedAt: '2017-03-02',
+            billingFrequency: 3,
+            level: 1,
+        });
 
-        return Plan.sync(processor)
+        const existingPlan = new Plan({
+            name: 'Test',
+            processor: {
+                id: 'test-plan-id',
+                state: 'saved',
+            },
+            currency: 'USD',
+            description: 'Test Descr',
+            createdAt: '2017-02-02',
+            updatedAt: '2017-03-02',
+            billingFrequency: 3,
+            level: 1,
+        });
+
+        processor.plans.resolves([testPlan])
+
+        return Plan.loadProcessor(processor)
             .then(plans => {
                 plan = plans[1];
 

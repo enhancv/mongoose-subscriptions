@@ -35,7 +35,7 @@ const Plan = new Schema({
     },
 });
 
-Plan.statics.sync = function sync (processor) {
+Plan.statics.loadProcessor = function load (processor) {
     return processor.plans()
         .then(plans => {
             return Promise.all(plans.map((plan) => {

@@ -1,12 +1,13 @@
 'use strict';
 
 const assert = require('assert');
-const Coupon = require('../../../src/Coupon');
-const Subscription = require('../../../src/Subscription');
-const DiscountCoupon = require('../../../src/Schema/Discount/Coupon');
-const Plan = require('../../../src/Plan');
+const main = require('../../../src');
+const Coupon = main.Coupon;
+const Customer = main.Customer;
+const Plan = main.Plan;
+const DiscountCoupon = main.Schema.Discount.DiscountCoupon;
 
-describe('Discount/Coupon', function () {
+describe('Schema/Discount/Coupon', function () {
     beforeEach(function() {
         const plan = new Plan({
             processor: { id: 'test1', state: 'saved' },
@@ -16,18 +17,24 @@ describe('Discount/Coupon', function () {
             billingFrequency: 1,
         });
 
-        this.subscription = new Subscription({
-            _id: 'four',
-            plan: plan,
-            status: 'Active',
-            descriptor: {
-                name: 'Tst*Mytest',
-                phone: 8899039032,
-                url: 'example.com',
-            },
-            paymentMethodId: 'three',
-            processor: { id: 'gzsxjb', state: 'saved' },
+        this.customer = new Customer({
+            subscriptions: [
+                {
+                    _id: 'four',
+                    plan: plan,
+                    status: 'Active',
+                    descriptor: {
+                        name: 'Tst*Mytest',
+                        phone: 8899039032,
+                        url: 'example.com',
+                    },
+                    paymentMethodId: 'three',
+                    processor: { id: 'gzsxjb', state: 'saved' },
+                }
+            ]
         });
+
+         this.subscription = this.customer.subscriptions[0];
     });
 
     it('discountCoupon build should return null when usedCount is more or equal than usedCountMax', function () {

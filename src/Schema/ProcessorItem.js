@@ -22,9 +22,9 @@ ProcessorItem.CHANGED = CHANGED;
 ProcessorItem.SAVED = SAVED;
 ProcessorItem.LOCAL = LOCAL;
 
-ProcessorItem.validateIsSaved = function (item) {
+ProcessorItem.validateIsSaved = function (item, name) {
     if (!item || !item.processor || !item.processor.id || item.processor.state !== SAVED) {
-        throw new Error('Mongoose item not saved to processor');
+        throw new Error((name || 'Mongoose item') + ' not saved to processor');
     }
     return item;
 }

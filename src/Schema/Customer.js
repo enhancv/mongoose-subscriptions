@@ -41,8 +41,8 @@ Customer.methods.markChanged = function () {
 
     ['addresses', 'subscriptions', 'paymentMethods'].forEach(collectionName => {
         this[collectionName].forEach((item, index) => {
-            if (this.processor.id && this.isModified(`${collectionName}[${index}]`)) {
-                item.state = ProcessorItem.CHANGED;
+            if (item.processor.id && this.isModified(`${collectionName}.${index}`)) {
+                item.processor.state = ProcessorItem.CHANGED;
             }
         });
     });
@@ -51,20 +51,19 @@ Customer.methods.markChanged = function () {
 }
 
 Customer.methods.cancelProcessor = function cancel (processor, id) {
-    return processor.cancelSubscription(this, id);
+    return processor.cancelSubscription(this, id).then(customer => customer.save());
 }
 
 Customer.methods.refundProcessor = function refund (processor, id, amount) {
-    return processor.refundTransaction(this, id, amount);
+    return processor.refundTransaction(this, id, amount).then(customer => customer.save());
 }
 
 Customer.methods.loadProcessor = function load (processor) {
-    return processor.load(this);
+    return processor.load(this).then(customer => customer.save());
 }
 
 Customer.methods.saveProcessor = function saveProcessor (processor) {
     this.markChanged();
-
     return processor.save(this).then(customer => customer.save());
 }
 
