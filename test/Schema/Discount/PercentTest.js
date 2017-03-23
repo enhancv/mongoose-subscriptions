@@ -1,9 +1,10 @@
 'use strict';
 
 const assert = require('assert');
-const Subscription = require('../../../src/Subscription');
-const DiscountPercent = require('../../../src/Schema/Discount/Percent');
-const Plan = require('../../../src/Plan');
+const main = require('../../../src');
+const Customer = main.Customer;
+const Plan = main.Plan;
+const DiscountPercent = main.Schema.Discount.DiscountPercent;
 
 describe('Discount/Percent', function () {
     beforeEach(function() {
@@ -15,19 +16,25 @@ describe('Discount/Percent', function () {
             billingFrequency: 1,
         });
 
-        this.subscription = new Subscription({
-            _id: 'four',
-            plan: plan,
-            status: 'Active',
-            descriptor: {
-                name: 'Tst*Mytest',
-                phone: 8899039032,
-                url: 'example.com',
-            },
-            price: 19.90,
-            paymentMethodId: 'three',
-            processor: { id: 'gzsxjb', state: 'saved' },
+        this.customer = new Customer({
+            subscriptions: [
+                {
+                    _id: 'four',
+                    plan: plan,
+                    status: 'Active',
+                    descriptor: {
+                        name: 'Tst*Mytest',
+                        phone: 8899039032,
+                        url: 'example.com',
+                    },
+                    price: 19.90,
+                    paymentMethodId: 'three',
+                    processor: { id: 'gzsxjb', state: 'saved' },
+                }
+            ]
         });
+
+        this.subscription = this.customer.subscriptions[0];
     });
 
     it('discountAmount build should return the correct amount when the percent value is correct', function () {
@@ -57,6 +64,4 @@ describe('Discount/Percent', function () {
 
         assert.deepEqual(DiscountPercent.build(this.subscription, discountTitle, percent), expected);
     });
-
-    //TODO: What happens when the percentage is less than 0
 });

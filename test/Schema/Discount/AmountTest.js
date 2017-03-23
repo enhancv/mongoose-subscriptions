@@ -62,6 +62,4 @@ describe('Schema/Discount/Amount', function () {
 
         assert.deepEqual(DiscountAmount.build(this.subscription, discountTitle, amount), expected);
     });
-
-    //TODO: What happens when the amount is less than 0
 });

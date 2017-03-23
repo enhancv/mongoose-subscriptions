@@ -1,9 +1,10 @@
 'use strict';
 
 const assert = require('assert');
-const Subscription = require('../../../src/Subscription');
-const DiscountInviter = require('../../../src/Schema/Discount/Inviter');
-const Plan = require('../../../src/Plan');
+const main = require('../../../src');
+const Customer = main.Customer;
+const Plan = main.Plan;
+const DiscountInviter = main.Schema.Discount.DiscountInviter;
 
 describe('Discount/Inviter', function () {
     beforeEach(function() {
@@ -15,19 +16,25 @@ describe('Discount/Inviter', function () {
             billingFrequency: 1,
         });
 
-        this.subscription = new Subscription({
-            _id: 'four',
-            plan: plan,
-            status: 'Active',
-            descriptor: {
-                name: 'Tst*Mytest',
-                phone: 8899039032,
-                url: 'example.com',
-            },
-            price: 19.90,
-            paymentMethodId: 'three',
-            processor: { id: 'gzsxjb', state: 'saved' },
+        this.customer = new Customer({
+            subscriptions: [
+                {
+                    _id: 'four',
+                    plan: plan,
+                    status: 'Active',
+                    descriptor: {
+                        name: 'Tst*Mytest',
+                        phone: 8899039032,
+                        url: 'example.com',
+                    },
+                    price: 19.90,
+                    paymentMethodId: 'three',
+                    processor: { id: 'gzsxjb', state: 'saved' },
+                }
+            ]
         });
+
+        this.subscription = this.customer.subscriptions[0];
     });
 
     it('discountInviter build should return a correct amount when there are less than 5 users verified', function () {
