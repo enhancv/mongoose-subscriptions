@@ -37,7 +37,7 @@ describe('Schema/Coupon/Percent', function () {
         };
     });
 
-    it('coupon percent should return valid result based on the subscription', function () {
+    it('CouponPercent should return valid result based on the subscription', function () {
         const coupon = new Coupon.CouponPercent({
             percent: 20
         });
@@ -45,7 +45,7 @@ describe('Schema/Coupon/Percent', function () {
         assert.deepEqual(coupon.currentAmount(this.subscription), this.subscription.price * 0.2)
     });
 
-    it('coupon percent should return the full price when percent is more than 100', function () {
+    it('CouponPercent should return the full price when percent is more than 100', function () {
         const coupon = new Coupon.CouponPercent({
             percent: 180
         });

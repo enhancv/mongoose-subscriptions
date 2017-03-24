@@ -37,7 +37,7 @@ describe('Schema/Coupon/Amount', function () {
         };
     });
 
-    it('coupon amount should return valid result based on the subscription', function () {
+    it('CouponAmount should return valid result based on the subscription', function () {
         const coupon = new Coupon.CouponAmount({
             amount: 10
         });
@@ -45,7 +45,7 @@ describe('Schema/Coupon/Amount', function () {
         assert.deepEqual(coupon.currentAmount(this.subscription), coupon.amount)
     });
 
-    it('coupon amount should return the full price when amount is more than the subscription price', function () {
+    it('CouponAmount should return the full price when amount is more than the subscription price', function () {
         const coupon = new Coupon.CouponAmount({
             amount: 20
         });

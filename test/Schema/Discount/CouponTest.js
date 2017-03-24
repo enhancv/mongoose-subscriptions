@@ -37,62 +37,61 @@ describe('Schema/Discount/Coupon', function () {
         };
     });
 
-    it('discountCoupon build should return null when usedCount is more or equal than usedCountMax', function () {
-        const coupon = new Coupon.CouponAmount({
-            name: 'Coupon test',
-            amount: 10,
-            usedCount: 3,
-            usedCountMax: 2,
-            startAt: '2016-09-29T16:12:26Z',
-            expireAt: '2017-09-29T16:12:26Z'
+    const fields = [
+        {
+            name: 'is used more than the max',
+            fields: {
+                name: 'Coupon test',
+                amount: 10,
+                usedCount: 3,
+                usedCountMax: 2,
+                startAt: '2016-09-29T16:12:26Z',
+                expireAt: '2016-12-29T16:12:26Z'
+            },
+            isValid: false,
+        }, {
+            name: 'starts in the future',
+            fields: {
+                name: 'Coupon test',
+                amount: 10,
+                usedCount: 3,
+                usedCountMax: 5,
+                startAt: '2016-11-29T16:12:26Z',
+                expireAt: '2016-12-29T16:12:26Z'
+            },
+            isValid: false,
+        }, {
+            name: 'expires in the past',
+            fields: {
+                name: 'Coupon test',
+                amount: 10,
+                usedCount: 3,
+                usedCountMax: 5,
+                startAt: '2016-07-29T16:12:26Z',
+                expireAt: '2016-09-29T16:12:26Z'
+            },
+            isValid: false,
+        }, {
+            name: 'is in the range and is not used more than the max',
+            fields: {
+                name: 'Coupon test',
+                amount: 10,
+                usedCount: 3,
+                usedCountMax: 5,
+                startAt: '2016-09-29T16:12:26Z',
+                expireAt: '2016-12-29T16:12:26Z'
+            },
+            isValid: true,
+        },
+    ];
+
+    fields.forEach(function (test) {
+        it(`DiscountCoupon should be valid when it ${test.name}`, function () {
+            const coupon = new Coupon.CouponAmount(test.fields);
+            const result = DiscountCoupon.build(this.subscription, coupon, new Date('2016-10-29T16:12:26Z'));
+            const isValid = !!result;
+
+            assert.equal(isValid, test.isValid);
         });
-
-        assert.deepEqual(DiscountCoupon.build(this.subscription, coupon), null);
-    });
-
-    it('discountCoupon build should return null when the coupon starts in the future', function () {
-        const coupon = new Coupon.CouponAmount({
-            name: 'Coupon test',
-            amount: 10,
-            usedCount: 3,
-            usedCountMax: 5,
-            startAt: '2016-11-29T16:12:26Z',
-            expireAt: '2016-12-29T16:12:26Z'
-        });
-
-        assert.deepEqual(DiscountCoupon.build(this.subscription, coupon, new Date('2016-10-29T16:12:26Z')), null);
-    });
-
-    it('discountCoupon build should return null when the coupon expires in the past', function () {
-        const coupon = new Coupon.CouponAmount({
-            name: 'Coupon test',
-            amount: 10,
-            usedCount: 3,
-            usedCountMax: 5,
-            startAt: '2016-09-29T16:12:26Z',
-            expireAt: '2016-07-29T16:12:26Z'
-        });
-
-        assert.deepEqual(DiscountCoupon.build(this.subscription, coupon, new Date('2016-08-29T16:12:26Z')), null);
-    });
-
-    it('discountCoupon build should return correct object when data is correct', function () {
-        const coupon = new Coupon.CouponAmount({
-            name: 'Coupon test',
-            amount: 10,
-            usedCount: 3,
-            usedCountMax: 5,
-            startAt: '2016-07-29T16:12:26Z',
-            expireAt: '2016-12-29T16:12:26Z'
-        });
-
-        const expected = {
-            coupon: coupon,
-            amount: coupon.amount.toFixed(2),
-            __t: 'DiscountCoupon',
-            name: coupon.name,
-        }
-
-        assert.deepEqual(DiscountCoupon.build(this.subscription, coupon, new Date('2016-08-29T16:12:26Z')), expected);
     });
 });
