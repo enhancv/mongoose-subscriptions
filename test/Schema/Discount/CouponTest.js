@@ -82,6 +82,17 @@ describe('Schema/Discount/Coupon', function () {
                 expireAt: '2016-12-29T16:12:26Z'
             },
             isValid: true,
+        }, {
+            name: 'is with amount 0',
+            fields: {
+                name: 'Coupon test',
+                amount: 0,
+                usedCount: 3,
+                usedCountMax: 5,
+                startAt: '2016-09-29T16:12:26Z',
+                expireAt: '2016-12-29T16:12:26Z'
+            },
+            isValid: false,
         },
     ];
 

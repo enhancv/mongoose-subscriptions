@@ -107,4 +107,16 @@ describe('Schema/Discount/Inviter', function () {
             assert.deepEqual(result.percent, test.expected.percent);
         });
     });
+
+    it('DiscountInviter should return null when there are no users verified', function (){
+        const users = [{
+            _id: 1,
+            isVerified: false
+        }, {
+            _id: 1,
+            isVerified: false
+        }];
+
+        assert.deepEqual(DiscountInviter.build(this.subscription, "Inviter Test", users), null);
+    });
 });

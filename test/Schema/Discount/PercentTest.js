@@ -36,7 +36,7 @@ describe('Schema/Discount/Percent', function () {
         };
     });
 
-    it('DiscountPercent should return the percent and the calculated amount when is is from 0-100', function () {
+    it('DiscountPercent should return the percent and the calculated amount when is is from 1-100', function () {
         const percent = 28;
         const discountTitle = "Test DiscountAmount";
 
@@ -62,5 +62,12 @@ describe('Schema/Discount/Percent', function () {
         };
 
         assert.deepEqual(DiscountPercent.build(this.subscription, discountTitle, percent), expected);
+    });
+
+    it('DiscountPercent should return null when the percent is 0', function () {
+        const percent = 0;
+        const discountTitle = "Test DiscountAmount";
+
+        assert.deepEqual(DiscountPercent.build(this.subscription, discountTitle, percent), null);
     });
 });

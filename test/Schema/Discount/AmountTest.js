@@ -49,6 +49,13 @@ describe('Schema/Discount/Amount', function () {
         assert.deepEqual(DiscountAmount.build(this.subscription, discountTitle, amount), expected);
     });
 
+    it('DiscountAmount should return null when the amount is zero', function () {
+        const amount = 0;
+        const discountTitle = "Test DiscountAmount";
+
+        assert.deepEqual(DiscountAmount.build(this.subscription, discountTitle, amount), null);
+    });
+
     it('DiscountAmount should return the subscription price when the amount is more than it', function () {
         const amount = 20;
         const discountTitle = "Test DiscountAmount";
