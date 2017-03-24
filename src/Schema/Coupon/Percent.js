@@ -11,7 +11,7 @@ const CouponPercent = new Schema({
 });
 
 CouponPercent.methods.currentAmount = function currentAmount(subscription) {
-    return Math.min(subscription.plan.price, subscription.plan.price * this.percent / 100);
+    return Math.min(subscription.plan.price, subscription.plan.price * (this.percent / 100));
 };
 
 module.exports = CouponPercent;

@@ -1,12 +1,17 @@
 'use strict';
 
+const mongoose = require('mongoose');
 const assert = require('assert');
 const main = require('../../../src');
-const Customer = main.Customer;
 const Plan = main.Plan;
 const DiscountInviter = main.Schema.Discount.DiscountInviter;
+const SubscriptionSchema = main.Schema.Subscription;
 
 describe('Schema/Discount/Inviter', function () {
+    before(function() {
+        this.SubscriptionTest = mongoose.model('SubscriptionTest', SubscriptionSchema);
+    });
+
     beforeEach(function() {
         const plan = new Plan({
             processor: { id: 'test1', state: 'saved' },
@@ -16,25 +21,19 @@ describe('Schema/Discount/Inviter', function () {
             billingFrequency: 1,
         });
 
-        this.customer = new Customer({
-            subscriptions: [
-                {
-                    _id: 'four',
-                    plan: plan,
-                    status: 'Active',
-                    descriptor: {
-                        name: 'Tst*Mytest',
-                        phone: 8899039032,
-                        url: 'example.com',
-                    },
-                    price: 19.90,
-                    paymentMethodId: 'three',
-                    processor: { id: 'gzsxjb', state: 'saved' },
-                }
-            ]
-        });
-
-        this.subscription = this.customer.subscriptions[0];
+        this.subscription = {
+            _id: 'four',
+            plan: plan,
+            status: 'Active',
+            descriptor: {
+                name: 'Tst*Mytest',
+                phone: 8899039032,
+                url: 'example.com',
+            },
+            price: 19.90,
+            paymentMethodId: 'three',
+            processor: { id: 'gzsxjb', state: 'saved' },
+        };
     });
 
     it('discountInviter build should return a correct amount when there are less than 5 users verified', function () {

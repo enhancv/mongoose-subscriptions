@@ -1,13 +1,18 @@
 'use strict';
 
+const mongoose = require('mongoose');
 const assert = require('assert');
 const main = require('../../../src');
-const Customer = main.Customer;
 const Plan = main.Plan;
 const Coupon = main.Coupon;
 const CouponPercent = main.Schema.Coupon.CouponPercent;
+const SubscriptionSchema = main.Schema.Subscription;
 
 describe('Schema/Coupon/Percent', function () {
+    before(function() {
+        this.SubscriptionTest = mongoose.model('SubscriptionTest', SubscriptionSchema);
+    });
+
     beforeEach(function() {
         const plan = new Plan({
             processor: { id: 'test1', state: 'saved' },
@@ -17,25 +22,19 @@ describe('Schema/Coupon/Percent', function () {
             billingFrequency: 1,
         });
 
-        this.customer = new Customer({
-            subscriptions: [
-                {
-                    _id: 'four',
-                    plan: plan,
-                    status: 'Active',
-                    descriptor: {
-                        name: 'Tst*Mytest',
-                        phone: 8899039032,
-                        url: 'example.com',
-                    },
-                    price: 19.90,
-                    paymentMethodId: 'three',
-                    processor: { id: 'gzsxjb', state: 'saved' },
-                }
-            ]
-        });
-
-        this.subscription = this.customer.subscriptions[0];
+        this.subscription = {
+            _id: 'four',
+            plan: plan,
+            status: 'Active',
+            descriptor: {
+                name: 'Tst*Mytest',
+                phone: 8899039032,
+                url: 'example.com',
+            },
+            price: 19.90,
+            paymentMethodId: 'three',
+            processor: { id: 'gzsxjb', state: 'saved' },
+        };
     });
 
     it('coupon percent should return valid result based on the subscription', function () {
