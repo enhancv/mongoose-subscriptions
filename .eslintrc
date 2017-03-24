@@ -1,0 +1,34 @@
+{
+    "plugins": [
+        "import"
+    ],
+    "env": {
+        "node": true,
+        "mocha": true
+    },
+    "extends": "airbnb-base",
+    "rules": {
+        "comma-dangle": ["error", {
+            "arrays": "always-multiline",
+            "objects": "always-multiline",
+            "imports": "never",
+            "exports": "never",
+            "functions": "never"
+        }],
+        "no-param-reassign": ["error", { "props": false }],
+
+        "max-len" : ["warn", 100],
+
+        // allow __t
+        "no-underscore-dangle": "off",
+
+        // indentation
+        "indent": ["error", 4],
+
+        // make it meaningful
+        "prefer-const": "warn",
+
+        // keep it simple
+        "complexity": [ "warn", 10 ]
+    }
+}
