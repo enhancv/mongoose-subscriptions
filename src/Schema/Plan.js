@@ -1,8 +1,7 @@
-'use strict';
-
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
 const ProcessorItem = require('./ProcessorItem');
+
+const Schema = mongoose.Schema;
 
 const Plan = new Schema({
     processor: {
@@ -35,18 +34,22 @@ const Plan = new Schema({
     },
 });
 
-Plan.statics.loadProcessor = function load (processor) {
-    return processor.plans()
-        .then(plans => {
-            return Promise.all(plans.map((plan) => {
-                return this
-                    .findOne({ 'processor.id': plan.processor.id })
-                    .then((existing) => {
-                        return (existing ? Object.assign(existing, plan) : new (this)(plan)).save();
-                    });
-            }))
+Plan.statics.updateOrCreate = function findOrCreate(plan) {
+    return this
+        .findOne({ 'processor.id': plan.processor.id })
+        .then((existing) => {
+            const syncedPlan = existing ? Object.assign(existing, plan) : new (this)(plan);
+            return syncedPlan.save();
         });
-}
+};
+
+Plan.statics.loadProcessor = function load(processor) {
+    return processor.plans()
+        .then((plans) => {
+            const updates = plans.map(plan => this.updateOrCreate(plan));
+            return Promise.all(updates);
+        });
+};
 
 
 module.exports = Plan;

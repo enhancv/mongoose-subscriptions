@@ -11,15 +11,15 @@ const Subscription = require('./Subscription');
 const Transaction = require('./Transaction');
 
 module.exports = {
-    Address: Address,
-    Coupon: Coupon,
-    Customer: Customer,
-    Descriptor: Descriptor,
-    Discount: Discount,
-    PaymentMethod: PaymentMethod,
-    Plan: Plan,
-    ProcessorItem: ProcessorItem,
-    Status: Status,
-    Subscription: Subscription,
-    Transaction: Transaction,
+    Address,
+    Coupon,
+    Customer,
+    Descriptor,
+    Discount,
+    PaymentMethod,
+    Plan,
+    ProcessorItem,
+    Status,
+    Subscription,
+    Transaction,
 };

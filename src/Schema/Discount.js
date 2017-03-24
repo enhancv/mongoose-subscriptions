@@ -1,13 +1,12 @@
-'use strict';
-
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
 const ProcessorItem = require('./ProcessorItem');
 const DiscountAmount = require('./Discount/Amount');
 const DiscountPercent = require('./Discount/Percent');
 const DiscountInviter = require('./Discount/Inviter');
 const DiscountCoupon = require('./Discount/Coupon');
 const originals = require('mongoose-originals');
+
+const Schema = mongoose.Schema;
 
 const Discount = new Schema({
     amount: Number,
@@ -32,6 +31,6 @@ Discount.DiscountPercent = DiscountPercent;
 Discount.DiscountInviter = DiscountInviter;
 Discount.DiscountCoupon = DiscountCoupon;
 
-Discount.plugin(originals, { fields: ['processor'] })
+Discount.plugin(originals, { fields: ['processor'] });
 
 module.exports = Discount;

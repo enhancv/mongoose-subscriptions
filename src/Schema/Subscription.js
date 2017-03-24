@@ -1,13 +1,12 @@
-'use strict';
-
 const mongoose = require('mongoose');
 const shortid = require('shortid');
-const Schema = mongoose.Schema;
 const ProcessorItem = require('./ProcessorItem');
 const Descriptor = require('./Descriptor');
 const originals = require('mongoose-originals');
 const Discount = require('./Discount');
 const Status = require('./Status');
+
+const Schema = mongoose.Schema;
 
 const Subscription = new Schema({
     _id: {
@@ -40,8 +39,8 @@ const Subscription = new Schema({
     },
 });
 
-Subscription.methods.addDiscounts = function find (callback) {
-    const newDiscounts = callback(this)
+Subscription.methods.addDiscounts = function find(callback) {
+    const newDiscounts = callback(this);
     const oldDiscounts = this.discounts;
 
     this.discounts = oldDiscounts

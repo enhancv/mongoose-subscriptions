@@ -1,9 +1,8 @@
-'use strict';
-
 const mongoose = require('mongoose');
 const shortid = require('shortid');
-const Schema = mongoose.Schema;
 const ProcessorItem = require('./ProcessorItem');
+
+const Schema = mongoose.Schema;
 
 const Address = new Schema({
     _id: {
