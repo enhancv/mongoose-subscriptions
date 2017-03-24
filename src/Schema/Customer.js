@@ -71,10 +71,8 @@ Customer.methods.activeSubscriptions = function activeSubscriptions (activeDate)
     const date = activeDate || new Date();
 
     return this.populate().subscriptions
-        .filter((subscription) =>  {
-            return subscription.paidThroughDate <= date;
-        })
-        .sort((a, b) => a.plan.level - b.plan.level);
+        .filter(item => item.paidThroughDate >= date && item.status === 'Active')
+        .sort((a, b) => b.plan.level - a.plan.level);
 }
 
 Customer.methods.subscription = function subscription (activeDate) {
