@@ -12,9 +12,9 @@
         "shortid": "^2.2.8"
     },
     "scripts": {
-        "lint": "node_modules/.bin/eslint src",
-        "coverage": "node_modules/.bin/istanbul cover node_modules/.bin/_mocha -- --recursive",
-        "test": "node_modules/.bin/mocha --recursive"
+        "lint": "node node_modules/eslint/bin/eslint src",
+        "coverage": "node node_modules/istanbul/lib/cli cover node_modules/mocha/bin/_mocha -- --recursive",
+        "test": "node node_modules/mocha/bin/mocha --recursive"
     },
     "devDependencies": {
         "braintree": "^2.0.2",

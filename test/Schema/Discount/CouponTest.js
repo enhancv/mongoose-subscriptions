@@ -28,6 +28,7 @@ describe('Schema/Discount/Coupon', function () {
                         phone: 8899039032,
                         url: 'example.com',
                     },
+                    price: 12,
                     paymentMethodId: 'three',
                     processor: { id: 'gzsxjb', state: 'saved' },
                 }
@@ -40,7 +41,7 @@ describe('Schema/Discount/Coupon', function () {
     it('discountCoupon build should return null when usedCount is more or equal than usedCountMax', function () {
         const coupon = new Coupon.CouponAmount({
             name: 'Coupon test',
-            amount: 20,
+            amount: 10,
             usedCount: 3,
             usedCountMax: 2,
             startAt: '2016-09-29T16:12:26Z',
@@ -53,7 +54,7 @@ describe('Schema/Discount/Coupon', function () {
     it('discountCoupon build should return null when the coupon starts in the past', function () {
         const coupon = new Coupon.CouponAmount({
             name: 'Coupon test',
-            amount: 20,
+            amount: 10,
             usedCount: 3,
             usedCountMax: 5,
             startAt: '2016-08-29T16:12:26Z',
@@ -66,7 +67,7 @@ describe('Schema/Discount/Coupon', function () {
     it('discountCoupon build should return null when the coupon expires in the past', function () {
         const coupon = new Coupon.CouponAmount({
             name: 'Coupon test',
-            amount: 20,
+            amount: 10,
             usedCount: 3,
             usedCountMax: 5,
             startAt: '2016-09-29T16:12:26Z',
@@ -79,7 +80,7 @@ describe('Schema/Discount/Coupon', function () {
     it('discountCoupon build should return correct object when data is correct', function () {
         const coupon = new Coupon.CouponAmount({
             name: 'Coupon test',
-            amount: 20,
+            amount: 10,
             usedCount: 3,
             usedCountMax: 5,
             startAt: '2016-09-29T16:12:26Z',

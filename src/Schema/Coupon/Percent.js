@@ -6,7 +6,7 @@ const CouponPercent = new Schema({
     percent: {
         type: Number,
         required: true,
-        min: 0
+        min: 0,
     },
 });
 
