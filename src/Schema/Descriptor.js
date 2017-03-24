@@ -9,7 +9,7 @@ const Descriptor = new Schema({
         // [3 letter company] * [up to 18 letter product]
         // [7 letter company] * [up to 14 letter product]
         // [12 letter company] * [up to 9 letter product]
-        match: /^([^*]{3}\*.{1,18})|([^*]{7}\*.{1,14})|([^*]{12}\*.{1,9})$/,
+        match: /(^[^*]{3}\*.{1,18}$)|(^[^*]{7}\*.{1,14}$)|(^[^*]{12}\*.{1,9}$)|(^[^*]{0,22}$)/,
     },
     phone: {
         type: String,
