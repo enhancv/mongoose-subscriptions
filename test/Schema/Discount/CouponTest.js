@@ -51,14 +51,14 @@ describe('Schema/Discount/Coupon', function () {
         assert.deepEqual(DiscountCoupon.build(this.subscription, coupon), null);
     });
 
-    it('discountCoupon build should return null when the coupon starts in the past', function () {
+    it('discountCoupon build should return null when the coupon starts in the future', function () {
         const coupon = new Coupon.CouponAmount({
             name: 'Coupon test',
             amount: 10,
             usedCount: 3,
             usedCountMax: 5,
-            startAt: '2016-08-29T16:12:26Z',
-            expireAt: '2016-09-29T16:12:26Z'
+            startAt: '2016-11-29T16:12:26Z',
+            expireAt: '2016-12-29T16:12:26Z'
         });
 
         assert.deepEqual(DiscountCoupon.build(this.subscription, coupon, new Date('2016-10-29T16:12:26Z')), null);
@@ -83,7 +83,7 @@ describe('Schema/Discount/Coupon', function () {
             amount: 10,
             usedCount: 3,
             usedCountMax: 5,
-            startAt: '2016-09-29T16:12:26Z',
+            startAt: '2016-07-29T16:12:26Z',
             expireAt: '2016-12-29T16:12:26Z'
         });
 

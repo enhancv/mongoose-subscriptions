@@ -22,7 +22,7 @@ DiscountCoupon.build = function build(subscription, coupon, currentDate) {
         return null;
     }
 
-    if (coupon.startAt && coupon.startAt < today) {
+    if (coupon.startAt && coupon.startAt > today) {
         return null;
     }
 
