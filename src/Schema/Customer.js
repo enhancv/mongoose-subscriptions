@@ -1,12 +1,11 @@
-'use strict';
-
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
 const Address = require('./Address');
 const PaymentMethod = require('./PaymentMethod');
 const Subscription = require('./Subscription');
 const Transaction = require('./Transaction');
 const ProcessorItem = require('./ProcessorItem');
+
+const Schema = mongoose.Schema;
 
 const Customer = new Schema({
     processor: {
@@ -24,22 +23,25 @@ const Customer = new Schema({
     transactions: [Transaction],
 });
 
-Customer.path('paymentMethods').discriminator('CreditCard', PaymentMethod.CreditCard);
-Customer.path('paymentMethods').discriminator('PayPalAccount', PaymentMethod.PayPalAccount);
-Customer.path('paymentMethods').discriminator('ApplePayCard', PaymentMethod.ApplePayCard);
-Customer.path('paymentMethods').discriminator('AndroidPayCard', PaymentMethod.AndroidPayCard);
+const paymentMethods = Customer.path('paymentMethods');
+const transactions = Customer.path('transactions');
 
-Customer.path('transactions').discriminator('TransactionCreditCard', Transaction.TransactionCreditCard);
-Customer.path('transactions').discriminator('TransactionPayPalAccount', Transaction.TransactionPayPalAccount);
-Customer.path('transactions').discriminator('TransactionApplePayCard', Transaction.TransactionApplePayCard);
-Customer.path('transactions').discriminator('TransactionAndroidPayCard', Transaction.TransactionAndroidPayCard);
+paymentMethods.discriminator('CreditCard', PaymentMethod.CreditCard);
+paymentMethods.discriminator('PayPalAccount', PaymentMethod.PayPalAccount);
+paymentMethods.discriminator('ApplePayCard', PaymentMethod.ApplePayCard);
+paymentMethods.discriminator('AndroidPayCard', PaymentMethod.AndroidPayCard);
 
-Customer.methods.markChanged = function () {
+transactions.discriminator('TransactionCreditCard', Transaction.TransactionCreditCard);
+transactions.discriminator('TransactionPayPalAccount', Transaction.TransactionPayPalAccount);
+transactions.discriminator('TransactionApplePayCard', Transaction.TransactionApplePayCard);
+transactions.discriminator('TransactionAndroidPayCard', Transaction.TransactionAndroidPayCard);
+
+Customer.methods.markChanged = function markChanged() {
     if (this.processor.id && this.isModified('name email phone ipAddress defaultPaymentMethodId')) {
         this.processor.state = ProcessorItem.CHANGED;
     }
 
-    ['addresses', 'subscriptions', 'paymentMethods'].forEach(collectionName => {
+    ['addresses', 'subscriptions', 'paymentMethods'].forEach((collectionName) => {
         this[collectionName].forEach((item, index) => {
             if (item.processor.id && this.isModified(`${collectionName}.${index}`)) {
                 item.processor.state = ProcessorItem.CHANGED;
@@ -48,35 +50,35 @@ Customer.methods.markChanged = function () {
     });
 
     return this;
-}
+};
 
-Customer.methods.cancelProcessor = function cancel (processor, id) {
+Customer.methods.cancelProcessor = function cancelProcessor(processor, id) {
     return processor.cancelSubscription(this, id).then(customer => customer.save());
-}
+};
 
-Customer.methods.refundProcessor = function refund (processor, id, amount) {
+Customer.methods.refundProcessor = function refundProcessor(processor, id, amount) {
     return processor.refundTransaction(this, id, amount).then(customer => customer.save());
-}
+};
 
-Customer.methods.loadProcessor = function load (processor) {
+Customer.methods.loadProcessor = function loadProcessor(processor) {
     return processor.load(this).then(customer => customer.save());
-}
+};
 
-Customer.methods.saveProcessor = function saveProcessor (processor) {
+Customer.methods.saveProcessor = function saveProcessor(processor) {
     this.markChanged();
     return processor.save(this).then(customer => customer.save());
-}
+};
 
-Customer.methods.activeSubscriptions = function activeSubscriptions (activeDate) {
+Customer.methods.activeSubscriptions = function activeSubscriptions(activeDate) {
     const date = activeDate || new Date();
 
     return this.populate().subscriptions
         .filter(item => item.paidThroughDate >= date && item.status === 'Active')
         .sort((a, b) => b.plan.level - a.plan.level);
-}
+};
 
-Customer.methods.subscription = function subscription (activeDate) {
+Customer.methods.subscription = function subscription(activeDate) {
     return this.activeSubscriptions(activeDate)[0];
-}
+};
 
 module.exports = Customer;

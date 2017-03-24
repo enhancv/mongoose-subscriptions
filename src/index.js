@@ -6,10 +6,10 @@ const NullProcessor = require('./NullProcessor');
 const AbstractProcessor = require('./AbstractProcessor');
 
 module.exports = {
-    Schema: Schema,
-    Coupon: Coupon,
-    Customer: Customer,
-    Plan: Plan,
-    NullProcessor: NullProcessor,
-    AbstractProcessor: AbstractProcessor,
+    Schema,
+    Coupon,
+    Customer,
+    Plan,
+    NullProcessor,
+    AbstractProcessor,
 };

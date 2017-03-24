@@ -1,8 +1,7 @@
-'use strict';
-
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
 const ProcessorItem = require('../ProcessorItem');
+
+const Schema = mongoose.Schema;
 
 /**
  * Coupon Discount
@@ -15,7 +14,7 @@ const DiscountCoupon = new Schema({
     },
 }, { _id: false });
 
-DiscountCoupon.build = function (subscription, coupon, currentDate) {
+DiscountCoupon.build = function build(subscription, coupon, currentDate) {
     const amount = coupon.currentAmount(subscription);
     const today = currentDate || new Date();
 
@@ -31,17 +30,19 @@ DiscountCoupon.build = function (subscription, coupon, currentDate) {
         return null;
     }
 
-    if (amount) {
-        return {
-            coupon: coupon,
-            amount: amount.toFixed(2),
-            __t: 'DiscountCoupon',
-            name: coupon.name,
-        };
+    if (!amount) {
+        return null;
     }
-}
 
-DiscountCoupon.pre('save', function (next) {
+    return {
+        coupon,
+        amount: amount.toFixed(2),
+        __t: 'DiscountCoupon',
+        name: coupon.name,
+    };
+};
+
+DiscountCoupon.pre('save', function preSave(next) {
     if (
         this.original
         && this.coupon

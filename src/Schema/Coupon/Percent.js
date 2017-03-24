@@ -1,6 +1,5 @@
-'use strict';
-
 const mongoose = require('mongoose');
+
 const Schema = mongoose.Schema;
 
 const CouponPercent = new Schema({
@@ -11,8 +10,8 @@ const CouponPercent = new Schema({
     },
 });
 
-CouponPercent.methods.currentAmount = function (subscription) {
+CouponPercent.methods.currentAmount = function currentAmount(subscription) {
     return Math.min(subscription.plan.price, subscription.plan.price * this.percent / 100);
-}
+};
 
 module.exports = CouponPercent;

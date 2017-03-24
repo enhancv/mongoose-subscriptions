@@ -1,8 +1,7 @@
-'use strict';
-
 const mongoose = require('mongoose');
 const CouponAmount = require('./Coupon/Amount');
 const CouponPercent = require('./Coupon/Percent');
+
 const Schema = mongoose.Schema;
 
 const Coupon = new Schema({
@@ -25,7 +24,7 @@ const Coupon = new Schema({
         type: Number,
         min: 0,
         default: Infinity,
-    }
+    },
 });
 
 Coupon.CouponAmount = CouponAmount;
