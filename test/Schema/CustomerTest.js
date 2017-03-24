@@ -60,6 +60,7 @@ describe('Customer', database([Customer], function () {
                         phone: '0888415433',
                         url: 'enhancv.com',
                     },
+                    paidThroughDate: '2017-03-03',
                     paymentMethodId: 'three',
                 },
             ],
@@ -111,21 +112,164 @@ describe('Customer', database([Customer], function () {
         },
     ];
 
-    changeSets.forEach(function (change) {
-        it(`Should be process changes for ${change.name}`, function () {
+    changeSets.forEach(function (test) {
+        it(`Should be process changes for ${test.name}`, function () {
             return this.customer.save()
                 .then((customer) => {
-                    Object.assign(customer, change.customer);
-                    Object.assign(customer.addresses[0], change.address);
-                    Object.assign(customer.paymentMethods[0], change.payment);
-                    Object.assign(customer.subscriptions[0], change.sub);
+                    Object.assign(customer, test.customer);
+                    Object.assign(customer.addresses[0], test.address);
+                    Object.assign(customer.paymentMethods[0], test.payment);
+                    Object.assign(customer.subscriptions[0], test.sub);
                     customer.markChanged();
 
-                    assert.equal(customer.processor.state, change.expected.customer ? 'changed' : 'saved');
-                    assert.equal(customer.addresses[0].processor.state, change.expected.address ? 'changed' : 'saved');
-                    assert.equal(customer.paymentMethods[0].processor.state, change.expected.payment ? 'changed' : 'saved');
-                    assert.equal(customer.subscriptions[0].processor.state, change.expected.sub ? 'changed' : 'saved');
+                    assert.equal(customer.processor.state, test.expected.customer ? 'changed' : 'saved');
+                    assert.equal(customer.addresses[0].processor.state, test.expected.address ? 'changed' : 'saved');
+                    assert.equal(customer.paymentMethods[0].processor.state, test.expected.payment ? 'changed' : 'saved');
+                    assert.equal(customer.subscriptions[0].processor.state, test.expected.sub ? 'changed' : 'saved');
                 });
         });
+    });
+
+    it('Should correctly apply saveProcessor', function () {
+        const markChangedSpy = sinon.spy(this.customer, 'markChanged');
+        const spy = sinon.stub(this.processor, 'save').resolves(this.customer);
+
+        return this.customer.save()
+            .then(customer => customer.saveProcessor(this.processor))
+            .then(customer => {
+                assert.equal(customer, this.customer);
+                sinon.assert.calledOnce(markChangedSpy);
+                sinon.assert.calledOnce(spy);
+                sinon.assert.calledWith(spy, this.customer);
+            })
+    });
+
+    it('Should correctly apply cancelProcessor', function () {
+        const spy = sinon.stub(this.processor, 'cancelSubscription').resolves(this.customer);
+
+        return this.customer.save()
+            .then(customer => customer.cancelProcessor(this.processor, 'sub-id'))
+            .then(customer => {
+                assert.equal(customer, this.customer);
+                sinon.assert.calledOnce(spy);
+                sinon.assert.calledWith(spy, this.customer, 'sub-id');
+            })
+    });
+
+    it('Should correctly apply refundProcessor', function () {
+        const spy = sinon.stub(this.processor, 'refundTransaction').resolves(this.customer);
+
+        return this.customer.save()
+            .then(customer => customer.refundProcessor(this.processor, 'transaction-id', 123))
+            .then(customer => {
+                assert.equal(customer, this.customer);
+                sinon.assert.calledOnce(spy);
+                sinon.assert.calledWith(spy, this.customer, 'transaction-id', 123);
+            })
+    });
+
+    it('Should correctly apply loadProcessor', function () {
+        const spy = sinon.stub(this.processor, 'load').resolves(this.customer);
+
+        return this.customer.save()
+            .then(customer => customer.loadProcessor(this.processor))
+            .then(customer => {
+                assert.equal(customer, this.customer);
+                sinon.assert.calledOnce(spy);
+                sinon.assert.calledWith(spy, this.customer);
+            })
+    });
+
+    const activeSubs = [
+        {
+            name: 'Only one sub',
+            subs: [{ id: 1, level: 2, status: 'Active', paidThroughDate: '2017-02-02'}],
+            expected: [1],
+            expectedActive: 1,
+        },
+        {
+            name: 'With expired sub',
+            subs: [{ id: 1, level: 2, status: 'Active', paidThroughDate: '2017-01-01'}],
+            expected: [],
+            expectedActive: null,
+        },
+        {
+            name: 'With non-active sub',
+            subs: [{ id: 1, level: 2, status: 'Past Due', paidThroughDate: '2017-02-02'}],
+            expected: [],
+            expectedActive: null,
+        },
+        {
+            name: 'Correct level order',
+            subs: [
+                { id: 3, level: 3, status: 'Active', paidThroughDate: '2017-02-02'},
+                { id: 1, level: 1, status: 'Active', paidThroughDate: '2017-02-02'},
+                { id: 2, level: 2, status: 'Active', paidThroughDate: '2017-02-02'},
+            ],
+            expected: [3, 2, 1],
+            expectedActive: 3,
+        },
+    ];
+
+    activeSubs.forEach(function (test) {
+        it(`Should get active subscriptions for ${test.name}`, function () {
+            this.customer.subscriptions = test.subs.map(sub => {
+                return {
+                    _id: sub.id,
+                    plan: {
+                        name: `Plan for sub ${sub.id}`,
+                        processor: { id: `plan-${sub.id}`, state: 'saved' },
+                        price: 5,
+                        currency: 'USD',
+                        billingFrequency: 1,
+                        level: sub.level,
+                    },
+                    status: sub.status,
+                    paidThroughDate: sub.paidThroughDate,
+                    processor: { id: `sub-${sub.id}`, state: 'saved' },
+                    paymentMethodId: 'three',
+                }
+            });
+
+            return this.customer.save()
+                .then((customer) => {
+                    const nowDate = new Date('2017-01-10');
+                    assert.deepEqual(
+                        customer.activeSubscriptions(nowDate).map(sub => sub._id),
+                        test.expected
+                    );
+
+                    if (test.expectedActive) {
+                        assert.equal(customer.subscription(nowDate)._id, test.expectedActive);
+                    } else {
+                        assert.equal(customer.subscription(nowDate), null);
+                    }
+                });
+        });
+    });
+
+    it('Should get active subscriptions with plan refs', function () {
+        const plan = new Plan({
+            name: 'Plan 1',
+            processor: {
+                id: 'plan-1',
+                state: 'saved',
+            },
+            price: 5,
+            currency: 'USD',
+            billingFrequency: 1,
+            level: 2,
+        });
+
+        return this.plan.save()
+            .then(plan => {
+                const nowDate = new Date('2017-01-10');
+                this.customer.subscriptions[0].plan = plan._id;
+
+                assert.equal(
+                    this.customer.subscription(nowDate),
+                    this.customer.subscriptions[0]
+                );
+            });
     });
 }));
