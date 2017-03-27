@@ -1,8 +1,9 @@
 language: node_js
 services: mongodb
-# addons:
-#   code_climate:
-#     repo_token: <token>
+notifications:
+  email: false
+  slack:
+    secure: cGIjn10k+X70YpX89TSPQYYIUKzz/xseJ7nzUjH7VE478QGQKOzl31ZN+8EFSxWtaYxNH38/so5hgv3ulkYPWt/J3UcbhjxXN7a+xiASwku6/KtxnPT28EogDdkvN3smsLXJmjsUfKoJUH7bIVeFYESc7Qjznk9Fdv9iBmTC6xcxWFbaY7v6PqqPOTkkwchWYIFykxiiLlHeymw8vJTqpJIHuyhhpkKLpRiZw3X0EyDzagPLNQAJdeUogbxEaRxHt1geSIZAE5iVar+N+2utlA4Dj1UE8RodOBypLkDXHKl/DM61deBIy+6ZVbpMopbBdPE3QYxWV1Cp39aqJ0BFXPqm+iacLRqiJZKplHPGW1Y96AvcH9J9CmkY/6EYyoO9GgznMo1SZnvIDqEabo/L91qePiPsZYZAtF/Sj6JDRoJAqv59j3M+joQBKvjF8QebqosgnMXMGw5Kgi+H7x0aLxWND8cnBp8/lltET5Yqpm86+/j7NxieVPW20AXLOwzxi5K25CX2j3wuMjOwofVPJoKM7+Tulk+zTiaTKJuGZHXLdPoTLRHfPPc2n9peEo9BGX4+lkmCCyOnTofB537worDf+pNc+RpcZhTaMKsG+wOPw6Q4fBsk8NWxi6PcY5KRzB/Bc9E1QU2beZcPTxbaNqsi3ptdJmK/XXD650ixUGQ=
 node_js: 6
 cache:
   directories:

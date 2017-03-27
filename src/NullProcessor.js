@@ -6,7 +6,7 @@ const AbstractProcessor = require('./AbstractProcessor');
 class NullProcessor extends AbstractProcessor {
 
     load(customer) {
-        return customer;
+        return Promise.resolve(customer);
     }
 
     save(customer) {
