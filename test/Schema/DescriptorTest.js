@@ -5,7 +5,7 @@ const assert = require('assert');
 const main = require('../../src');
 const DescriptorSchema = main.Schema.Descriptor;
 
-describe('Subscription', function () {
+describe('Descriptor', function () {
 
     before(function () {
         this.DescriptorTest = mongoose.model('DescriptorTest', DescriptorSchema);
