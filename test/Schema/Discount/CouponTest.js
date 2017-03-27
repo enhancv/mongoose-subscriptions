@@ -2,19 +2,21 @@
 
 const mongoose = require('mongoose');
 const assert = require('assert');
+const database = require('../../database');
 const main = require('../../../src');
 const Coupon = main.Coupon;
 const Plan = main.Plan;
+const Customer = main.Customer;
 const DiscountCoupon = main.Schema.Discount.DiscountCoupon;
 const SubscriptionSchema = main.Schema.Subscription;
 
-describe('Schema/Discount/Coupon', function () {
+describe('Schema/Discount/Coupon', database([Customer, Coupon, Plan], function () {
     before(function() {
         this.SubscriptionTest = mongoose.model('SubscriptionTest', SubscriptionSchema);
     });
 
     beforeEach(function() {
-        const plan = new Plan({
+        this.plan = new Plan({
             processor: { id: 'test1', state: 'saved' },
             name: 'Test',
             price: 19.90,
@@ -24,7 +26,7 @@ describe('Schema/Discount/Coupon', function () {
 
         this.subscription = {
             _id: 'four',
-            plan: plan,
+            plan: this.plan,
             status: 'Active',
             descriptor: {
                 name: 'Tst*Mytest',
@@ -105,4 +107,72 @@ describe('Schema/Discount/Coupon', function () {
             assert.equal(isValid, test.isValid);
         });
     });
-});
+
+
+    it('DiscountCoupon should increment coupon upon use', function () {
+        const coupon = new Coupon.CouponAmount({ amount: 10, usedCount: 1, usedCountMax: 4 });
+
+        return coupon.save()
+            .then(() => {
+                const customer = new Customer({
+                    name: 'Pesho Peshev',
+                    phone: '+35988911111',
+                    email: 'seer@example.com',
+                    ipAddress: '10.0.0.2',
+                    defaultPaymentMethodId: 'three',
+                    processor: { id: 'id-customer', state: 'saved' },
+                    addresses: [
+                        {
+                            _id: 'one',
+                            company: 'Example company',
+                            name: 'Pesho Peshev Stoevski',
+                            country: 'BG',
+                            locality: 'Sofia',
+                            streetAddress: 'Tsarigradsko Shose 4',
+                            extendedAddress: 'floor 3',
+                            postalCode: '1000',
+                            processor: { id: 'id-address', state: 'saved' },
+                        },
+                    ],
+                    paymentMethods: [
+                        {
+                            _id: 'three',
+                            __t: 'PayPalAccount',
+                            email: 'test@example.com',
+                            processor: { id: 'id-paymentMethod', state: 'saved' },
+                            billingAddressId: 'one',
+                        },
+                    ],
+                    subscriptions: [
+                        {
+                            _id: 'four',
+                            plan: this.plan,
+                            processor: { id: 'id-subscription', state: 'saved' },
+                            status: 'Active',
+                            price: 30,
+                            descriptor: {
+                                name: 'Enhancv*Pro Plan',
+                                phone: '0888415433',
+                                url: 'enhancv.com',
+                            },
+                            paidThroughDate: '2017-03-03',
+                            paymentMethodId: 'three',
+                        },
+                    ],
+                });
+
+                customer.subscriptions.id('four').addDiscounts((subscription) => {
+                    return [DiscountCoupon.build(subscription, coupon)];
+                });
+
+                return customer.save();
+            }).then(customer => {
+                customer.subscriptions.id('four').discounts[0].processor.state = 'saved';
+                return customer.save();
+            }).then(() => {
+                return Coupon.CouponAmount.findOne({ _id: coupon._id });
+            }).then((updatedCoupon) => {
+                assert.equal(updatedCoupon.usedCount, 2);
+            });
+    });
+}));

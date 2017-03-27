@@ -1,5 +1,8 @@
 language: node_js
 services: mongodb
+addons:
+    code_climate:
+        repo_token: e26a7ad48606ff4d7140e326418fee29ce708a1feeb741d5c4183b8dde81bb47
 notifications:
   email: false
   slack:
