@@ -7,11 +7,11 @@ Installation
 ------------
 
 ```
-yarn add mongoose-subscription
+yarn add mongoose-subscriptions
 ```
 You'll also need a specific processor driver. Currently only supported is braintree
 ```
-yarn add mongoose-subscription-braintree
+yarn add mongoose-subscriptions-braintree
 ```
 
 Usage
