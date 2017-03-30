@@ -27,6 +27,16 @@ const Coupon = new Schema({
     },
 });
 
+Coupon.methods.isExpired = function (currentDate) {
+    const date = ((currentDate && new Date(currentDate)) || Date.now());
+
+    return Boolean(this.expireAt && date > this.expireAt);
+};
+
+Coupon.methods.isUseLimitReached = function () {
+    return Boolean(this.usedCountMax && this.usedCount > this.usedCountMax);
+};
+
 Coupon.CouponAmount = CouponAmount;
 Coupon.CouponPercent = CouponPercent;
 
