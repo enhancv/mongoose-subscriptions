@@ -30,11 +30,11 @@ const Coupon = new Schema({
 Coupon.methods.isExpired = function (currentDate) {
     const date = ((currentDate && new Date(currentDate)) || Date.now());
 
-    return this.expireAt && date > this.expireAt;
+    return Boolean(this.expireAt && date > this.expireAt);
 };
 
 Coupon.methods.isUseLimitReached = function () {
-    return this.usedCountMax && this.usedCount > this.usedCountMax;
+    return Boolean(this.usedCountMax && this.usedCount > this.usedCountMax);
 };
 
 Coupon.CouponAmount = CouponAmount;
