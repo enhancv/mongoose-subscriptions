@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const ProcessorItem = require('./ProcessorItem');
 const TransactionAddress = require('./Transaction/Address');
 const TransactionCustomer = require('./Transaction/Customer');
-const Status = require('./Status');
+const TransactionStatus = require('./Statuses/TransactionStatus');
 const TransactionDiscount = require('./Transaction/Discount');
 const Descriptor = require('./Descriptor');
 const CreditCard = require('./Transaction/CreditCard');
@@ -36,10 +36,12 @@ const Transaction = new Schema({
     discounts: [TransactionDiscount],
     descriptor: Descriptor,
     customer: TransactionCustomer,
-    status: String,
+    status: {
+        type: TransactionStatus,
+    },
     createdAt: Date,
     updatedAt: Date,
-    statusHistory: [Status],
+    statusHistory: [TransactionStatus],
 });
 
 Transaction.TransactionCreditCard = CreditCard;
