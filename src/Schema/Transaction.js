@@ -37,7 +37,8 @@ const Transaction = new Schema({
     descriptor: Descriptor,
     customer: TransactionCustomer,
     status: {
-        type: TransactionStatus,
+        type: String,
+        enum: TransactionStatus.Statuses,
     },
     createdAt: Date,
     updatedAt: Date,

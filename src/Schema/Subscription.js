@@ -29,7 +29,8 @@ const Subscription = new Schema({
     nextBillingDate: Date,
     paidThroughDate: Date,
     status: {
-        type: SubscriptionStatus,
+        type: String,
+        enum: SubscriptionStatus.Statuses,
     },
     price: Number,
     statusHistory: [SubscriptionStatus],

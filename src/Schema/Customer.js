@@ -84,7 +84,7 @@ Customer.methods.activeSubscriptions = function activeSubscriptions(activeDate) 
     const date = activeDate || new Date();
 
     return this.populate().subscriptions
-        .filter(item => item.paidThroughDate >= date && item.status.status === SubscriptionStatus.ACTIVE)
+        .filter(item => item.paidThroughDate >= date && item.status === SubscriptionStatus.ACTIVE)
         .sort((a, b) => b.plan.level - a.plan.level);
 };
 

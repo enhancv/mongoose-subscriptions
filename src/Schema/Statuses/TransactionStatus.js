@@ -16,24 +16,26 @@ const SETTLING = 'settling';
 const SUBMITTED_FOR_SETTLEMENT = 'submitted_for_settlement';
 const VOIDED = 'voided';
 
+const statuses = [
+    AUTHORIZATION_EXPIRED,
+    AUTHORIZED,
+    AUTHORIZING,
+    SETTLEMENT_PENDING,
+    SETTLEMENT_CONFIRMED,
+    SETTLEMENT_DECLINED,
+    FAILED,
+    GATEWAY_REJECTED,
+    PROCESSOR_DECLINED,
+    SETTLED,
+    SETTLING,
+    SUBMITTED_FOR_SETTLEMENT,
+    VOIDED,
+];
+
 const TransactionStatus = new Schema({
     status: {
         type: String,
-        enum: [
-            AUTHORIZATION_EXPIRED,
-            AUTHORIZED,
-            AUTHORIZING,
-            SETTLEMENT_PENDING,
-            SETTLEMENT_CONFIRMED,
-            SETTLEMENT_DECLINED,
-            FAILED,
-            GATEWAY_REJECTED,
-            PROCESSOR_DECLINED,
-            SETTLED,
-            SETTLING,
-            SUBMITTED_FOR_SETTLEMENT,
-            VOIDED,
-        ],
+        enum: statuses,
     },
     timestamp: Date,
 }, { _id: false });
@@ -51,5 +53,7 @@ TransactionStatus.SETTLED = SETTLED;
 TransactionStatus.SETTLING = SETTLING;
 TransactionStatus.SUBMITTED_FOR_SETTLEMENT = SUBMITTED_FOR_SETTLEMENT;
 TransactionStatus.VOIDED = VOIDED;
+
+TransactionStatus.Statuses = statuses;
 
 module.exports = TransactionStatus;
