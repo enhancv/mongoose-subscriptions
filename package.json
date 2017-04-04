@@ -1,14 +1,13 @@
 {
     "name": "mongoose-subscriptions",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "description": "Processor agnostic payment subscription backend",
     "main": "src/index.js",
     "repository": "git@github.com:enhancv/mongoose-subscriptions.git",
     "author": "Ivan Kerin <ikerin@gmail.com>",
     "license": "MIT",
     "dependencies": {
-        "mongoose": "^4.8.4",
-        "mongoose-originals": "^1.0.0",
+        "mongoose-originals": "^1.0.1",
         "shortid": "^2.2.8"
     },
     "scripts": {
@@ -16,7 +15,11 @@
         "coverage": "node node_modules/istanbul/lib/cli cover node_modules/mocha/bin/_mocha -- --recursive",
         "test": "node node_modules/mocha/bin/mocha --recursive"
     },
+    "peerDepenencies": {
+        "mongoose": "^4.8"
+    },
     "devDependencies": {
+        "mongoose": "^4.8.4",
         "braintree": "^2.0.2",
         "dotenv": "^4.0.0",
         "mocha": "^3.2.0",
