@@ -30,7 +30,9 @@ describe('Subscription', function () {
                 level: 2,
             },
             processor: { id: 'id-subscription', state: 'saved' },
-            status: 'Active',
+            status: {
+                status: 'Active'
+            },
             discounts: [{
                 __t: 'DiscountAmount',
                 amount: 10,

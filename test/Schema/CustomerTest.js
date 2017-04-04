@@ -54,7 +54,9 @@ describe('Customer', database([Customer], function () {
                     _id: 'four',
                     plan: this.plan,
                     processor: { id: 'id-subscription', state: 'saved' },
-                    status: 'Active',
+                    status: {
+                        status: 'Active'
+                    },
                     descriptor: {
                         name: 'Enhancv*Pro Plan',
                         phone: '0888415433',
@@ -183,28 +185,28 @@ describe('Customer', database([Customer], function () {
     const activeSubs = [
         {
             name: 'Only one sub',
-            subs: [{ id: 1, level: 2, status: 'Active', paidThroughDate: '2017-02-02'}],
+            subs: [{ id: 1, level: 2, status: { status: 'Active' }, paidThroughDate: '2017-02-02'}],
             expected: [1],
             expectedActive: 1,
         },
         {
             name: 'With expired sub',
-            subs: [{ id: 1, level: 2, status: 'Active', paidThroughDate: '2017-01-01'}],
+            subs: [{ id: 1, level: 2, status: { status: 'Active' }, paidThroughDate: '2017-01-01'}],
             expected: [],
             expectedActive: null,
         },
         {
             name: 'With non-active sub',
-            subs: [{ id: 1, level: 2, status: 'Past Due', paidThroughDate: '2017-02-02'}],
+            subs: [{ id: 1, level: 2, status: { status: 'Past Due' }, paidThroughDate: '2017-02-02'}],
             expected: [],
             expectedActive: null,
         },
         {
             name: 'Correct level order',
             subs: [
-                { id: 3, level: 3, status: 'Active', paidThroughDate: '2017-02-02'},
-                { id: 1, level: 1, status: 'Active', paidThroughDate: '2017-02-02'},
-                { id: 2, level: 2, status: 'Active', paidThroughDate: '2017-02-02'},
+                { id: 3, level: 3, status: { status: 'Active' }, paidThroughDate: '2017-02-02'},
+                { id: 1, level: 1, status: { status: 'Active' }, paidThroughDate: '2017-02-02'},
+                { id: 2, level: 2, status: { status: 'Active' }, paidThroughDate: '2017-02-02'},
             ],
             expected: [3, 2, 1],
             expectedActive: 3,

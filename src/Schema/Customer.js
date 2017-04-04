@@ -4,6 +4,7 @@ const PaymentMethod = require('./PaymentMethod');
 const Subscription = require('./Subscription');
 const Transaction = require('./Transaction');
 const ProcessorItem = require('./ProcessorItem');
+const SubscriptionStatus = require('./Statuses/SubscriptionStatus');
 
 const Schema = mongoose.Schema;
 
@@ -83,7 +84,7 @@ Customer.methods.activeSubscriptions = function activeSubscriptions(activeDate) 
     const date = activeDate || new Date();
 
     return this.populate().subscriptions
-        .filter(item => item.paidThroughDate >= date && item.status === 'Active')
+        .filter(item => item.paidThroughDate >= date && item.status.status === SubscriptionStatus.ACTIVE)
         .sort((a, b) => b.plan.level - a.plan.level);
 };
 
