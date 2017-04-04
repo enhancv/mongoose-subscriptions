@@ -29,6 +29,8 @@
         "prefer-const": "warn",
 
         // keep it simple
-        "complexity": [ "warn", 10 ]
+        "complexity": [ "warn", 10 ],
+
+        "import/no-extraneous-dependencies": "off"
     }
 }
