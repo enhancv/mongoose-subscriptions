@@ -4,7 +4,7 @@ const ProcessorItem = require('./ProcessorItem');
 const Descriptor = require('./Descriptor');
 const originals = require('mongoose-originals');
 const Discount = require('./Discount');
-const Status = require('./Status');
+const SubscriptionStatus = require('./Statuses/SubscriptionStatus');
 
 const Schema = mongoose.Schema;
 
@@ -28,9 +28,12 @@ const Subscription = new Schema({
     firstBillingDate: Date,
     nextBillingDate: Date,
     paidThroughDate: Date,
-    status: String,
+    status: {
+        type: String,
+        enum: SubscriptionStatus.Statuses,
+    },
     price: Number,
-    statusHistory: [Status],
+    statusHistory: [SubscriptionStatus],
     descriptor: Descriptor,
     trialDuration: Number,
     trialDurationUnit: {
