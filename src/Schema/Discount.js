@@ -33,4 +33,11 @@ Discount.DiscountCoupon = DiscountCoupon;
 
 Discount.plugin(originals, { fields: ['processor'] });
 
+Discount.virtual('addedToProcessor')
+    .get(function () {
+        return this.original
+            && this.original.processor.state === ProcessorItem.INITIAL
+            && this.processor.state === ProcessorItem.SAVED;
+    });
+
 module.exports = Discount;

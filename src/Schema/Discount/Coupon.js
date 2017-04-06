@@ -43,15 +43,9 @@ DiscountCoupon.build = function build(subscription, coupon, currentDate) {
 };
 
 DiscountCoupon.pre('save', function preSave(next) {
-    if (
-        this.original
-        && this.coupon
-        && this.original.processor.state === ProcessorItem.INITIAL
-        && this.processor.state === ProcessorItem.SAVED
-    ) {
-        const coupon = this.coupon;
-        coupon.usedCount += 1;
-        coupon.save(next);
+    if (this.coupon && this.addedToProcessor) {
+        this.coupon.usedCount += 1;
+        this.coupon.save(next);
     } else {
         next();
     }
