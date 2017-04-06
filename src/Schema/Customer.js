@@ -80,16 +80,22 @@ Customer.methods.saveProcessor = function saveProcessor(processor) {
     return processor.save(this).then(customer => customer.save());
 };
 
-Customer.methods.activeSubscriptions = function activeSubscriptions(activeDate) {
+Customer.methods.validSubscriptions = function validSubscriptions(activeDate) {
     const date = activeDate || new Date();
 
     return this.populate().subscriptions
-        .filter(item => item.paidThroughDate >= date && item.status === SubscriptionStatus.ACTIVE)
+        .filter(item => item.paidThroughDate >= date)
         .sort((a, b) => b.plan.level - a.plan.level);
 };
 
+Customer.methods.activeSubscriptions = function activeSubscriptions(activeDate) {
+    return this
+        .validSubscriptions(activeDate)
+        .filter(item => item.status === SubscriptionStatus.ACTIVE);
+};
+
 Customer.methods.subscription = function subscription(activeDate) {
-    return this.activeSubscriptions(activeDate)[0];
+    return this.validSubscriptions(activeDate)[0];
 };
 
 module.exports = Customer;

@@ -184,20 +184,34 @@ describe('Customer', database([Customer], function () {
         {
             name: 'Only one sub',
             subs: [{ id: 1, level: 2, status: 'Active', paidThroughDate: '2017-02-02'}],
-            expected: [1],
-            expectedActive: 1,
+            expectedActive: [1],
+            expectedValid: [1],
+            expectedSubscription: 1,
         },
         {
             name: 'With expired sub',
             subs: [{ id: 1, level: 2, status: 'Active', paidThroughDate: '2017-01-01'}],
-            expected: [],
-            expectedActive: null,
+            expectedActive: [],
+            expectedValid: [],
+            expectedSubscription: null,
         },
         {
             name: 'With non-active sub',
             subs: [{ id: 1, level: 2, status: 'Past Due', paidThroughDate: '2017-02-02'}],
-            expected: [],
-            expectedActive: null,
+            expectedActive: [],
+            expectedValid: [1],
+            expectedSubscription: 1,
+        },
+        {
+            name: 'Valid but not active sub, no expired',
+            subs: [
+                { id: 2, level: 1, status: 'Active', paidThroughDate: '2017-01-01'},
+                { id: 3, level: 2, status: 'Active', paidThroughDate: '2017-02-02'},
+                { id: 1, level: 3, status: 'Past Due', paidThroughDate: '2017-02-02'},
+            ],
+            expectedActive: [3],
+            expectedValid: [1, 3],
+            expectedSubscription: 1,
         },
         {
             name: 'Correct level order',
@@ -206,8 +220,9 @@ describe('Customer', database([Customer], function () {
                 { id: 1, level: 1, status: 'Active', paidThroughDate: '2017-02-02'},
                 { id: 2, level: 2, status: 'Active', paidThroughDate: '2017-02-02'},
             ],
-            expected: [3, 2, 1],
-            expectedActive: 3,
+            expectedActive: [3, 2, 1],
+            expectedValid: [3, 2, 1],
+            expectedSubscription: 3,
         },
     ];
 
@@ -234,16 +249,13 @@ describe('Customer', database([Customer], function () {
             return this.customer.save()
                 .then((customer) => {
                     const nowDate = new Date('2017-01-10');
-                    assert.deepEqual(
-                        customer.activeSubscriptions(nowDate).map(sub => sub._id),
-                        test.expected
-                    );
+                    const active = customer.activeSubscriptions(nowDate);
+                    const valid = customer.validSubscriptions(nowDate)
+                    const subscription = customer.subscription(nowDate);
 
-                    if (test.expectedActive) {
-                        assert.equal(customer.subscription(nowDate)._id, test.expectedActive);
-                    } else {
-                        assert.equal(customer.subscription(nowDate), null);
-                    }
+                    assert.deepEqual(active.map(sub => sub._id), test.expectedActive);
+                    assert.deepEqual(valid.map(sub => sub._id), test.expectedValid);
+                    assert.equal(subscription && subscription._id, test.expectedSubscription);
                 });
         });
     });
