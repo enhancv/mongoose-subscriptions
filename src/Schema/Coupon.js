@@ -27,13 +27,13 @@ const Coupon = new Schema({
     },
 });
 
-Coupon.methods.isExpired = function (currentDate) {
+Coupon.methods.isExpired = function isExpired(currentDate) {
     const date = ((currentDate && new Date(currentDate)) || Date.now());
 
     return Boolean(this.expireAt && date > this.expireAt);
 };
 
-Coupon.methods.isUseLimitReached = function () {
+Coupon.methods.isUseLimitReached = function isUseLimitReached() {
     return Boolean(this.usedCountMax && this.usedCount > this.usedCountMax);
 };
 

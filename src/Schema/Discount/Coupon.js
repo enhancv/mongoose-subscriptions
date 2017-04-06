@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const ProcessorItem = require('../ProcessorItem');
 
 const Schema = mongoose.Schema;
 
@@ -43,7 +42,7 @@ DiscountCoupon.build = function build(subscription, coupon, currentDate) {
 };
 
 DiscountCoupon.pre('save', function preSave(next) {
-    if (this.coupon && this.addedToProcessor) {
+    if (this.coupon && this.isAddedToProcessor) {
         this.coupon.usedCount += 1;
         this.coupon.save(next);
     } else {

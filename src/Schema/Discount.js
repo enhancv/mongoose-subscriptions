@@ -33,8 +33,8 @@ Discount.DiscountCoupon = DiscountCoupon;
 
 Discount.plugin(originals, { fields: ['processor'] });
 
-Discount.virtual('addedToProcessor')
-    .get(function () {
+Discount.virtual('isAddedToProcessor')
+    .get(function isAddedToProcessor() {
         return this.original
             && this.original.processor.state === ProcessorItem.INITIAL
             && this.processor.state === ProcessorItem.SAVED;
