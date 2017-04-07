@@ -6,19 +6,16 @@ const database = require('../database');
 const main = require('../../src');
 const NullProcessor = main.NullProcessor;
 const Customer = main.Customer;
-const Plan = main.Plan;
 const assign = require('lodash/fp/assign');
 
 describe('Customer', database([Customer], function () {
     beforeEach(function () {
-        this.plan = new Plan({
-            name: 'New Test',
-            processor: { id: 'id-plan', state: 'saved' },
+        this.plan = {
+            processorId: 'id-plan',
             price: 4,
-            currency: 'USD',
             billingFrequency: 3,
             level: 2,
-        });
+        };
 
         this.customer = new Customer({
             name: 'Pesho Peshev',
@@ -232,10 +229,8 @@ describe('Customer', database([Customer], function () {
                 return {
                     _id: sub.id,
                     plan: {
-                        name: `Plan for sub ${sub.id}`,
-                        processor: { id: `plan-${sub.id}`, state: 'saved' },
+                        processorId: `plan-${sub.id}`,
                         price: 5,
-                        currency: 'USD',
                         billingFrequency: 1,
                         level: sub.level,
                     },
@@ -260,28 +255,181 @@ describe('Customer', database([Customer], function () {
         });
     });
 
-    it('Should get active subscriptions with plan refs', function () {
-        const plan = new Plan({
-            name: 'Plan 1',
-            processor: {
-                id: 'plan-1',
-                state: 'saved',
+    const activeSubscriptionForPlan = [
+        {
+            name: 'the active plan',
+            subs: [
+                { paidThroughDate: '2017-01-06', status: 'Active', _id: 1 },
+                { paidThroughDate: '2017-02-10', status: 'Canceled', _id: 2 },
+                { paidThroughDate: '2017-02-10', status: 'Active', _id: 3 },
+            ],
+            plan: {
+                processorId: 'p-3',
+                price: 10,
             },
-            price: 5,
-            currency: 'USD',
-            billingFrequency: 1,
-            level: 2,
-        });
+            expected: '3',
+        },
+        {
+            name: 'the active plan among many active',
+            subs: [
+                { paidThroughDate: '2017-02-10', status: 'Active', _id: 1 },
+                { paidThroughDate: '2017-02-10', status: 'Active', _id: 2 },
+                { paidThroughDate: '2017-02-06', status: 'Active', _id: 3 },
+            ],
+            plan: {
+                processorId: 'p-1',
+                price: 10,
+            },
+            expected: '1',
+        },
+        {
+            name: 'no active plan',
+            subs: [
+                { paidThroughDate: '2017-02-10', status: 'Canceled', _id: 2 },
+                { paidThroughDate: '2017-01-06', status: 'Active', _id: 3 },
+            ],
+            plan: {
+                processorId: 'p-1',
+                price: 10,
+            },
+            expected: null,
+        },
+    ];
 
-        return this.plan.save()
-            .then(plan => {
-                const nowDate = new Date('2017-01-10');
-                this.customer.subscriptions[0].plan = plan._id;
-
-                assert.equal(
-                    this.customer.subscription(nowDate),
-                    this.customer.subscriptions[0]
-                );
+    activeSubscriptionForPlan.forEach(test => {
+        it(`Should get the subscription for ${test.name}`, function () {
+            const nowDate = new Date('2017-01-10');
+            this.customer.subscriptions = test.subs.map(sub => {
+                return {
+                    _id: sub._id,
+                    plan: {
+                        price: 10,
+                        processorId: `p-${sub._id}`,
+                    },
+                    processor: { id: sub._id, state: 'saved' },
+                    status: sub.status,
+                    descriptor: {
+                        name: 'Enhancv*Pro Plan',
+                        phone: '0888415433',
+                        url: 'enhancv.com',
+                    },
+                    paidThroughDate: sub.paidThroughDate,
+                    paymentMethodId: 'three',
+                };
             });
+
+            const found = this.customer.activeSubscriptionForPlan(test.plan, nowDate);
+            assert.equal(found ? found._id : null, test.expected);
+        });
+    });
+
+
+    const activeSubscriptionLikePlan = [
+        {
+            name: 'the plan with matching level',
+            subs: [
+                { paidThroughDate: '2017-02-06', status: 'Active', _id: 1, level: 1 },
+                { paidThroughDate: '2017-02-10', status: 'Active', _id: 2, level: 2 },
+                { paidThroughDate: '2017-02-10', status: 'Active', _id: 3, level: 3 },
+            ],
+            plan: {
+                processorId: 'p-3',
+                price: 10,
+                level: 2,
+            },
+            expected: '3',
+        },
+        {
+            name: 'the biggest level plan',
+            subs: [
+                { paidThroughDate: '2017-02-10', status: 'Active', _id: 1, level: 1 },
+                { paidThroughDate: '2017-02-10', status: 'Active', _id: 2, level: 2 },
+                { paidThroughDate: '2017-02-06', status: 'Canceled', _id: 3, level: 3 },
+            ],
+            plan: {
+                processorId: 'p-1',
+                price: 10,
+                level: 2,
+            },
+            expected: '2',
+        },
+        {
+            name: 'no plan with that level',
+            subs: [
+                { paidThroughDate: '2017-02-06', status: 'Active', _id: 1, level: 1 },
+                { paidThroughDate: '2017-02-10', status: 'Active', _id: 2, level: 2 },
+                { paidThroughDate: '2017-02-10', status: 'Active', _id: 3, level: 3 },
+            ],
+            plan: {
+                processorId: 'p-1',
+                price: 10,
+                level: 4,
+            },
+            expected: null,
+        },
+    ];
+
+    activeSubscriptionLikePlan.forEach(test => {
+        it(`Should get the subscription for ${test.name}`, function () {
+            const nowDate = new Date('2017-01-10');
+            this.customer.subscriptions = test.subs.map(sub => {
+                return {
+                    _id: sub._id,
+                    plan: {
+                        price: 10,
+                        processorId: `p-${sub._id}`,
+                        level: sub.level,
+                    },
+                    processor: { id: sub._id, state: 'saved' },
+                    status: sub.status,
+                    descriptor: {
+                        name: 'Enhancv*Pro Plan',
+                        phone: '0888415433',
+                        url: 'enhancv.com',
+                    },
+                    paidThroughDate: sub.paidThroughDate,
+                    paymentMethodId: 'three',
+                };
+            });
+
+            const found = this.customer.activeSubscriptionLikePlan(test.plan, nowDate);
+            assert.equal(found ? found._id : null, test.expected);
+        });
+    });
+
+
+    it('Should subscribe to new plan', function () {
+        const nowDate = new Date('2017-01-10');
+
+        const addressData = {
+            company: 'Example company 2',
+            name: 'Pesho Peshev Stoevski 2',
+            country: 'BG',
+            locality: 'Sofia',
+            streetAddress: 'Tsarigradsko Shose 5',
+            extendedAddress: 'floor 4',
+            postalCode: '1000',
+        };
+
+        const plan = {
+            price: 10,
+            processorId: '2',
+            level: 2,
+        };
+
+        this.customer.subscribeToPlan(plan, 'nonce-test', addressData, nowDate);
+
+        sinon.assert.match(this.customer.addresses[1], addressData);
+        sinon.assert.match(this.customer.subscriptions[1].plan, plan);
+
+        assert.equal(
+            this.customer.subscriptions[1].paymentMethodId,
+            this.customer.paymentMethods[1]._id
+        );
+
+        assert.equal(
+            this.customer.paymentMethods[1].billingAddressId,
+            this.customer.addresses[1]._id
+        );
     });
 }));

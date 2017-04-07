@@ -11,7 +11,6 @@ describe('AbstractProcessor', function () {
         { method: 'save', error: /Save customer/ },
         { method: 'cancelSubscription', error: /Cancel subscription/ },
         { method: 'refundTransaction', error: /Refund transaction/ },
-        { method: 'plans', error: /Load plans/ },
     ];
 
     methods.forEach(function (test) {

@@ -3,7 +3,6 @@
 const mongoose = require('mongoose');
 const assert = require('assert');
 const main = require('../../../src');
-const Plan = main.Plan;
 const Coupon = main.Coupon;
 const CouponPercent = main.Schema.Coupon.CouponPercent;
 const SubscriptionSchema = main.Schema.Subscription;
@@ -14,13 +13,11 @@ describe('Schema/Coupon/Percent', function () {
     });
 
     beforeEach(function() {
-        const plan = new Plan({
-            processor: { id: 'test1', state: 'saved' },
-            name: 'Test',
+        const plan = {
+            processorId: 'test1',
             price: 19.90,
-            currency: 'USD',
             billingFrequency: 1,
-        });
+        };
 
         this.subscription = {
             _id: 'four',

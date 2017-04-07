@@ -3,20 +3,18 @@
 const mongoose = require('mongoose');
 const assert = require('assert');
 const main = require('../../src');
-const Plan = main.Plan;
 const SubscriptionSchema = main.Schema.Subscription;
 const ProcessorItem = main.Schema.ProcessorItem;
 
 describe('ProcessorItem', function () {
     before(function() {
         this.SubscriptionTest = mongoose.model('SubscriptionTest', SubscriptionSchema);
-        this.plan = new Plan({
-            processor: { id: 'test1', state: 'saved' },
+        this.plan = {
+            processorId: 'test1',
             name: 'Test',
             price: 19.90,
-            currency: 'USD',
             billingFrequency: 1,
-        });
+        };
 
         const processorIds = ['dasdsa', 'axcxas', 'acgers', 'potirt'];
         const subscriptions = [];

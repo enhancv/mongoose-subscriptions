@@ -24,13 +24,4 @@ describe('NullProcessor', function () {
             });
         });
     });
-
-    it(`Should have plans method`, function () {
-        const processor = new NullProcessor();
-        const customer = new Customer();
-
-        return processor.plans().then(result => {
-            assert.deepEqual(result, []);
-        });
-    });
 });

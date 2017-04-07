@@ -4,6 +4,7 @@ const ProcessorItem = require('./ProcessorItem');
 const Descriptor = require('./Descriptor');
 const originals = require('mongoose-originals');
 const Discount = require('./Discount');
+const Plan = require('./Plan');
 const SubscriptionStatus = require('./Statuses/SubscriptionStatus');
 
 const Schema = mongoose.Schema;
@@ -18,11 +19,9 @@ const Subscription = new Schema({
         default: ProcessorItem,
     },
     plan: {
-        type: Schema.Types.ObjectId,
-        ref: 'Plan',
+        type: Plan,
         required: true,
     },
-    planProcessorId: String,
     discounts: [Discount],
     paymentMethodId: String,
     firstBillingDate: Date,

@@ -5,24 +5,21 @@ const assert = require('assert');
 const database = require('../../database');
 const main = require('../../../src');
 const Coupon = main.Coupon;
-const Plan = main.Plan;
 const Customer = main.Customer;
 const DiscountCoupon = main.Schema.Discount.DiscountCoupon;
 const SubscriptionSchema = main.Schema.Subscription;
 
-describe('Schema/Discount/Coupon', database([Customer, Coupon, Plan], function () {
+describe('Schema/Discount/Coupon', database([Customer, Coupon], function () {
     before(function() {
         this.SubscriptionTest = mongoose.model('SubscriptionTest', SubscriptionSchema);
     });
 
     beforeEach(function() {
-        this.plan = new Plan({
-            processor: { id: 'test1', state: 'saved' },
-            name: 'Test',
+        this.plan = {
+            processorId: 'test1',
             price: 19.90,
-            currency: 'USD',
             billingFrequency: 1,
-        });
+        };
 
         this.subscription = {
             _id: 'four',

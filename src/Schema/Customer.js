@@ -80,10 +80,42 @@ Customer.methods.saveProcessor = function saveProcessor(processor) {
     return processor.save(this).then(customer => customer.save());
 };
 
+Customer.methods.activeSubscriptionForPlan = function activeSubscriptionForPlan(plan, date) {
+    return this
+        .activeSubscriptions(date)
+        .find(sub => plan.processorId === sub.plan.processorId);
+};
+
+Customer.methods.activeSubscriptionLikePlan = function activeSubscriptionLikePlan(plan, date) {
+    return this
+        .activeSubscriptions(date)
+        .find(sub => plan.level <= sub.plan.level);
+};
+
+Customer.methods.subscribeToPlan = function subscribeToPlan(plan, nonce, addressData) {
+    const address = this.addresses.create(addressData);
+    const paymentMethod = this.paymentMethods.create({
+        billingAddressId: address._id,
+        nonce,
+    });
+    const subscription = this.subscriptions.create({
+        plan,
+        paymentMethodId: paymentMethod._id,
+        price: plan.price,
+    });
+
+    this.addresses.push(address);
+    this.paymentMethods.push(paymentMethod);
+    this.subscriptions.push(subscription);
+    this.defaultPaymentMethodId = paymentMethod._id;
+
+    return subscription;
+};
+
 Customer.methods.validSubscriptions = function validSubscriptions(activeDate) {
     const date = activeDate || new Date();
 
-    return this.populate().subscriptions
+    return this.subscriptions
         .filter(item => item.paidThroughDate >= date)
         .sort((a, b) => b.plan.level - a.plan.level);
 };
