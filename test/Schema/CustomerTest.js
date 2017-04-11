@@ -180,45 +180,50 @@ describe('Customer', database([Customer], function () {
     const activeSubs = [
         {
             name: 'Only one sub',
-            subs: [{ id: 1, level: 2, status: 'Active', paidThroughDate: '2017-02-02'}],
+            subs: [{ id: 1, level: 2, status: 'Active', isTrial: false, paidThroughDate: '2017-02-02'}],
             expectedActive: [1],
             expectedValid: [1],
+            expectedValidNonTrial: [1],
             expectedSubscription: 1,
         },
         {
             name: 'With expired sub',
-            subs: [{ id: 1, level: 2, status: 'Active', paidThroughDate: '2017-01-01'}],
+            subs: [{ id: 1, level: 2, status: 'Active', isTrial: false, paidThroughDate: '2017-01-01'}],
             expectedActive: [],
             expectedValid: [],
+            expectedValidNonTrial: [],
             expectedSubscription: null,
         },
         {
             name: 'With non-active sub',
-            subs: [{ id: 1, level: 2, status: 'Past Due', paidThroughDate: '2017-02-02'}],
+            subs: [{ id: 1, level: 2, status: 'Past Due', isTrial: false, paidThroughDate: '2017-02-02'}],
             expectedActive: [],
             expectedValid: [1],
+            expectedValidNonTrial: [1],
             expectedSubscription: 1,
         },
         {
             name: 'Valid but not active sub, no expired',
             subs: [
-                { id: 2, level: 1, status: 'Active', paidThroughDate: '2017-01-01'},
-                { id: 3, level: 2, status: 'Active', paidThroughDate: '2017-02-02'},
-                { id: 1, level: 3, status: 'Past Due', paidThroughDate: '2017-02-02'},
+                { id: 2, level: 1, status: 'Active', isTrial: false, paidThroughDate: '2017-01-01'},
+                { id: 3, level: 2, status: 'Active', isTrial: true, paidThroughDate: '2017-02-02'},
+                { id: 1, level: 3, status: 'Past Due', isTrial: false, paidThroughDate: '2017-02-02'},
             ],
             expectedActive: [3],
             expectedValid: [1, 3],
+            expectedValidNonTrial: [1],
             expectedSubscription: 1,
         },
         {
             name: 'Correct level order',
             subs: [
-                { id: 3, level: 3, status: 'Active', paidThroughDate: '2017-02-02'},
-                { id: 1, level: 1, status: 'Active', paidThroughDate: '2017-02-02'},
-                { id: 2, level: 2, status: 'Active', paidThroughDate: '2017-02-02'},
+                { id: 3, level: 3, status: 'Active', isTrial: true, paidThroughDate: '2017-02-02'},
+                { id: 1, level: 1, status: 'Active', isTrial: false, paidThroughDate: '2017-03-02'},
+                { id: 2, level: 2, status: 'Active', isTrial: false, paidThroughDate: '2017-02-02'},
             ],
             expectedActive: [3, 2, 1],
             expectedValid: [3, 2, 1],
+            expectedValidNonTrial: [1, 2],
             expectedSubscription: 3,
         },
     ];
@@ -234,11 +239,12 @@ describe('Customer', database([Customer], function () {
                         billingFrequency: 1,
                         level: sub.level,
                     },
+                    isTrial: sub.isTrial,
                     status: sub.status,
                     paidThroughDate: sub.paidThroughDate,
                     processor: { id: `sub-${sub.id}`, state: 'saved' },
                     paymentMethodId: 'three',
-                }
+                };
             });
 
             return this.customer.save()
@@ -246,132 +252,69 @@ describe('Customer', database([Customer], function () {
                     const nowDate = new Date('2017-01-10');
                     const active = customer.activeSubscriptions(nowDate);
                     const valid = customer.validSubscriptions(nowDate)
+                    const validNonTrial = customer.validNonTrialSubscriptions(nowDate)
                     const subscription = customer.subscription(nowDate);
 
-                    assert.deepEqual(active.map(sub => sub._id), test.expectedActive);
-                    assert.deepEqual(valid.map(sub => sub._id), test.expectedValid);
-                    assert.equal(subscription && subscription._id, test.expectedSubscription);
+                    assert.deepEqual(
+                        active.map(sub => sub._id),
+                        test.expectedActive,
+                        'Should have correct activeSubscriptions'
+                    );
+                    assert.deepEqual(
+                        valid.map(sub => sub._id),
+                        test.expectedValid,
+                        'Should have correct validSubscriptions'
+                    );
+                    assert.deepEqual(
+                        validNonTrial.map(sub => sub._id),
+                        test.expectedValidNonTrial,
+                        'Should have correct validNonTrialSubscriptions'
+                    );
+                    assert.equal(
+                        subscription && subscription._id,
+                        test.expectedSubscription,
+                        'Should have correct subscription'
+                    );
                 });
         });
     });
 
-    const activeSubscriptionForPlan = [
-        {
-            name: 'the active plan',
-            subs: [
-                { paidThroughDate: '2017-01-06', status: 'Active', _id: 1 },
-                { paidThroughDate: '2017-02-10', status: 'Canceled', _id: 2 },
-                { paidThroughDate: '2017-02-10', status: 'Active', _id: 3 },
-            ],
-            plan: {
-                processorId: 'p-3',
-                price: 10,
-            },
-            expected: '3',
-        },
-        {
-            name: 'the active plan among many active',
-            subs: [
-                { paidThroughDate: '2017-02-10', status: 'Active', _id: 1 },
-                { paidThroughDate: '2017-02-10', status: 'Active', _id: 2 },
-                { paidThroughDate: '2017-02-06', status: 'Active', _id: 3 },
-            ],
-            plan: {
-                processorId: 'p-1',
-                price: 10,
-            },
-            expected: '1',
-        },
-        {
-            name: 'no active plan',
-            subs: [
-                { paidThroughDate: '2017-02-10', status: 'Canceled', _id: 2 },
-                { paidThroughDate: '2017-01-06', status: 'Active', _id: 3 },
-            ],
-            plan: {
-                processorId: 'p-1',
-                price: 10,
-            },
-            expected: null,
-        },
-    ];
-
-    activeSubscriptionForPlan.forEach(test => {
-        it(`Should get the subscription for ${test.name}`, function () {
-            const nowDate = new Date('2017-01-10');
-            this.customer.subscriptions = test.subs.map(sub => {
-                return {
-                    _id: sub._id,
-                    plan: {
-                        price: 10,
-                        processorId: `p-${sub._id}`,
-                    },
-                    processor: { id: sub._id, state: 'saved' },
-                    status: sub.status,
-                    descriptor: {
-                        name: 'Enhancv*Pro Plan',
-                        phone: '0888415433',
-                        url: 'enhancv.com',
-                    },
-                    paidThroughDate: sub.paidThroughDate,
-                    paymentMethodId: 'three',
-                };
-            });
-
-            const found = this.customer.activeSubscriptionForPlan(test.plan, nowDate);
-            assert.equal(found ? found._id : null, test.expected);
-        });
-    });
-
-
-    const activeSubscriptionLikePlan = [
+    const newSubscriptionStartDate = [
         {
             name: 'the plan with matching level',
             subs: [
-                { paidThroughDate: '2017-02-06', status: 'Active', _id: 1, level: 1 },
-                { paidThroughDate: '2017-02-10', status: 'Active', _id: 2, level: 2 },
-                { paidThroughDate: '2017-02-10', status: 'Active', _id: 3, level: 3 },
+                { paidThroughDate: '2017-04-06', status: 'Active', isTrial: false, level: 1 },
+                { paidThroughDate: '2017-03-06', status: 'Active', isTrial: true, level: 2 },
+                { paidThroughDate: '2017-03-05', status: 'Active', isTrial: false, level: 3 },
+                { paidThroughDate: '2017-02-10', status: 'Active', isTrial: false, level: 2 },
+                { paidThroughDate: '2017-02-10', status: 'Canceled', isTrial: false, level: 3 },
             ],
             plan: {
                 processorId: 'p-3',
                 price: 10,
                 level: 2,
             },
-            expected: '3',
+            expected: new Date('2017-03-05'),
         },
         {
-            name: 'the biggest level plan',
+            name: 'no valid sub matches plan',
             subs: [
-                { paidThroughDate: '2017-02-10', status: 'Active', _id: 1, level: 1 },
-                { paidThroughDate: '2017-02-10', status: 'Active', _id: 2, level: 2 },
-                { paidThroughDate: '2017-02-06', status: 'Canceled', _id: 3, level: 3 },
+                { paidThroughDate: '2017-04-06', status: 'Active', isTrial: false, level: 1 },
+                { paidThroughDate: '2017-01-05', status: 'Active', isTrial: false, level: 2 },
             ],
             plan: {
-                processorId: 'p-1',
+                processorId: 'p-3',
                 price: 10,
                 level: 2,
             },
-            expected: '2',
-        },
-        {
-            name: 'no plan with that level',
-            subs: [
-                { paidThroughDate: '2017-02-06', status: 'Active', _id: 1, level: 1 },
-                { paidThroughDate: '2017-02-10', status: 'Active', _id: 2, level: 2 },
-                { paidThroughDate: '2017-02-10', status: 'Active', _id: 3, level: 3 },
-            ],
-            plan: {
-                processorId: 'p-1',
-                price: 10,
-                level: 4,
-            },
-            expected: null,
+            expected: undefined,
         },
     ];
 
-    activeSubscriptionLikePlan.forEach(test => {
-        it(`Should get the subscription for ${test.name}`, function () {
+    newSubscriptionStartDate.forEach(test => {
+        it(`Should get the firstBillingDate for ${test.name}`, function () {
             const nowDate = new Date('2017-01-10');
+
             this.customer.subscriptions = test.subs.map(sub => {
                 return {
                     _id: sub._id,
@@ -380,23 +323,18 @@ describe('Customer', database([Customer], function () {
                         processorId: `p-${sub._id}`,
                         level: sub.level,
                     },
+                    isTrial: sub.isTrial,
                     processor: { id: sub._id, state: 'saved' },
                     status: sub.status,
-                    descriptor: {
-                        name: 'Enhancv*Pro Plan',
-                        phone: '0888415433',
-                        url: 'enhancv.com',
-                    },
                     paidThroughDate: sub.paidThroughDate,
                     paymentMethodId: 'three',
                 };
             });
 
-            const found = this.customer.activeSubscriptionLikePlan(test.plan, nowDate);
-            assert.equal(found ? found._id : null, test.expected);
+            const firstBillingDate = this.customer.newSubscriptionStartDate(test.plan, nowDate);
+            assert.deepEqual(firstBillingDate, test.expected);
         });
     });
-
 
     it('Should subscribe to new plan', function () {
         const nowDate = new Date('2017-01-10');
@@ -417,19 +355,26 @@ describe('Customer', database([Customer], function () {
             level: 2,
         };
 
-        this.customer.subscribeToPlan(plan, 'nonce-test', addressData, nowDate);
+        return this.customer.save()
+            .then(customer => {
+                return Customer.findById(customer._id);
+            })
+            .then(customer => {
+                customer.subscribeToPlan(plan, 'nonce-test', addressData, nowDate);
 
-        sinon.assert.match(this.customer.addresses[1], addressData);
-        sinon.assert.match(this.customer.subscriptions[1].plan, plan);
+                sinon.assert.match(customer.addresses[1], addressData);
+                sinon.assert.match(customer.subscriptions[1].plan, plan);
+                sinon.assert.match(customer.subscriptions[1].firstBillingDate, new Date('2017-03-03'));
 
-        assert.equal(
-            this.customer.subscriptions[1].paymentMethodId,
-            this.customer.paymentMethods[1]._id
-        );
+                assert.equal(
+                    customer.subscriptions[1].paymentMethodId,
+                    customer.paymentMethods[1]._id
+                );
 
-        assert.equal(
-            this.customer.paymentMethods[1].billingAddressId,
-            this.customer.addresses[1]._id
-        );
+                assert.equal(
+                    customer.paymentMethods[1].billingAddressId,
+                    customer.addresses[1]._id
+                );
+            })
     });
 }));

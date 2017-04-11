@@ -47,7 +47,7 @@ transactions.discriminator('TransactionPayPalAccount', Transaction.TransactionPa
 transactions.discriminator('TransactionApplePayCard', Transaction.TransactionApplePayCard);
 transactions.discriminator('TransactionAndroidPayCard', Transaction.TransactionAndroidPayCard);
 
-Customer.methods.markChanged = function markChanged() {
+function markChanged() {
     if (this.processor.id && this.isModified('name email phone ipAddress defaultPaymentMethodId')) {
         this.processor.state = ProcessorItem.CHANGED;
     }
@@ -61,73 +61,118 @@ Customer.methods.markChanged = function markChanged() {
     });
 
     return this;
-};
+}
 
-Customer.methods.cancelProcessor = function cancelProcessor(processor, id) {
+function cancelProcessor(processor, id) {
     return processor.cancelSubscription(this, id).then(customer => customer.save());
-};
+}
 
-Customer.methods.refundProcessor = function refundProcessor(processor, id, amount) {
+function refundProcessor(processor, id, amount) {
     return processor.refundTransaction(this, id, amount).then(customer => customer.save());
-};
+}
 
-Customer.methods.loadProcessor = function loadProcessor(processor) {
+function loadProcessor(processor) {
     return processor.load(this).then(customer => customer.save());
-};
+}
 
-Customer.methods.saveProcessor = function saveProcessor(processor) {
+function saveProcessor(processor) {
     this.markChanged();
     return processor.save(this).then(customer => customer.save());
-};
+}
 
-Customer.methods.activeSubscriptionForPlan = function activeSubscriptionForPlan(plan, date) {
-    return this
-        .activeSubscriptions(date)
-        .find(sub => plan.processorId === sub.plan.processorId);
-};
+function cancelPendingSubscriptions(activeDate) {
+    const date = activeDate || new Date();
 
-Customer.methods.activeSubscriptionLikePlan = function activeSubscriptionLikePlan(plan, date) {
-    return this
-        .activeSubscriptions(date)
-        .find(sub => plan.level <= sub.plan.level);
-};
+    this.subscriptions.forEach((sub) => {
+        if (
+            sub.status === SubscriptionStatus.PENDING
+            && sub.firstBillingDate
+            && sub.firstBillingDate > date
+        ) {
+            sub.status = SubscriptionStatus.CANCELED;
+        }
+    });
 
-Customer.methods.subscribeToPlan = function subscribeToPlan(plan, nonce, addressData) {
+    return this;
+}
+
+function subscribeToPlan(plan, nonce, addressData, activeDate) {
     const address = this.addresses.create(addressData);
     const paymentMethod = this.paymentMethods.create({
         billingAddressId: address._id,
         nonce,
     });
-    const subscription = this.subscriptions.create({
+    const sub = this.subscriptions.create({
         plan,
         paymentMethodId: paymentMethod._id,
+        firstBillingDate: this.newSubscriptionStartDate(plan, activeDate),
         price: plan.price,
     });
 
     this.addresses.push(address);
     this.paymentMethods.push(paymentMethod);
-    this.subscriptions.push(subscription);
+    this.subscriptions.push(sub);
     this.defaultPaymentMethodId = paymentMethod._id;
 
-    return subscription;
-};
+    return sub;
+}
 
-Customer.methods.validSubscriptions = function validSubscriptions(activeDate) {
+function activeSubscriptions(activeDate) {
+    return this.validSubscriptions(activeDate)
+        .filter(item => item.status === SubscriptionStatus.ACTIVE);
+}
+
+function validSubscriptions(activeDate) {
     const date = activeDate || new Date();
 
     return this.subscriptions
         .filter(item => item.paidThroughDate >= date)
         .sort((a, b) => b.plan.level - a.plan.level);
-};
+}
 
-Customer.methods.activeSubscriptions = function activeSubscriptions(activeDate) {
-    return this
-        .validSubscriptions(activeDate)
-        .filter(item => item.status === SubscriptionStatus.ACTIVE);
-};
+function validNonTrialSubscriptions(activeDate) {
+    const date = activeDate || new Date();
 
-Customer.methods.subscription = function subscription(activeDate) {
+    return this.subscriptions
+        .filter(item => item.paidThroughDate >= date)
+        .filter(item => !item.isTrial)
+        .filter(item => item.status !== SubscriptionStatus.PENDING)
+        .sort((a, b) => a.paidThroughDate < b.paidThroughDate);
+}
+
+function newSubscriptionOverwritten(plan, activeDate) {
+    const subs = this
+        .validNonTrialSubscriptions(activeDate)
+        .filter(item => plan.level > item.plan.level);
+
+    return subs[0];
+}
+
+function newSubscriptionStartDate(plan, activeDate) {
+    const startDates = this
+        .validNonTrialSubscriptions(activeDate)
+        .filter(item => plan.level <= item.plan.level)
+        .map(item => item.paidThroughDate);
+
+    return startDates[0];
+}
+
+function subscription(activeDate) {
     return this.validSubscriptions(activeDate)[0];
-};
+}
+
+Customer.methods.markChanged = markChanged;
+Customer.methods.cancelProcessor = cancelProcessor;
+Customer.methods.refundProcessor = refundProcessor;
+Customer.methods.loadProcessor = loadProcessor;
+Customer.methods.saveProcessor = saveProcessor;
+Customer.methods.subscribeToPlan = subscribeToPlan;
+Customer.methods.validSubscriptions = validSubscriptions;
+Customer.methods.activeSubscriptions = activeSubscriptions;
+Customer.methods.cancelPendingSubscriptions = cancelPendingSubscriptions;
+Customer.methods.validNonTrialSubscriptions = validNonTrialSubscriptions;
+Customer.methods.subscription = subscription;
+Customer.methods.newSubscriptionStartDate = newSubscriptionStartDate;
+Customer.methods.newSubscriptionOverwritten = newSubscriptionOverwritten;
 
 module.exports = Customer;

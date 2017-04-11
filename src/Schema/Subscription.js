@@ -34,6 +34,10 @@ const Subscription = new Schema({
     price: Number,
     statusHistory: [SubscriptionStatus],
     descriptor: Descriptor,
+    isTrial: {
+        type: Boolean,
+        default: false,
+    },
     trialDuration: Number,
     trialDurationUnit: {
         type: String,
