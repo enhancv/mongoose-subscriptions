@@ -25,7 +25,6 @@ const Subscription = new Schema({
     discounts: [Discount],
     paymentMethodId: String,
     firstBillingDate: Date,
-    nextBillingDate: Date,
     paidThroughDate: Date,
     status: {
         type: String,
@@ -44,6 +43,14 @@ const Subscription = new Schema({
         enum: ['month', 'day'],
     },
 });
+
+Subscription.virtual('nextBillingDate')
+    .get(function getNextBillingDate() {
+        return this.paidThroughDate;
+    })
+    .set(function setNextBillingDate(value) {
+        this.paidThroughDate = value;
+    });
 
 Subscription.methods.addDiscounts = function find(callback) {
     const newDiscounts = callback(this);
