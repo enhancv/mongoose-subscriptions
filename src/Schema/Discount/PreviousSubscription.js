@@ -10,7 +10,7 @@ const DiscountPreviousSubscription = new Schema({
 }, { _id: false });
 
 DiscountPreviousSubscription.build = function build(subscription, previous) {
-    if (!previous) {
+    if (!previous || !previous.price) {
         return null;
     }
 

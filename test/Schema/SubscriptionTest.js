@@ -11,23 +11,26 @@ describe('Subscription', function () {
         this.SubscriptionTest = mongoose.model('SubscriptionTest', SubscriptionSchema);
     });
 
+    it('Should return correct nextBillingDate', function () {
+        const sub = new this.SubscriptionTest({
+            paidThroughDate: '2017-03-03',
+        });
+
+        assert.deepEqual(new Date('2017-03-03'), sub.nextBillingDate);
+
+        sub.nextBillingDate = '2017-04-04';
+
+        assert.deepEqual(new Date('2017-04-04'), sub.paidThroughDate);
+    });
+
     it('addDiscounts', function () {
         const sub = new this.SubscriptionTest({
             _id: 'four',
             price: 20,
             plan: {
-                name: 'New Test',
-                processor: {
-                    id: 'new-plan-id',
-                    state: 'saved',
-                },
+                processorId: 'new-plan-id',
                 price: 20,
                 currency: 'USD',
-                description: 'Test Descr',
-                createdAt: new Date('2017-02-02'),
-                updatedAt: new Date('2017-03-02'),
-                billingFrequency: 3,
-                level: 2,
             },
             processor: { id: 'id-subscription', state: 'saved' },
             status: 'Active',

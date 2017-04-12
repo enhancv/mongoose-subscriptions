@@ -180,50 +180,116 @@ describe('Customer', database([Customer], function () {
     const activeSubs = [
         {
             name: 'Only one sub',
-            subs: [{ id: 1, level: 2, status: 'Active', isTrial: false, paidThroughDate: '2017-02-02'}],
+            subs: [{
+                _id: 1,
+                level: 2,
+                status: 'Active',
+                isTrial: false,
+                firstBillingDate: '2017-01-02',
+                paidThroughDate: '2017-02-02',
+            }],
             expectedActive: [1],
             expectedValid: [1],
-            expectedValidNonTrial: [1],
             expectedSubscription: 1,
         },
         {
             name: 'With expired sub',
-            subs: [{ id: 1, level: 2, status: 'Active', isTrial: false, paidThroughDate: '2017-01-01'}],
+            subs: [{
+                _id: 1,
+                level: 2,
+                status: 'Active',
+                isTrial: false,
+                firstBillingDate: '2016-12-01',
+                paidThroughDate: '2017-01-01',
+            }],
             expectedActive: [],
             expectedValid: [],
-            expectedValidNonTrial: [],
             expectedSubscription: null,
         },
         {
             name: 'With non-active sub',
-            subs: [{ id: 1, level: 2, status: 'Past Due', isTrial: false, paidThroughDate: '2017-02-02'}],
+            subs: [{
+                _id: 1,
+                level: 2,
+                status: 'Past Due',
+                isTrial: false,
+                firstBillingDate: '2017-01-02',
+                paidThroughDate: '2017-02-02',
+            }],
             expectedActive: [],
             expectedValid: [1],
-            expectedValidNonTrial: [1],
             expectedSubscription: 1,
         },
         {
             name: 'Valid but not active sub, no expired',
             subs: [
-                { id: 2, level: 1, status: 'Active', isTrial: false, paidThroughDate: '2017-01-01'},
-                { id: 3, level: 2, status: 'Active', isTrial: true, paidThroughDate: '2017-02-02'},
-                { id: 1, level: 3, status: 'Past Due', isTrial: false, paidThroughDate: '2017-02-02'},
+                {
+                    _id: 2,
+                    level: 1,
+                    status: 'Active',
+                    isTrial: false,
+                    firstBillingDate: '2016-12-01',
+                    paidThroughDate: '2017-01-01',
+                },
+                {
+                    _id: 3,
+                    level: 2,
+                    status: 'Active',
+                    isTrial: true,
+                    firstBillingDate: '2017-01-02',
+                    paidThroughDate: '2017-02-02',
+                },
+                {
+                    _id: 1,
+                    level: 3,
+                    status: 'Past Due',
+                    isTrial: false,
+                    firstBillingDate: '2017-01-02',
+                    paidThroughDate: '2017-02-02',
+                 },
             ],
             expectedActive: [3],
             expectedValid: [1, 3],
-            expectedValidNonTrial: [1],
             expectedSubscription: 1,
         },
         {
             name: 'Correct level order',
             subs: [
-                { id: 3, level: 3, status: 'Active', isTrial: true, paidThroughDate: '2017-02-02'},
-                { id: 1, level: 1, status: 'Active', isTrial: false, paidThroughDate: '2017-03-02'},
-                { id: 2, level: 2, status: 'Active', isTrial: false, paidThroughDate: '2017-02-02'},
+                {
+                    _id: 3,
+                    level: 3,
+                    status: 'Active',
+                    isTrial: true,
+                    firstBillingDate: '2017-01-02',
+                    paidThroughDate: '2017-02-02',
+                },
+                {
+                    _id: 1,
+                    level: 1,
+                    status: 'Active',
+                    isTrial: false,
+                    firstBillingDate: '2017-01-02',
+                    paidThroughDate: '2017-03-02',
+                },
+                {
+                    _id: 4,
+                    level: 1,
+                    status: 'Active',
+                    isTrial: false,
+                    firstBillingDate: '2017-02-02',
+                    paidThroughDate: '2017-03-02',
+                },
+                {
+                    _id: 2,
+                    level: 2,
+                    status: 'Active',
+                    isTrial: false,
+                    firstBillingDate: '2017-01-02',
+                    paidThroughDate: '2017-02-02',
+                },
             ],
             expectedActive: [3, 2, 1],
             expectedValid: [3, 2, 1],
-            expectedValidNonTrial: [1, 2],
             expectedSubscription: 3,
         },
     ];
@@ -232,17 +298,18 @@ describe('Customer', database([Customer], function () {
         it(`Should get active subscriptions for ${test.name}`, function () {
             this.customer.subscriptions = test.subs.map(sub => {
                 return {
-                    _id: sub.id,
+                    _id: sub._id,
                     plan: {
-                        processorId: `plan-${sub.id}`,
+                        processorId: `plan-${sub._id}`,
                         price: 5,
                         billingFrequency: 1,
                         level: sub.level,
                     },
                     isTrial: sub.isTrial,
                     status: sub.status,
+                    firstBillingDate: sub.firstBillingDate,
                     paidThroughDate: sub.paidThroughDate,
-                    processor: { id: `sub-${sub.id}`, state: 'saved' },
+                    processor: { id: `sub-${sub._id}`, state: 'saved' },
                     paymentMethodId: 'three',
                 };
             });
@@ -252,7 +319,6 @@ describe('Customer', database([Customer], function () {
                     const nowDate = new Date('2017-01-10');
                     const active = customer.activeSubscriptions(nowDate);
                     const valid = customer.validSubscriptions(nowDate)
-                    const validNonTrial = customer.validNonTrialSubscriptions(nowDate)
                     const subscription = customer.subscription(nowDate);
 
                     assert.deepEqual(
@@ -265,11 +331,6 @@ describe('Customer', database([Customer], function () {
                         test.expectedValid,
                         'Should have correct validSubscriptions'
                     );
-                    assert.deepEqual(
-                        validNonTrial.map(sub => sub._id),
-                        test.expectedValidNonTrial,
-                        'Should have correct validNonTrialSubscriptions'
-                    );
                     assert.equal(
                         subscription && subscription._id,
                         test.expectedSubscription,
@@ -279,102 +340,345 @@ describe('Customer', database([Customer], function () {
         });
     });
 
-    const newSubscriptionStartDate = [
-        {
-            name: 'the plan with matching level',
-            subs: [
-                { paidThroughDate: '2017-04-06', status: 'Active', isTrial: false, level: 1 },
-                { paidThroughDate: '2017-03-06', status: 'Active', isTrial: true, level: 2 },
-                { paidThroughDate: '2017-03-05', status: 'Active', isTrial: false, level: 3 },
-                { paidThroughDate: '2017-02-10', status: 'Active', isTrial: false, level: 2 },
-                { paidThroughDate: '2017-02-10', status: 'Canceled', isTrial: false, level: 3 },
-            ],
-            plan: {
-                processorId: 'p-3',
-                price: 10,
-                level: 2,
+    it('Should correctly cancel subscriptions', function () {
+        this.customer.subscriptions = [
+            {
+                plan: { processorId: `plan-1`, price: 10 },
+                status: 'Expired',
+                processor: { id: `sub-1`, state: 'saved' },
             },
-            expected: new Date('2017-03-05'),
+            {
+                plan: { processorId: `plan-2`, price: 10 },
+                status: 'Active',
+                processor: { id: `sub-2`, state: 'saved' },
+            },
+            {
+                plan: { processorId: `plan-3`, price: 10 },
+                status: 'Past Due',
+                processor: { id: `sub-3`, state: 'saved' },
+            },
+            {
+                plan: { processorId: `plan-4`, price: 10 },
+                status: 'Pending',
+                processor: { id: `sub-4`, state: 'saved' },
+            },
+            {
+                plan: { processorId: `plan-5`, price: 10 },
+                status: 'Canceled',
+                processor: { id: `sub-5`, state: 'saved' },
+            },
+        ];
+
+        this.customer.cancelSubscriptions();
+
+        const expected = [
+            'Expired',
+            'Canceled',
+            'Canceled',
+            'Canceled',
+            'Canceled',
+        ];
+
+        assert.deepEqual(this.customer.subscriptions.map(item => item.status), expected);
+    });
+
+    it('Should correctly add address with data', function () {
+        const addressData = {
+            company: 'Example 2 company',
+            name: 'Pesho 2 Peshev Stoevski',
+            country: 'US',
+            locality: 'New York',
+            streetAddress: 'Street 4',
+            extendedAddress: 'floor 3',
+            postalCode: 'NXZ123',
+        };
+
+        const result = this.customer.addAddress(addressData);
+
+        sinon.assert.match(result, addressData);
+        sinon.assert.match(result._id, sinon.match.string);
+
+        assert.equal(this.customer.addresses[1], result);
+    });
+
+    it('Should correctly add addPaymentMethodNonce', function () {
+        const nonce = 'test-nonce';
+        const result = this.customer.addPaymentMethodNonce(nonce, this.customer.addresses[0]);
+
+        sinon.assert.match(result, {
+            _id: sinon.match.string,
+            nonce: nonce,
+            billingAddressId: this.customer.addresses[0]._id
+        });
+
+        assert.equal(this.customer.paymentMethods[1], result);
+        assert.equal(this.customer.defaultPaymentMethod(), result);
+    });
+
+    const addSubscription = [
+        {
+            name: 'no previous subscriptions',
+            subs: [],
+            plan: {
+                level: 1,
+            },
+            expected: {
+                firstBillingDate: '2017-01-10',
+                discount: false,
+            }
         },
         {
-            name: 'no valid sub matches plan',
-            subs: [
-                { paidThroughDate: '2017-04-06', status: 'Active', isTrial: false, level: 1 },
-                { paidThroughDate: '2017-01-05', status: 'Active', isTrial: false, level: 2 },
-            ],
+            name: 'do not take lower level trials into account',
+            subs: [{
+                _id: 1,
+                level: 2,
+                status: 'Active',
+                processorState: 'saved',
+                isTrial: true,
+                firstBillingDate: '2017-01-02',
+                paidThroughDate: '2017-02-02',
+            }],
             plan: {
-                processorId: 'p-3',
-                price: 10,
                 level: 2,
             },
-            expected: undefined,
+            expected: {
+                firstBillingDate: '2017-01-10',
+                discount: false,
+            }
+        },
+        {
+            name: 'do not take higher level trials into account',
+            subs: [{
+                _id: 1,
+                level: 4,
+                status: 'Active',
+                processorState: 'saved',
+                isTrial: true,
+                firstBillingDate: '2017-01-02',
+                paidThroughDate: '2017-02-02',
+            }],
+            plan: {
+                level: 2,
+            },
+            expected: {
+                firstBillingDate: '2017-01-10',
+                discount: false,
+            }
+        },
+        {
+            name: 'start after previous plan of equal level',
+            subs: [{
+                _id: 1,
+                level: 2,
+                status: 'Active',
+                processorState: 'saved',
+                isTrial: false,
+                firstBillingDate: '2017-01-02',
+                paidThroughDate: '2017-02-02',
+            }],
+            plan: {
+                level: 2,
+            },
+            expected: {
+                firstBillingDate: '2017-02-02',
+                discount: false,
+            }
+        },
+        {
+            name: 'start after previous plan of higher level',
+            subs: [{
+                _id: 1,
+                level: 4,
+                status: 'Active',
+                processorState: 'saved',
+                isTrial: false,
+                firstBillingDate: '2017-01-02',
+                paidThroughDate: '2017-02-02',
+            }],
+            plan: {
+                level: 2,
+            },
+            expected: {
+                firstBillingDate: '2017-02-02',
+                discount: false,
+            }
+        },
+        {
+            name: 'discount based on previous plan of lower level',
+            subs: [{
+                _id: 1,
+                level: 1,
+                status: 'Active',
+                processorState: 'saved',
+                isTrial: false,
+                firstBillingDate: '2017-01-02',
+                paidThroughDate: '2017-02-02',
+            }],
+            plan: {
+                level: 2,
+            },
+            expected: {
+                firstBillingDate: '2017-01-10',
+                discount: 7.42,
+            }
+        },
+        {
+            name: 'start after previous canceled subscription',
+            subs: [{
+                _id: 1,
+                level: 2,
+                status: 'Canceled',
+                processorState: 'saved',
+                isTrial: false,
+                firstBillingDate: '2017-01-02',
+                paidThroughDate: '2017-02-02',
+            }],
+            plan: {
+                level: 2,
+            },
+            expected: {
+                firstBillingDate: '2017-02-02',
+                discount: false,
+            }
+        },
+        {
+            name: 'start discount previous canceled subscription of lower level',
+            subs: [{
+                _id: 1,
+                level: 1,
+                status: 'Canceled',
+                processorState: 'saved',
+                isTrial: false,
+                firstBillingDate: '2017-01-02',
+                paidThroughDate: '2017-02-02',
+            }],
+            plan: {
+                level: 2,
+            },
+            expected: {
+                firstBillingDate: '2017-01-10',
+                discount: 7.42,
+            }
+        },
+        {
+            name: 'no discount of local subscriptions',
+            subs: [{
+                _id: 1,
+                level: 1,
+                status: 'Canceled',
+                processorState: 'local',
+                isTrial: false,
+                firstBillingDate: '2017-01-02',
+                paidThroughDate: '2017-02-02',
+            }],
+            plan: {
+                level: 2,
+            },
+            expected: {
+                firstBillingDate: '2017-01-10',
+                discount: false,
+            }
+        },
+        {
+            name: 'start after latest subscription',
+            subs: [
+                {
+                    _id: 1,
+                    level: 2,
+                    status: 'Canceled',
+                    processorState: 'saved',
+                    isTrial: false,
+                    firstBillingDate: '2017-01-02',
+                    paidThroughDate: '2017-02-02',
+                },
+                {
+                    _id: 2,
+                    level: 3,
+                    status: 'Active',
+                    processorState: 'saved',
+                    isTrial: false,
+                    firstBillingDate: '2017-01-08',
+                    paidThroughDate: '2017-02-10',
+                },
+            ],
+            plan: {
+                level: 2,
+            },
+            expected: {
+                firstBillingDate: '2017-02-10',
+                discount: false,
+            }
+        },
+        {
+            name: 'ignore pending subscriptions',
+            subs: [
+                {
+                    _id: 1,
+                    level: 2,
+                    status: 'Canceled',
+                    processorState: 'saved',
+                    isTrial: false,
+                    firstBillingDate: '2017-01-02',
+                    paidThroughDate: '2017-02-02',
+                },
+                {
+                    _id: 2,
+                    level: 3,
+                    status: 'Active',
+                    processorState: 'saved',
+                    isTrial: false,
+                    firstBillingDate: '2017-02-10',
+                    paidThroughDate: '2017-03-10',
+                },
+            ],
+            plan: {
+                level: 2,
+            },
+            expected: {
+                firstBillingDate: '2017-02-02',
+                discount: false,
+            }
         },
     ];
 
-    newSubscriptionStartDate.forEach(test => {
-        it(`Should get the firstBillingDate for ${test.name}`, function () {
-            const nowDate = new Date('2017-01-10');
-
+    addSubscription.forEach(function (test) {
+        it(`Should addSubscription, ${test.name}`, function () {
             this.customer.subscriptions = test.subs.map(sub => {
                 return {
                     _id: sub._id,
                     plan: {
+                        processorId: `plan-${sub._id}`,
                         price: 10,
-                        processorId: `p-${sub._id}`,
+                        billingFrequency: 1,
                         level: sub.level,
                     },
                     isTrial: sub.isTrial,
-                    processor: { id: sub._id, state: 'saved' },
                     status: sub.status,
+                    price: 10,
+                    firstBillingDate: sub.firstBillingDate,
                     paidThroughDate: sub.paidThroughDate,
+                    processor: { id: `sub-${sub._id}`, state: sub.processorState },
                     paymentMethodId: 'three',
                 };
             });
 
-            const firstBillingDate = this.customer.newSubscriptionStartDate(test.plan, nowDate);
-            assert.deepEqual(firstBillingDate, test.expected);
+            const newPlan = {
+                processorId: `new-plan-${test.plan.level}`,
+                price: 5,
+                billingFrequency: 1,
+                level: test.plan.level,
+            };
+            const nowDate = new Date('2017-01-10');
+
+            return this.customer.save()
+                .then((customer) => {
+                    const result = customer.addSubscription(newPlan, customer.defaultPaymentMethod(), nowDate);
+                    const resultDiscount = result.discounts[0] ? result.discounts[0].amount : false;
+
+                    assert.deepEqual(result.firstBillingDate, new Date(test.expected.firstBillingDate));
+                    assert.equal(resultDiscount, test.expected.discount);
+                    assert.equal(customer.subscriptions.id(result._id), result);
+                });
         });
-    });
-
-    it('Should subscribe to new plan', function () {
-        const nowDate = new Date('2017-01-10');
-
-        const addressData = {
-            company: 'Example company 2',
-            name: 'Pesho Peshev Stoevski 2',
-            country: 'BG',
-            locality: 'Sofia',
-            streetAddress: 'Tsarigradsko Shose 5',
-            extendedAddress: 'floor 4',
-            postalCode: '1000',
-        };
-
-        const plan = {
-            price: 10,
-            processorId: '2',
-            level: 2,
-        };
-
-        return this.customer.save()
-            .then(customer => {
-                return Customer.findById(customer._id);
-            })
-            .then(customer => {
-                customer.subscribeToPlan(plan, 'nonce-test', addressData, nowDate);
-
-                sinon.assert.match(customer.addresses[1], addressData);
-                sinon.assert.match(customer.subscriptions[1].plan, plan);
-                sinon.assert.match(customer.subscriptions[1].firstBillingDate, new Date('2017-03-03'));
-
-                assert.equal(
-                    customer.subscriptions[1].paymentMethodId,
-                    customer.paymentMethods[1]._id
-                );
-
-                assert.equal(
-                    customer.paymentMethods[1].billingAddressId,
-                    customer.addresses[1]._id
-                );
-            })
     });
 }));
