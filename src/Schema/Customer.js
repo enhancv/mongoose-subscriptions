@@ -90,7 +90,9 @@ function cancelSubscriptions() {
 
     this.subscriptions
         .filter(sub => cancaleableStatuses.includes(sub.status))
-        .forEach(sub => sub.status = SubscriptionStatus.CANCELED);
+        .forEach((sub) => {
+            sub.status = SubscriptionStatus.CANCELED;
+        });
 
     return this;
 }
@@ -138,9 +140,7 @@ function addSubscription(plan, paymentMethod, activeDate) {
             firstBillingDate: waitForSubs.length ? waitForSubs[0].paidThroughDate : date,
             price: plan.price,
         })
-        .addDiscounts(newSub => {
-            return [DiscountPreviousSubscription.build(newSub, refundableSubs[0])];
-        });
+        .addDiscounts(newSub => [DiscountPreviousSubscription.build(newSub, refundableSubs[0])]);
 
     this.subscriptions.push(sub);
 
