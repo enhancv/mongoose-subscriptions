@@ -13,6 +13,7 @@ const Address = new Schema({
         type: ProcessorItem,
         default: ProcessorItem,
     },
+    phone: String,
     company: String,
     name: String,
     country: String,
