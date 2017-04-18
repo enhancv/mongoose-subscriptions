@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const CouponError = require('../CouponError');
 const CouponAmount = require('./Coupon/Amount');
 const CouponPercent = require('./Coupon/Percent');
 
@@ -27,15 +28,44 @@ const Coupon = new Schema({
     },
 });
 
-Coupon.methods.isExpired = function isExpired(currentDate) {
+function isExpired(currentDate) {
     const date = ((currentDate && new Date(currentDate)) || Date.now());
 
     return Boolean(this.expireAt && date > this.expireAt);
-};
+}
 
-Coupon.methods.isUseLimitReached = function isUseLimitReached() {
+function isUseLimitReached() {
     return Boolean(this.usedCountMax && this.usedCount > this.usedCountMax);
-};
+}
+
+Coupon.method('isExpired', isExpired);
+Coupon.method('isUseLimitReached', isUseLimitReached);
+
+function validateState(coupon) {
+    if (coupon === null) {
+        return new CouponError('Invalid promocode');
+    } else if (coupon.isExpired()) {
+        return new CouponError('Promocode expired');
+    } else if (coupon.isUseLimitReached()) {
+        return new CouponError('Promocode limit reached');
+    }
+    return null;
+}
+
+function findOneAndValidate(query) {
+    return this.findOne(query)
+        .then((coupon) => {
+            const error = this.validateState(coupon);
+            if (error) {
+                throw error;
+            }
+
+            return coupon;
+        });
+}
+
+Coupon.static('validateState', validateState);
+Coupon.static('findOneAndValidate', findOneAndValidate);
 
 Coupon.CouponAmount = CouponAmount;
 Coupon.CouponPercent = CouponPercent;

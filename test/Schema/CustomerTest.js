@@ -27,6 +27,7 @@ describe('Customer', database([Customer], function () {
             addresses: [
                 {
                     _id: 'one',
+                    phone: '123123123',
                     company: 'Example company',
                     name: 'Pesho Peshev Stoevski',
                     country: 'BG',
@@ -150,7 +151,7 @@ describe('Customer', database([Customer], function () {
                 assert.equal(customer, this.customer);
                 sinon.assert.calledOnce(spy);
                 sinon.assert.calledWith(spy, this.customer, 'sub-id');
-            })
+            });
     });
 
     it('Should correctly apply refundProcessor', function () {

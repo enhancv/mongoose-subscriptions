@@ -54,4 +54,75 @@ describe('Schema/Coupon', function () {
 
         assert.equal(coupon.isExpired('2017-03-31T16:12:26Z'), false);
     });
+
+    const validateState = [
+        {
+            name: 'missing coupon',
+            coupon: null,
+            expected: 'Invalid promocode'
+        },
+        {
+            name: 'expired coupon',
+            coupon: new Coupon({ expireAt: '2016-04-29T16:12:26Z' }),
+            expected: 'Promocode expired'
+        },
+        {
+            name: 'coupon uses limit reached',
+            coupon: new Coupon({ usedCount: 6, usedCountMax: 5 }),
+            expected: 'Promocode limit reached',
+        },
+    ];
+
+    validateState.forEach(test => {
+        it(`Coupon validateState will error when ${test.name}`, function () {
+            const error = Coupon.validateState(test.coupon);
+            assert.equal(error.message, test.expected);
+        });
+    });
+
+    it('Coupon validateState will not error', function () {
+        const coupon = new Coupon({});
+        const error = Coupon.validateState(coupon);
+        assert.ok(!error);
+    });
+
+    const findOneAndValidate = [
+        {
+            name: 'expired coupon',
+            coupon: new Coupon({ name: 'test', expireAt: '2016-04-29T16:12:26Z' }),
+            expected: 'Promocode expired'
+        },
+        {
+            name: 'coupon uses limit reached',
+            coupon: new Coupon({ name: 'test', usedCount: 6, usedCountMax: 5 }),
+            expected: 'Promocode limit reached',
+        },
+    ];
+
+    findOneAndValidate.forEach(test => {
+        it(`Coupon findOneAndValidate will error when ${test.name}`, function () {
+            return test.coupon.save()
+                .then(coupon => {
+                    return Coupon.findOneAndValidate({ _id: coupon._id });
+                })
+                .then(coupon => {
+                    assert.ok(!true, `Should not find ${test.name}`);
+                })
+                .catch(error => {
+                    assert.equal(error.message, test.expected);
+                });
+        });
+    });
+
+    it('Coupon findOneAndValidate will not error', function () {
+        const coupon = new Coupon({ name: 'test' });
+
+        return coupon.save()
+            .then(coupon => {
+                return Coupon.findOneAndValidate({ _id: coupon._id });
+            })
+            .then(couponFound => {
+                assert.ok(couponFound.equals(coupon));
+            });
+    });
 });
