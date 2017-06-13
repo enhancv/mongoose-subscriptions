@@ -1,21 +1,15 @@
-'use strict';
+"use strict";
 
-const assert = require('assert');
-const main = require('../../src');
+const assert = require("assert");
+const main = require("../../src");
 const NullProcessor = main.NullProcessor;
 const Customer = main.Customer;
 
-describe('NullProcessor', function () {
+describe("NullProcessor", function() {
+    const methods = ["load", "save", "cancelSubscription", "refundTransaction"];
 
-    const methods = [
-        'load',
-        'save',
-        'cancelSubscription',
-        'refundTransaction',
-    ];
-
-    methods.forEach(function (method) {
-        it(`Should have ${method} method`, function () {
+    methods.forEach(function(method) {
+        it(`Should have ${method} method`, function() {
             const processor = new NullProcessor();
             const customer = new Customer();
 

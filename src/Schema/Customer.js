@@ -1,11 +1,11 @@
-const mongoose = require('mongoose');
-const Address = require('./Address');
-const PaymentMethod = require('./PaymentMethod');
-const Subscription = require('./Subscription');
-const Transaction = require('./Transaction');
-const ProcessorItem = require('./ProcessorItem');
-const SubscriptionStatus = require('./Statuses/SubscriptionStatus');
-const DiscountPreviousSubscription = require('./Discount/PreviousSubscription');
+const mongoose = require("mongoose");
+const Address = require("./Address");
+const PaymentMethod = require("./PaymentMethod");
+const Subscription = require("./Subscription");
+const Transaction = require("./Transaction");
+const ProcessorItem = require("./ProcessorItem");
+const SubscriptionStatus = require("./Statuses/SubscriptionStatus");
+const DiscountPreviousSubscription = require("./Discount/PreviousSubscription");
 
 const Schema = mongoose.Schema;
 
@@ -35,27 +35,45 @@ const Customer = new Schema({
     transactions: [Transaction],
 });
 
-const paymentMethods = Customer.path('paymentMethods');
-const transactions = Customer.path('transactions');
+const paymentMethods = Customer.path("paymentMethods");
+const transactions = Customer.path("transactions");
 
-paymentMethods.discriminator('CreditCard', PaymentMethod.CreditCard);
-paymentMethods.discriminator('PayPalAccount', PaymentMethod.PayPalAccount);
-paymentMethods.discriminator('ApplePayCard', PaymentMethod.ApplePayCard);
-paymentMethods.discriminator('AndroidPayCard', PaymentMethod.AndroidPayCard);
+paymentMethods.discriminator("CreditCard", PaymentMethod.CreditCard);
+paymentMethods.discriminator("PayPalAccount", PaymentMethod.PayPalAccount);
+paymentMethods.discriminator("ApplePayCard", PaymentMethod.ApplePayCard);
+paymentMethods.discriminator("AndroidPayCard", PaymentMethod.AndroidPayCard);
 
-transactions.discriminator('TransactionCreditCard', Transaction.TransactionCreditCard);
-transactions.discriminator('TransactionPayPalAccount', Transaction.TransactionPayPalAccount);
-transactions.discriminator('TransactionApplePayCard', Transaction.TransactionApplePayCard);
-transactions.discriminator('TransactionAndroidPayCard', Transaction.TransactionAndroidPayCard);
+transactions.discriminator(
+    "TransactionCreditCard",
+    Transaction.TransactionCreditCard
+);
+transactions.discriminator(
+    "TransactionPayPalAccount",
+    Transaction.TransactionPayPalAccount
+);
+transactions.discriminator(
+    "TransactionApplePayCard",
+    Transaction.TransactionApplePayCard
+);
+transactions.discriminator(
+    "TransactionAndroidPayCard",
+    Transaction.TransactionAndroidPayCard
+);
 
 function markChanged() {
-    if (this.processor.id && this.isModified('name email phone ipAddress defaultPaymentMethodId')) {
+    if (
+        this.processor.id &&
+        this.isModified("name email phone ipAddress defaultPaymentMethodId")
+    ) {
         this.processor.state = ProcessorItem.CHANGED;
     }
 
-    ['addresses', 'subscriptions', 'paymentMethods'].forEach((collectionName) => {
+    ["addresses", "subscriptions", "paymentMethods"].forEach(collectionName => {
         this[collectionName].forEach((item, index) => {
-            if (item.processor.id && this.isModified(`${collectionName}.${index}`)) {
+            if (
+                item.processor.id &&
+                this.isModified(`${collectionName}.${index}`)
+            ) {
                 item.processor.state = ProcessorItem.CHANGED;
             }
         });
@@ -65,11 +83,15 @@ function markChanged() {
 }
 
 function cancelProcessor(processor, id) {
-    return processor.cancelSubscription(this, id).then(customer => customer.save());
+    return processor
+        .cancelSubscription(this, id)
+        .then(customer => customer.save());
 }
 
 function refundProcessor(processor, id, amount) {
-    return processor.refundTransaction(this, id, amount).then(customer => customer.save());
+    return processor
+        .refundTransaction(this, id, amount)
+        .then(customer => customer.save());
 }
 
 function loadProcessor(processor) {
@@ -90,7 +112,7 @@ function cancelSubscriptions() {
 
     this.subscriptions
         .filter(sub => cancaleableStatuses.includes(sub.status))
-        .forEach((sub) => {
+        .forEach(sub => {
             sub.status = SubscriptionStatus.CANCELED;
         });
 
@@ -137,10 +159,14 @@ function addSubscription(plan, paymentMethod, activeDate) {
         .create({
             plan,
             paymentMethodId: paymentMethod._id,
-            firstBillingDate: waitForSubs.length ? waitForSubs[0].paidThroughDate : date,
+            firstBillingDate: waitForSubs.length
+                ? waitForSubs[0].paidThroughDate
+                : date,
             price: plan.price,
         })
-        .addDiscounts(newSub => [DiscountPreviousSubscription.build(newSub, refundableSubs[0])]);
+        .addDiscounts(newSub => [
+            DiscountPreviousSubscription.build(newSub, refundableSubs[0]),
+        ]);
 
     this.subscriptions.push(sub);
 
@@ -148,8 +174,9 @@ function addSubscription(plan, paymentMethod, activeDate) {
 }
 
 function activeSubscriptions(activeDate) {
-    return this.validSubscriptions(activeDate)
-        .filter(item => item.status === SubscriptionStatus.ACTIVE);
+    return this.validSubscriptions(activeDate).filter(
+        item => item.status === SubscriptionStatus.ACTIVE
+    );
 }
 
 function validSubscriptions(activeDate) {
@@ -165,18 +192,18 @@ function subscription(activeDate) {
     return this.validSubscriptions(activeDate)[0];
 }
 
-Customer.method('markChanged', markChanged);
-Customer.method('cancelProcessor', cancelProcessor);
-Customer.method('refundProcessor', refundProcessor);
-Customer.method('loadProcessor', loadProcessor);
-Customer.method('saveProcessor', saveProcessor);
-Customer.method('cancelSubscriptions', cancelSubscriptions);
-Customer.method('addAddress', addAddress);
-Customer.method('defaultPaymentMethod', defaultPaymentMethod);
-Customer.method('addPaymentMethodNonce', addPaymentMethodNonce);
-Customer.method('addSubscription', addSubscription);
-Customer.method('activeSubscriptions', activeSubscriptions);
-Customer.method('validSubscriptions', validSubscriptions);
-Customer.method('subscription', subscription);
+Customer.method("markChanged", markChanged);
+Customer.method("cancelProcessor", cancelProcessor);
+Customer.method("refundProcessor", refundProcessor);
+Customer.method("loadProcessor", loadProcessor);
+Customer.method("saveProcessor", saveProcessor);
+Customer.method("cancelSubscriptions", cancelSubscriptions);
+Customer.method("addAddress", addAddress);
+Customer.method("defaultPaymentMethod", defaultPaymentMethod);
+Customer.method("addPaymentMethodNonce", addPaymentMethodNonce);
+Customer.method("addSubscription", addSubscription);
+Customer.method("activeSubscriptions", activeSubscriptions);
+Customer.method("validSubscriptions", validSubscriptions);
+Customer.method("subscription", subscription);
 
 module.exports = Customer;

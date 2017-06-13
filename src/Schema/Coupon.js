@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
-const CouponError = require('../CouponError');
-const CouponAmount = require('./Coupon/Amount');
-const CouponPercent = require('./Coupon/Percent');
+const mongoose = require("mongoose");
+const CouponError = require("../CouponError");
+const CouponAmount = require("./Coupon/Amount");
+const CouponPercent = require("./Coupon/Percent");
 
 const Schema = mongoose.Schema;
 
@@ -29,7 +29,7 @@ const Coupon = new Schema({
 });
 
 function isExpired(currentDate) {
-    const date = ((currentDate && new Date(currentDate)) || Date.now());
+    const date = (currentDate && new Date(currentDate)) || Date.now();
 
     return Boolean(this.expireAt && date > this.expireAt);
 }
@@ -38,34 +38,33 @@ function isUseLimitReached() {
     return Boolean(this.usedCountMax && this.usedCount > this.usedCountMax);
 }
 
-Coupon.method('isExpired', isExpired);
-Coupon.method('isUseLimitReached', isUseLimitReached);
+Coupon.method("isExpired", isExpired);
+Coupon.method("isUseLimitReached", isUseLimitReached);
 
 function validateState(coupon) {
     if (coupon === null) {
-        return new CouponError('Invalid promocode');
+        return new CouponError("Invalid promocode");
     } else if (coupon.isExpired()) {
-        return new CouponError('Promocode expired');
+        return new CouponError("Promocode expired");
     } else if (coupon.isUseLimitReached()) {
-        return new CouponError('Promocode limit reached');
+        return new CouponError("Promocode limit reached");
     }
     return null;
 }
 
 function findOneAndValidate(query) {
-    return this.findOne(query)
-        .then((coupon) => {
-            const error = this.validateState(coupon);
-            if (error) {
-                throw error;
-            }
+    return this.findOne(query).then(coupon => {
+        const error = this.validateState(coupon);
+        if (error) {
+            throw error;
+        }
 
-            return coupon;
-        });
+        return coupon;
+    });
 }
 
-Coupon.static('validateState', validateState);
-Coupon.static('findOneAndValidate', findOneAndValidate);
+Coupon.static("validateState", validateState);
+Coupon.static("findOneAndValidate", findOneAndValidate);
 
 Coupon.CouponAmount = CouponAmount;
 Coupon.CouponPercent = CouponPercent;

@@ -1,10 +1,9 @@
 /* eslint class-methods-use-this: "off" */
 /* eslint no-unused-vars: "off" */
 
-const AbstractProcessor = require('./AbstractProcessor');
+const AbstractProcessor = require("./AbstractProcessor");
 
 class NullProcessor extends AbstractProcessor {
-
     load(customer) {
         return Promise.resolve(customer);
     }

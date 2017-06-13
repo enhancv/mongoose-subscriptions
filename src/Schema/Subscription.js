@@ -1,11 +1,11 @@
-const mongoose = require('mongoose');
-const shortid = require('shortid');
-const ProcessorItem = require('./ProcessorItem');
-const Descriptor = require('./Descriptor');
-const originals = require('mongoose-originals');
-const Discount = require('./Discount');
-const Plan = require('./Plan');
-const SubscriptionStatus = require('./Statuses/SubscriptionStatus');
+const mongoose = require("mongoose");
+const shortid = require("shortid");
+const ProcessorItem = require("./ProcessorItem");
+const Descriptor = require("./Descriptor");
+const originals = require("mongoose-originals");
+const Discount = require("./Discount");
+const Plan = require("./Plan");
+const SubscriptionStatus = require("./Statuses/SubscriptionStatus");
 
 const Schema = mongoose.Schema;
 
@@ -40,11 +40,11 @@ const Subscription = new Schema({
     trialDuration: Number,
     trialDurationUnit: {
         type: String,
-        enum: ['month', 'day'],
+        enum: ["month", "day"],
     },
 });
 
-Subscription.virtual('nextBillingDate')
+Subscription.virtual("nextBillingDate")
     .get(function getNextBillingDate() {
         return this.paidThroughDate;
     })
@@ -65,10 +65,19 @@ Subscription.methods.addDiscounts = function find(callback) {
     return this;
 };
 
-Subscription.plugin(originals, { fields: ['discounts'] });
+Subscription.plugin(originals, { fields: ["discounts"] });
 
-Subscription.path('discounts').discriminator('DiscountAmount', Discount.DiscountAmount);
-Subscription.path('discounts').discriminator('DiscountPercent', Discount.DiscountPercent);
-Subscription.path('discounts').discriminator('DiscountCoupon', Discount.DiscountCoupon);
+Subscription.path("discounts").discriminator(
+    "DiscountAmount",
+    Discount.DiscountAmount
+);
+Subscription.path("discounts").discriminator(
+    "DiscountPercent",
+    Discount.DiscountPercent
+);
+Subscription.path("discounts").discriminator(
+    "DiscountCoupon",
+    Discount.DiscountCoupon
+);
 
 module.exports = Subscription;

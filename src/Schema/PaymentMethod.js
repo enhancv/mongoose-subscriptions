@@ -1,10 +1,10 @@
-const mongoose = require('mongoose');
-const shortid = require('shortid');
-const ProcessorItem = require('./ProcessorItem');
-const CreditCard = require('./PaymentMethod/CreditCard');
-const PayPalAccount = require('./PaymentMethod/PayPalAccount');
-const ApplePayCard = require('./PaymentMethod/ApplePayCard');
-const AndroidPayCard = require('./PaymentMethod/AndroidPayCard');
+const mongoose = require("mongoose");
+const shortid = require("shortid");
+const ProcessorItem = require("./ProcessorItem");
+const CreditCard = require("./PaymentMethod/CreditCard");
+const PayPalAccount = require("./PaymentMethod/PayPalAccount");
+const ApplePayCard = require("./PaymentMethod/ApplePayCard");
+const AndroidPayCard = require("./PaymentMethod/AndroidPayCard");
 
 const Schema = mongoose.Schema;
 
