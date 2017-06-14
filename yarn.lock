@@ -400,9 +400,9 @@ mongodb@2.2.25:
     mongodb-core "2.1.9"
     readable-stream "2.1.5"
 
-mongoose-originals@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/mongoose-originals/-/mongoose-originals-1.0.1.tgz#bd8c94cd87da474c64b303dee62e56c3f158df38"
+mongoose-originals@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/mongoose-originals/-/mongoose-originals-1.1.0.tgz#f4c57537a3148b64b22e0e6b82129bd51f851fd4"
 
 mongoose@^4.8.4:
   version "4.9.1"

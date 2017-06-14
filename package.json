@@ -1,13 +1,13 @@
 {
     "name": "mongoose-subscriptions",
-    "version": "1.7.2",
+    "version": "1.7.3",
     "description": "Processor agnostic payment subscription backend",
     "main": "src/index.js",
     "repository": "git@github.com:enhancv/mongoose-subscriptions.git",
     "author": "Ivan Kerin <ikerin@gmail.com>",
     "license": "MIT",
     "dependencies": {
-        "mongoose-originals": "^1.0.1",
+        "mongoose-originals": "^1.1.0",
         "shortid": "^2.2.8"
     },
     "scripts": {
