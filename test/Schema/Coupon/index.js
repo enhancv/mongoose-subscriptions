@@ -1,86 +1,85 @@
-'use strict';
+"use strict";
 
-const mongoose = require('mongoose');
-const assert = require('assert');
-const main = require('../../../src');
+const mongoose = require("mongoose");
+const assert = require("assert");
+const main = require("../../../src");
 const Coupon = main.Coupon;
 
-describe('Schema/Coupon', function () {
-    it('Coupon isLimitReached should return true when usedCount is more than the max', function () {
+describe("Schema/Coupon", function() {
+    it("Coupon isLimitReached should return true when usedCount is more than the max", function() {
         const coupon = new Coupon({
             usedCount: 6,
-            usedCountMax: 5
+            usedCountMax: 5,
         });
 
         assert.ok(coupon.isUseLimitReached());
     });
 
-    it('Coupon isLimitReached should return false when usedCount is less than the max', function () {
+    it("Coupon isLimitReached should return false when usedCount is less than the max", function() {
         const coupon = new Coupon({
             usedCount: 2,
-            usedCountMax: 5
+            usedCountMax: 5,
         });
 
         assert.equal(coupon.isUseLimitReached(), false);
     });
 
-    it('Coupon isLimitReached should return false when there is not max used count', function () {
+    it("Coupon isLimitReached should return false when there is not max used count", function() {
         const coupon = new Coupon({
-            usedCount: 2
+            usedCount: 2,
         });
 
         assert.equal(coupon.isUseLimitReached(), false);
     });
 
-    it('Coupon isExpired should return true when expire date is in the past', function () {
+    it("Coupon isExpired should return true when expire date is in the past", function() {
         const coupon = new Coupon({
-            expireAt: '2017-03-29T16:12:26Z'
+            expireAt: "2017-03-29T16:12:26Z",
         });
 
-        assert.ok(coupon.isExpired('2017-03-31T16:12:26Z'));
+        assert.ok(coupon.isExpired("2017-03-31T16:12:26Z"));
     });
 
-    it('Coupon isExpired should return false when expire date is in the future', function () {
+    it("Coupon isExpired should return false when expire date is in the future", function() {
         const coupon = new Coupon({
-            expireAt: '2017-04-29T16:12:26Z'
+            expireAt: "2017-04-29T16:12:26Z",
         });
 
-        assert.equal(coupon.isExpired('2017-03-31T16:12:26Z'), false);
+        assert.equal(coupon.isExpired("2017-03-31T16:12:26Z"), false);
     });
 
-    it('Coupon isExpired should return false when the coupon don\'t expire', function () {
-        const coupon = new Coupon({
-        });
+    it("Coupon isExpired should return false when the coupon don't expire", function() {
+        const coupon = new Coupon({});
 
-        assert.equal(coupon.isExpired('2017-03-31T16:12:26Z'), false);
+        assert.equal(coupon.isExpired("2017-03-31T16:12:26Z"), false);
     });
 
     const validateState = [
         {
-            name: 'missing coupon',
+            name: "missing coupon",
             coupon: null,
-            expected: 'Invalid promocode'
+            expected: "Invalid promocode",
         },
         {
-            name: 'expired coupon',
-            coupon: new Coupon({ expireAt: '2016-04-29T16:12:26Z' }),
-            expected: 'Promocode expired'
+            name: "expired coupon",
+            coupon: new Coupon({ expireAt: "2016-04-29T16:12:26Z" }),
+            expected: "Promocode expired",
         },
         {
-            name: 'coupon uses limit reached',
+            name: "coupon uses limit reached",
             coupon: new Coupon({ usedCount: 6, usedCountMax: 5 }),
-            expected: 'Promocode limit reached',
+            expected: "Promocode limit reached",
         },
     ];
 
     validateState.forEach(test => {
-        it(`Coupon validateState will error when ${test.name}`, function () {
+        it(`Coupon validateState will error when ${test.name}`, function() {
             const error = Coupon.validateState(test.coupon);
             assert.equal(error.message, test.expected);
         });
     });
 
-    it('Coupon validateState will not error', function () {
+    it("Coupon validateState will not error", function() {
         const coupon = new Coupon({});
         const error = Coupon.validateState(coupon);
         assert.ok(!error);
@@ -88,20 +87,21 @@ describe('Schema/Coupon', function () {
 
     const findOneAndValidate = [
         {
-            name: 'expired coupon',
-            coupon: new Coupon({ name: 'test', expireAt: '2016-04-29T16:12:26Z' }),
-            expected: 'Promocode expired'
+            name: "expired coupon",
+            coupon: new Coupon({ name: "test", expireAt: "2016-04-29T16:12:26Z" }),
+            expected: "Promocode expired",
         },
         {
-            name: 'coupon uses limit reached',
-            coupon: new Coupon({ name: 'test', usedCount: 6, usedCountMax: 5 }),
-            expected: 'Promocode limit reached',
+            name: "coupon uses limit reached",
+            coupon: new Coupon({ name: "test", usedCount: 6, usedCountMax: 5 }),
+            expected: "Promocode limit reached",
         },
     ];
 
     findOneAndValidate.forEach(test => {
-        it(`Coupon findOneAndValidate will error when ${test.name}`, function () {
-            return test.coupon.save()
+        it(`Coupon findOneAndValidate will error when ${test.name}`, function() {
+            return test.coupon
+                .save()
                 .then(coupon => {
                     return Coupon.findOneAndValidate({ _id: coupon._id });
                 })
@@ -114,10 +114,11 @@ describe('Schema/Coupon', function () {
         });
     });
 
-    it('Coupon findOneAndValidate will not error', function () {
-        const coupon = new Coupon({ name: 'test' });
+    it("Coupon findOneAndValidate will not error", function() {
+        const coupon = new Coupon({ name: "test" });
 
-        return coupon.save()
+        return coupon
+            .save()
             .then(coupon => {
                 return Coupon.findOneAndValidate({ _id: coupon._id });
             })

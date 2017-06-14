@@ -1,13 +1,16 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
 /**
  * PreviousSubscription Discount
  */
-const DiscountPreviousSubscription = new Schema({
-    subscriptionId: Number,
-}, { _id: false });
+const DiscountPreviousSubscription = new Schema(
+    {
+        subscriptionId: Number,
+    },
+    { _id: false }
+);
 
 DiscountPreviousSubscription.build = function build(subscription, previous) {
     if (!previous || !previous.price) {
@@ -23,13 +26,13 @@ DiscountPreviousSubscription.build = function build(subscription, previous) {
     }
 
     const remaining = (subStart - prevStart) / (prevEnd - prevStart);
-    const amount = previous.price - (previous.price * remaining);
+    const amount = previous.price - previous.price * remaining;
 
     return {
         subscriptionId: previous._id,
         amount: amount.toFixed(2),
-        __t: 'DiscountPreviousSubscription',
-        name: 'Refunded Previous Transaction',
+        __t: "DiscountPreviousSubscription",
+        name: "Refunded Previous Transaction",
     };
 };
 

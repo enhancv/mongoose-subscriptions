@@ -25,12 +25,7 @@ ProcessorItem.SAVED = SAVED;
 ProcessorItem.LOCAL = LOCAL;
 
 ProcessorItem.validateIsSaved = function validateIsSaved(item, name) {
-    if (
-        !item ||
-        !item.processor ||
-        !item.processor.id ||
-        item.processor.state !== SAVED
-    ) {
+    if (!item || !item.processor || !item.processor.id || item.processor.state !== SAVED) {
         throw new Error(`${name || "Mongoose item"} not saved to processor`);
     }
     return item;
@@ -41,9 +36,7 @@ ProcessorItem.getId = function getId(processorId, collection) {
         return null;
     }
 
-    const foundItem = collection.find(
-        item => item.processor.id === processorId
-    );
+    const foundItem = collection.find(item => item.processor.id === processorId);
 
     if (!foundItem) {
         return null;

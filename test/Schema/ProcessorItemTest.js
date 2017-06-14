@@ -8,10 +8,7 @@ const ProcessorItem = main.Schema.ProcessorItem;
 
 describe("ProcessorItem", function() {
     before(function() {
-        this.SubscriptionTest = mongoose.model(
-            "SubscriptionTest",
-            SubscriptionSchema
-        );
+        this.SubscriptionTest = mongoose.model("SubscriptionTest", SubscriptionSchema);
         this.plan = {
             processorId: "test1",
             name: "Test",
@@ -99,10 +96,7 @@ describe("ProcessorItem", function() {
             subscription.plan = this.plan;
 
             assert.throws(function() {
-                ProcessorItem.validateIsSaved(
-                    subscription,
-                    "Subscription Item test"
-                );
+                ProcessorItem.validateIsSaved(subscription, "Subscription Item test");
             }, Error);
         });
     });
@@ -111,10 +105,7 @@ describe("ProcessorItem", function() {
         const subscription = this.subscriptions[0];
 
         assert.deepEqual(
-            ProcessorItem.validateIsSaved(
-                subscription,
-                "Subscription Item test"
-            ),
+            ProcessorItem.validateIsSaved(subscription, "Subscription Item test"),
             subscription
         );
     });
@@ -131,18 +122,12 @@ describe("ProcessorItem", function() {
     it("ProcessorItem getId should return null when there is no processorId provided", function() {
         const searchedProcessorId = "dasdsa";
 
-        assert.deepEqual(
-            ProcessorItem.getId(undefined, this.subscriptions),
-            null
-        );
+        assert.deepEqual(ProcessorItem.getId(undefined, this.subscriptions), null);
     });
 
     it("ProcessorItem getId should return null when there is no item with such processor", function() {
         const searchedProcessorId = "no-such-id";
 
-        assert.deepEqual(
-            ProcessorItem.getId(searchedProcessorId, this.subscriptions),
-            null
-        );
+        assert.deepEqual(ProcessorItem.getId(searchedProcessorId, this.subscriptions), null);
     });
 });

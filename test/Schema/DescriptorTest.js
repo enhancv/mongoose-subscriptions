@@ -7,10 +7,7 @@ const DescriptorSchema = main.Schema.Descriptor;
 
 describe("Descriptor", function() {
     before(function() {
-        this.DescriptorTest = mongoose.model(
-            "DescriptorTest",
-            DescriptorSchema
-        );
+        this.DescriptorTest = mongoose.model("DescriptorTest", DescriptorSchema);
     });
 
     const fields = [

@@ -183,9 +183,7 @@ describe(
 
         it("Should correctly apply saveProcessor", function() {
             const markChangedSpy = sinon.spy(this.customer, "markChanged");
-            const spy = sinon
-                .stub(this.processor, "save")
-                .resolves(this.customer);
+            const spy = sinon.stub(this.processor, "save").resolves(this.customer);
 
             return this.customer
                 .save()
@@ -199,15 +197,11 @@ describe(
         });
 
         it("Should correctly apply cancelProcessor", function() {
-            const spy = sinon
-                .stub(this.processor, "cancelSubscription")
-                .resolves(this.customer);
+            const spy = sinon.stub(this.processor, "cancelSubscription").resolves(this.customer);
 
             return this.customer
                 .save()
-                .then(customer =>
-                    customer.cancelProcessor(this.processor, "sub-id")
-                )
+                .then(customer => customer.cancelProcessor(this.processor, "sub-id"))
                 .then(customer => {
                     assert.equal(customer, this.customer);
                     sinon.assert.calledOnce(spy);
@@ -216,35 +210,20 @@ describe(
         });
 
         it("Should correctly apply refundProcessor", function() {
-            const spy = sinon
-                .stub(this.processor, "refundTransaction")
-                .resolves(this.customer);
+            const spy = sinon.stub(this.processor, "refundTransaction").resolves(this.customer);
 
             return this.customer
                 .save()
-                .then(customer =>
-                    customer.refundProcessor(
-                        this.processor,
-                        "transaction-id",
-                        123
-                    )
-                )
+                .then(customer => customer.refundProcessor(this.processor, "transaction-id", 123))
                 .then(customer => {
                     assert.equal(customer, this.customer);
                     sinon.assert.calledOnce(spy);
-                    sinon.assert.calledWith(
-                        spy,
-                        this.customer,
-                        "transaction-id",
-                        123
-                    );
+                    sinon.assert.calledWith(spy, this.customer, "transaction-id", 123);
                 });
         });
 
         it("Should correctly apply loadProcessor", function() {
-            const spy = sinon
-                .stub(this.processor, "load")
-                .resolves(this.customer);
+            const spy = sinon.stub(this.processor, "load").resolves(this.customer);
 
             return this.customer
                 .save()
@@ -455,18 +434,9 @@ describe(
 
             this.customer.cancelSubscriptions();
 
-            const expected = [
-                "Expired",
-                "Canceled",
-                "Canceled",
-                "Canceled",
-                "Canceled",
-            ];
+            const expected = ["Expired", "Canceled", "Canceled", "Canceled", "Canceled"];
 
-            assert.deepEqual(
-                this.customer.subscriptions.map(item => item.status),
-                expected
-            );
+            assert.deepEqual(this.customer.subscriptions.map(item => item.status), expected);
         });
 
         it("Should correctly add address with data", function() {
@@ -490,10 +460,7 @@ describe(
 
         it("Should correctly add addPaymentMethodNonce", function() {
             const nonce = "test-nonce";
-            const result = this.customer.addPaymentMethodNonce(
-                nonce,
-                this.customer.addresses[0]
-            );
+            const result = this.customer.addPaymentMethodNonce(nonce, this.customer.addresses[0]);
 
             sinon.assert.match(result, {
                 _id: sinon.match.string,
@@ -644,8 +611,7 @@ describe(
                 },
             },
             {
-                name:
-                    "start discount previous canceled subscription of lower level",
+                name: "start discount previous canceled subscription of lower level",
                 subs: [
                     {
                         _id: 1,
@@ -786,9 +752,7 @@ describe(
                         customer.defaultPaymentMethod(),
                         nowDate
                     );
-                    const resultDiscount = result.discounts[0]
-                        ? result.discounts[0].amount
-                        : false;
+                    const resultDiscount = result.discounts[0] ? result.discounts[0].amount : false;
 
                     assert.deepEqual(
                         result.firstBillingDate,

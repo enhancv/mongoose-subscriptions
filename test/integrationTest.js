@@ -23,30 +23,15 @@ describe(
                 .save()
                 .then(user => {
                     assert.ok(user instanceof User, "user should be User");
-                    assert.ok(
-                        user instanceof Visitor,
-                        "user should be Visitor"
-                    );
-                    assert.ok(
-                        !(user instanceof Customer),
-                        "user should not be a Customer"
-                    );
+                    assert.ok(user instanceof Visitor, "user should be Visitor");
+                    assert.ok(!(user instanceof Customer), "user should not be a Customer");
 
                     return Customer.hydrate(user.toObject()).increment().save();
                 })
                 .then(customer => {
-                    assert.ok(
-                        customer instanceof User,
-                        "customer should be User"
-                    );
-                    assert.ok(
-                        !(customer instanceof Visitor),
-                        "customer should not be Visitor"
-                    );
-                    assert.ok(
-                        customer instanceof Customer,
-                        "customer should be Customer"
-                    );
+                    assert.ok(customer instanceof User, "customer should be User");
+                    assert.ok(!(customer instanceof Visitor), "customer should not be Visitor");
+                    assert.ok(customer instanceof Customer, "customer should be Customer");
                 });
         });
     })

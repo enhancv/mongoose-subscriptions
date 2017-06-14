@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
@@ -13,7 +13,7 @@ DiscountAmount.build = function build(subscription, name, amount) {
 
     return {
         amount: cappedAmount.toFixed(2),
-        __t: 'DiscountAmount',
+        __t: "DiscountAmount",
         name,
     };
 };

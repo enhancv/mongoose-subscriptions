@@ -1,20 +1,20 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
-const AUTHORIZATION_EXPIRED = 'authorization_expired';
-const AUTHORIZED = 'authorized';
-const AUTHORIZING = 'authorizing';
-const SETTLEMENT_PENDING = 'settlement_pending';
-const SETTLEMENT_CONFIRMED = 'settlement_confirmed';
-const SETTLEMENT_DECLINED = 'settlement_declined';
-const FAILED = 'failed';
-const GATEWAY_REJECTED = 'gateway_rejected';
-const PROCESSOR_DECLINED = 'processor_declined';
-const SETTLED = 'settled';
-const SETTLING = 'settling';
-const SUBMITTED_FOR_SETTLEMENT = 'submitted_for_settlement';
-const VOIDED = 'voided';
+const AUTHORIZATION_EXPIRED = "authorization_expired";
+const AUTHORIZED = "authorized";
+const AUTHORIZING = "authorizing";
+const SETTLEMENT_PENDING = "settlement_pending";
+const SETTLEMENT_CONFIRMED = "settlement_confirmed";
+const SETTLEMENT_DECLINED = "settlement_declined";
+const FAILED = "failed";
+const GATEWAY_REJECTED = "gateway_rejected";
+const PROCESSOR_DECLINED = "processor_declined";
+const SETTLED = "settled";
+const SETTLING = "settling";
+const SUBMITTED_FOR_SETTLEMENT = "submitted_for_settlement";
+const VOIDED = "voided";
 
 const statuses = [
     AUTHORIZATION_EXPIRED,
@@ -32,13 +32,16 @@ const statuses = [
     VOIDED,
 ];
 
-const TransactionStatus = new Schema({
-    status: {
-        type: String,
-        enum: statuses,
+const TransactionStatus = new Schema(
+    {
+        status: {
+            type: String,
+            enum: statuses,
+        },
+        timestamp: Date,
     },
-    timestamp: Date,
-}, { _id: false });
+    { _id: false }
+);
 
 TransactionStatus.AUTHORIZATION_EXPIRED = AUTHORIZATION_EXPIRED;
 TransactionStatus.AUTHORIZED = AUTHORIZED;

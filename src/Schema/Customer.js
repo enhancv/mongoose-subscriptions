@@ -43,37 +43,19 @@ paymentMethods.discriminator("PayPalAccount", PaymentMethod.PayPalAccount);
 paymentMethods.discriminator("ApplePayCard", PaymentMethod.ApplePayCard);
 paymentMethods.discriminator("AndroidPayCard", PaymentMethod.AndroidPayCard);
 
-transactions.discriminator(
-    "TransactionCreditCard",
-    Transaction.TransactionCreditCard
-);
-transactions.discriminator(
-    "TransactionPayPalAccount",
-    Transaction.TransactionPayPalAccount
-);
-transactions.discriminator(
-    "TransactionApplePayCard",
-    Transaction.TransactionApplePayCard
-);
-transactions.discriminator(
-    "TransactionAndroidPayCard",
-    Transaction.TransactionAndroidPayCard
-);
+transactions.discriminator("TransactionCreditCard", Transaction.TransactionCreditCard);
+transactions.discriminator("TransactionPayPalAccount", Transaction.TransactionPayPalAccount);
+transactions.discriminator("TransactionApplePayCard", Transaction.TransactionApplePayCard);
+transactions.discriminator("TransactionAndroidPayCard", Transaction.TransactionAndroidPayCard);
 
 function markChanged() {
-    if (
-        this.processor.id &&
-        this.isModified("name email phone ipAddress defaultPaymentMethodId")
-    ) {
+    if (this.processor.id && this.isModified("name email phone ipAddress defaultPaymentMethodId")) {
         this.processor.state = ProcessorItem.CHANGED;
     }
 
     ["addresses", "subscriptions", "paymentMethods"].forEach(collectionName => {
         this[collectionName].forEach((item, index) => {
-            if (
-                item.processor.id &&
-                this.isModified(`${collectionName}.${index}`)
-            ) {
+            if (item.processor.id && this.isModified(`${collectionName}.${index}`)) {
                 item.processor.state = ProcessorItem.CHANGED;
             }
         });
@@ -83,15 +65,11 @@ function markChanged() {
 }
 
 function cancelProcessor(processor, id) {
-    return processor
-        .cancelSubscription(this, id)
-        .then(customer => customer.save());
+    return processor.cancelSubscription(this, id).then(customer => customer.save());
 }
 
 function refundProcessor(processor, id, amount) {
-    return processor
-        .refundTransaction(this, id, amount)
-        .then(customer => customer.save());
+    return processor.refundTransaction(this, id, amount).then(customer => customer.save());
 }
 
 function loadProcessor(processor) {
@@ -110,11 +88,9 @@ function cancelSubscriptions() {
         SubscriptionStatus.ACTIVE,
     ];
 
-    this.subscriptions
-        .filter(sub => cancaleableStatuses.includes(sub.status))
-        .forEach(sub => {
-            sub.status = SubscriptionStatus.CANCELED;
-        });
+    this.subscriptions.filter(sub => cancaleableStatuses.includes(sub.status)).forEach(sub => {
+        sub.status = SubscriptionStatus.CANCELED;
+    });
 
     return this;
 }
@@ -159,14 +135,10 @@ function addSubscription(plan, paymentMethod, activeDate) {
         .create({
             plan,
             paymentMethodId: paymentMethod._id,
-            firstBillingDate: waitForSubs.length
-                ? waitForSubs[0].paidThroughDate
-                : date,
+            firstBillingDate: waitForSubs.length ? waitForSubs[0].paidThroughDate : date,
             price: plan.price,
         })
-        .addDiscounts(newSub => [
-            DiscountPreviousSubscription.build(newSub, refundableSubs[0]),
-        ]);
+        .addDiscounts(newSub => [DiscountPreviousSubscription.build(newSub, refundableSubs[0])]);
 
     this.subscriptions.push(sub);
 

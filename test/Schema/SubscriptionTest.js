@@ -7,10 +7,7 @@ const SubscriptionSchema = main.Schema.Subscription;
 
 describe("Subscription", function() {
     before(function() {
-        this.SubscriptionTest = mongoose.model(
-            "SubscriptionTest",
-            SubscriptionSchema
-        );
+        this.SubscriptionTest = mongoose.model("SubscriptionTest", SubscriptionSchema);
     });
 
     it("Should return correct nextBillingDate", function() {

@@ -5,9 +5,7 @@ const EventEmitter = require("events");
 
 class AbstractProcessor extends EventEmitter {
     isNotImplemented(featureName) {
-        throw new Error(
-            `${featureName} is not implemented by ${this.constructor.name}`
-        );
+        throw new Error(`${featureName} is not implemented by ${this.constructor.name}`);
     }
 
     load(customer) {
