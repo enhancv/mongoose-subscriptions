@@ -75,5 +75,9 @@ Subscription.plugin(originals, { fields: ["discounts"] });
 Subscription.path("discounts").discriminator("DiscountAmount", Discount.DiscountAmount);
 Subscription.path("discounts").discriminator("DiscountPercent", Discount.DiscountPercent);
 Subscription.path("discounts").discriminator("DiscountCoupon", Discount.DiscountCoupon);
+Subscription.path("discounts").discriminator(
+    "DiscountPreviousSubscription",
+    Discount.DiscountPreviousSubscription
+);
 
 module.exports = Subscription;
