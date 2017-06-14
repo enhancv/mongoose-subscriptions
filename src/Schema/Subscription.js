@@ -59,6 +59,11 @@ Subscription.methods.addDiscounts = function find(callback) {
     this.discounts = oldDiscounts
         .concat(newDiscounts)
         .filter(item => item)
+        .map(item => {
+            const itemObject = this.discounts.create(item);
+            itemObject.initOriginals();
+            return itemObject;
+        })
         .sort((a, b) => b.amount - a.amount)
         .slice(0, 1);
 
