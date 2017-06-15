@@ -7,7 +7,7 @@ const Schema = mongoose.Schema;
  */
 const DiscountPreviousSubscription = new Schema(
     {
-        subscriptionId: Number,
+        subscriptionId: String,
     },
     { _id: false }
 );

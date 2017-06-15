@@ -240,7 +240,7 @@ describe(
                 name: "Only one sub",
                 subs: [
                     {
-                        _id: 1,
+                        _id: "one",
                         level: 2,
                         status: "Active",
                         isTrial: false,
@@ -248,15 +248,15 @@ describe(
                         paidThroughDate: "2017-02-02",
                     },
                 ],
-                expectedActive: [1],
-                expectedValid: [1],
-                expectedSubscription: 1,
+                expectedActive: ["one"],
+                expectedValid: ["one"],
+                expectedSubscription: "one",
             },
             {
                 name: "With expired sub",
                 subs: [
                     {
-                        _id: 1,
+                        _id: "one",
                         level: 2,
                         status: "Active",
                         isTrial: false,
@@ -272,7 +272,7 @@ describe(
                 name: "With non-active sub",
                 subs: [
                     {
-                        _id: 1,
+                        _id: "one",
                         level: 2,
                         status: "Past Due",
                         isTrial: false,
@@ -281,14 +281,14 @@ describe(
                     },
                 ],
                 expectedActive: [],
-                expectedValid: [1],
-                expectedSubscription: 1,
+                expectedValid: ["one"],
+                expectedSubscription: "one",
             },
             {
                 name: "Valid but not active sub, no expired",
                 subs: [
                     {
-                        _id: 2,
+                        _id: "two",
                         level: 1,
                         status: "Active",
                         isTrial: false,
@@ -296,7 +296,7 @@ describe(
                         paidThroughDate: "2017-01-01",
                     },
                     {
-                        _id: 3,
+                        _id: "three",
                         level: 2,
                         status: "Active",
                         isTrial: true,
@@ -304,7 +304,7 @@ describe(
                         paidThroughDate: "2017-02-02",
                     },
                     {
-                        _id: 1,
+                        _id: "one",
                         level: 3,
                         status: "Past Due",
                         isTrial: false,
@@ -312,15 +312,15 @@ describe(
                         paidThroughDate: "2017-02-02",
                     },
                 ],
-                expectedActive: [3],
-                expectedValid: [1, 3],
-                expectedSubscription: 1,
+                expectedActive: ["three"],
+                expectedValid: ["one", "three"],
+                expectedSubscription: "one",
             },
             {
                 name: "Correct level order",
                 subs: [
                     {
-                        _id: 3,
+                        _id: "three",
                         level: 3,
                         status: "Active",
                         isTrial: true,
@@ -328,7 +328,7 @@ describe(
                         paidThroughDate: "2017-02-02",
                     },
                     {
-                        _id: 1,
+                        _id: "one",
                         level: 1,
                         status: "Active",
                         isTrial: false,
@@ -336,7 +336,7 @@ describe(
                         paidThroughDate: "2017-03-02",
                     },
                     {
-                        _id: 4,
+                        _id: "four",
                         level: 1,
                         status: "Active",
                         isTrial: false,
@@ -344,7 +344,7 @@ describe(
                         paidThroughDate: "2017-03-02",
                     },
                     {
-                        _id: 2,
+                        _id: "two",
                         level: 2,
                         status: "Active",
                         isTrial: false,
@@ -352,9 +352,9 @@ describe(
                         paidThroughDate: "2017-02-02",
                     },
                 ],
-                expectedActive: [3, 2, 1],
-                expectedValid: [3, 2, 1],
-                expectedSubscription: 3,
+                expectedActive: ["three", "two", "one"],
+                expectedValid: ["three", "two", "one"],
+                expectedSubscription: "three",
             },
         ];
 
@@ -488,7 +488,7 @@ describe(
                 name: "do not take lower level trials into account",
                 subs: [
                     {
-                        _id: 1,
+                        _id: "one",
                         level: 2,
                         status: "Active",
                         processorState: "saved",
@@ -509,7 +509,7 @@ describe(
                 name: "do not take higher level trials into account",
                 subs: [
                     {
-                        _id: 1,
+                        _id: "one",
                         level: 4,
                         status: "Active",
                         processorState: "saved",
@@ -530,7 +530,7 @@ describe(
                 name: "start after previous plan of equal level",
                 subs: [
                     {
-                        _id: 1,
+                        _id: "one",
                         level: 2,
                         status: "Active",
                         processorState: "saved",
@@ -551,7 +551,7 @@ describe(
                 name: "start after previous plan of higher level",
                 subs: [
                     {
-                        _id: 1,
+                        _id: "one",
                         level: 4,
                         status: "Active",
                         processorState: "saved",
@@ -572,7 +572,7 @@ describe(
                 name: "discount based on previous plan of lower level",
                 subs: [
                     {
-                        _id: 1,
+                        _id: "one",
                         level: 1,
                         status: "Active",
                         processorState: "saved",
@@ -593,7 +593,7 @@ describe(
                 name: "start after previous canceled subscription",
                 subs: [
                     {
-                        _id: 1,
+                        _id: "one",
                         level: 2,
                         status: "Canceled",
                         processorState: "saved",
@@ -614,7 +614,7 @@ describe(
                 name: "start discount previous canceled subscription of lower level",
                 subs: [
                     {
-                        _id: 1,
+                        _id: "one",
                         level: 1,
                         status: "Canceled",
                         processorState: "saved",
@@ -635,7 +635,7 @@ describe(
                 name: "no discount of local subscriptions",
                 subs: [
                     {
-                        _id: 1,
+                        _id: "one",
                         level: 1,
                         status: "Canceled",
                         processorState: "local",
@@ -656,7 +656,7 @@ describe(
                 name: "start after latest subscription",
                 subs: [
                     {
-                        _id: 1,
+                        _id: "one",
                         level: 2,
                         status: "Canceled",
                         processorState: "saved",
@@ -665,7 +665,7 @@ describe(
                         paidThroughDate: "2017-02-02",
                     },
                     {
-                        _id: 2,
+                        _id: "two",
                         level: 3,
                         status: "Active",
                         processorState: "saved",
@@ -686,7 +686,7 @@ describe(
                 name: "ignore pending subscriptions",
                 subs: [
                     {
-                        _id: 1,
+                        _id: "one",
                         level: 2,
                         status: "Canceled",
                         processorState: "saved",
@@ -695,7 +695,7 @@ describe(
                         paidThroughDate: "2017-02-02",
                     },
                     {
-                        _id: 2,
+                        _id: "two",
                         level: 3,
                         status: "Active",
                         processorState: "saved",
