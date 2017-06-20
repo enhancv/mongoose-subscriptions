@@ -45,6 +45,7 @@ const User = mongoose.model('User', UserSchema);
 
 Structure
 ---------
+```
 ┌──────────────────┐
 │     Customer     │
 └┬┬┬┬┬─────────────┘
@@ -63,6 +64,7 @@ Structure
  │  ┌────────────────────────┐
  └─▶│ defaultPaymentMethodId │
     └────────────────────────┘
+```
 
 All the connections between objects are done with internal local ids, without using the ids from the payment processor. This way you can establish relationships between objects even before they are sent there.
 
@@ -108,7 +110,7 @@ Braintree
 
 To sync with braintree you'll need to use the `mongoose-subscriptions-braintree` package.
 
-```
+```javascript
 const braintree = require("braintree");
 const Processor = require("mongoose-subscriptions-braintree");
 
