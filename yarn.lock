@@ -6,6 +6,10 @@ abbrev@1, abbrev@1.0.x:
   version "1.0.9"
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-1.0.9.tgz#91b4792588a7738c25f35dd6f63752a2f8776135"
 
+addmonths@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/addmonths/-/addmonths-0.2.0.tgz#2d90aeb5fc31600f00b58d32ae2e4e8bcbd9de7d"
+
 align-text@^0.1.1, align-text@^0.1.3:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/align-text/-/align-text-0.1.4.tgz#0cd90a561093f35d0a99256c22b7069433fad117"

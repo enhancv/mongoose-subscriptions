@@ -43,6 +43,103 @@ const UserSchema = ms.Schema.Customer.add({
 const User = mongoose.model('User', UserSchema);
 ```
 
+Structure
+---------
+┌──────────────────┐
+│     Customer     │
+└┬┬┬┬┬─────────────┘
+ │││││     ┌────────────────────────┐
+ ││││└────▶│       [Address]        │
+ ││││      └────────────────────────┘
+ ││││    ┌────────────────────────┐
+ │││└───▶│    [Payment Method]    │
+ │││     └────────────────────────┘
+ │││   ┌────────────────────────┐
+ ││└──▶│     [Subscription]     │
+ ││    └────────────────────────┘
+ ││  ┌────────────────────────┐
+ │└─▶│     [Transaction]      │
+ │   └────────────────────────┘
+ │  ┌────────────────────────┐
+ └─▶│ defaultPaymentMethodId │
+    └────────────────────────┘
+
+All the connections between objects are done with internal local ids, without using the ids from the payment processor. This way you can establish relationships between objects even before they are sent there.
+
+```javascript
+const customer = new Customer({
+    name: "John DOe",
+    email: "john@example.com",
+    subscriptions: [
+        {
+            paymentMethodId: "test-pay",
+            plan: {
+                price: 4.99,
+                processorId: "basic",
+                level: 1,
+                billingFrequency: 1,
+            },
+        },
+    ],
+    paymentMethods: [
+        {
+            _id: "test-pay",
+            billingAddressId: 'addr-1',
+            nonce: "some-nonce",
+        },
+    ],
+    defaultPaymentMethodId: "test-pay",
+    addresses: [
+        {
+            _id: 'addr-1',
+            phone: '1-3232-123-323',
+            name: 'John Doe',
+            country: 'United States',
+            locality: 'Florida',
+            streetAddress: 'Monti 1',
+            postalCode: 'NX032',
+        }
+    ].
+});
+```
+
+Braintree
+---------
+
+To sync with braintree you'll need to use the `mongoose-subscriptions-braintree` package.
+
+```
+const braintree = require("braintree");
+const Processor = require("mongoose-subscriptions-braintree");
+
+// Provide an array of plan objects to be used by the processor
+// processorId is the id of the plan in braintree,
+// and level is the precedence of the plan, this goes in effect,
+// whenever someone has more than one subscription active.
+const plans = [{
+    processorId: 'plan1',
+    price: 9.35,
+    billingFrequency: 1,
+    level: 1,
+}];
+
+const gateway = braintree.connect({
+    environment: braintree.Environment.Sandbox,
+    merchantId: ...,
+    publicKey: ...,
+    privateKey: ...,
+});
+
+const processor new Processor(gateway, plans);
+
+const address = customer.addAddress({ ... });
+const paymentMethod = customer.addPaymentMethodNonce(nonce, address);
+
+customer.saveProcessor(processor).then(() => {
+    console.log('Saved in braintree');
+});
+```
+
 License
 -------
 

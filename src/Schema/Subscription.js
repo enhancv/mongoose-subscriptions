@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const shortid = require("shortid");
+const addmonths = require("addmonths");
 const ProcessorItem = require("./ProcessorItem");
 const Descriptor = require("./Descriptor");
 const originals = require("mongoose-originals");
@@ -66,6 +67,15 @@ Subscription.methods.addDiscounts = function find(callback) {
         })
         .sort((a, b) => b.amount - a.amount)
         .slice(0, 1);
+
+    const discount = this.discounts[0];
+
+    if (discount && this.firstBillingDate && discount.amount === this.price) {
+        this.paidThroughDate = addmonths(
+            this.firstBillingDate,
+            this.plan.billingFrequency * discount.numberOfBillingCycles
+        );
+    }
 
     return this;
 };
