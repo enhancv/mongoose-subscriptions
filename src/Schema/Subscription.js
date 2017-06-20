@@ -80,7 +80,7 @@ Subscription.methods.addDiscounts = function find(callback) {
     return this;
 };
 
-Subscription.plugin(originals, { fields: ["discounts"] });
+Subscription.plugin(originals, { fields: ["discounts", "status"] });
 
 Subscription.path("discounts").discriminator("DiscountAmount", Discount.DiscountAmount);
 Subscription.path("discounts").discriminator("DiscountPercent", Discount.DiscountPercent);
