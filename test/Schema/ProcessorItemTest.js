@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const assert = require("assert");
 const main = require("../../src");
 const SubscriptionSchema = main.Schema.Subscription;
+const Customer = main.Customer;
 const ProcessorItem = main.Schema.ProcessorItem;
 
 describe("ProcessorItem", function() {
@@ -38,6 +39,7 @@ describe("ProcessorItem", function() {
         });
 
         this.subscriptions = subscriptions;
+        this.customer = new Customer({ subscriptions: subscriptions });
     });
 
     const errorTests = [
@@ -120,8 +122,6 @@ describe("ProcessorItem", function() {
     });
 
     it("ProcessorItem getId should return null when there is no processorId provided", function() {
-        const searchedProcessorId = "dasdsa";
-
         assert.deepEqual(ProcessorItem.getId(undefined, this.subscriptions), null);
     });
 
@@ -129,5 +129,30 @@ describe("ProcessorItem", function() {
         const searchedProcessorId = "no-such-id";
 
         assert.deepEqual(ProcessorItem.getId(searchedProcessorId, this.subscriptions), null);
+    });
+
+    it("ProcessorItem getProcessorId should return item processor id when there is such item", function() {
+        const searchedProcessorId = "four0";
+
+        assert.deepEqual(
+            ProcessorItem.getProcessorId(searchedProcessorId, this.customer.subscriptions),
+            this.customer.subscriptions[0].processor.id
+        );
+    });
+
+    it("ProcessorItem getProcessorId should return null when there is no processorId provided", function() {
+        assert.deepEqual(
+            ProcessorItem.getProcessorId(undefined, this.customer.subscriptions),
+            null
+        );
+    });
+
+    it("ProcessorItem getProcessorId should return null when there is no item with such processor", function() {
+        const searchedProcessorId = "no-such-id";
+
+        assert.deepEqual(
+            ProcessorItem.getProcessorId(searchedProcessorId, this.customer.subscriptions),
+            null
+        );
     });
 });

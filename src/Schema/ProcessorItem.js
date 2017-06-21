@@ -45,4 +45,18 @@ ProcessorItem.getId = function getId(processorId, collection) {
     return foundItem._id;
 };
 
+ProcessorItem.getProcessorId = function getId(id, collection) {
+    if (!id) {
+        return null;
+    }
+
+    const foundItem = collection.id(id);
+
+    if (!foundItem) {
+        return null;
+    }
+
+    return foundItem.processor.id;
+};
+
 module.exports = ProcessorItem;
