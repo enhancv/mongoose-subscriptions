@@ -6,9 +6,7 @@ const PayPalAccount = require("./PaymentMethod/PayPalAccount");
 const ApplePayCard = require("./PaymentMethod/ApplePayCard");
 const AndroidPayCard = require("./PaymentMethod/AndroidPayCard");
 
-const Schema = mongoose.Schema;
-
-const PaymentMethod = new Schema({
+const PaymentMethod = new mongoose.Schema({
     _id: {
         type: String,
         default: shortid.generate,

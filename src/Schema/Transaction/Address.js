@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
 
-const Schema = mongoose.Schema;
-
-const TransactionAddress = new Schema(
+const TransactionAddress = new mongoose.Schema(
     {
         company: String,
         name: String,

@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
 
-const Schema = mongoose.Schema;
-
-const Plan = new Schema(
+const Plan = new mongoose.Schema(
     {
         processorId: {
             type: String,

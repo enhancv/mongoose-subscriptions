@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
 
-const Schema = mongoose.Schema;
-
-const TransactionCustomer = new Schema(
+const TransactionCustomer = new mongoose.Schema(
     {
         company: String,
         email: String,

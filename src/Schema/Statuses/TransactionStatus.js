@@ -1,7 +1,5 @@
 const mongoose = require("mongoose");
 
-const Schema = mongoose.Schema;
-
 const AUTHORIZATION_EXPIRED = "authorization_expired";
 const AUTHORIZED = "authorized";
 const AUTHORIZING = "authorizing";
@@ -32,7 +30,7 @@ const statuses = [
     VOIDED,
 ];
 
-const TransactionStatus = new Schema(
+const TransactionStatus = new mongoose.Schema(
     {
         status: {
             type: String,

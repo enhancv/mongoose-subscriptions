@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
 
-const Schema = mongoose.Schema;
-
-const AndroidPayCard = new Schema(
+const AndroidPayCard = new mongoose.Schema(
     {
         sourceCardLast4: String,
         virtualCardLast4: String,

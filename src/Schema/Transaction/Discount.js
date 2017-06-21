@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
 
-const Schema = mongoose.Schema;
-
-const TransactionDiscount = new Schema(
+const TransactionDiscount = new mongoose.Schema(
     {
         amount: Number,
         name: String,

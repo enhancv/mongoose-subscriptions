@@ -6,9 +6,7 @@ const DiscountCoupon = require("./Discount/Coupon");
 const DiscountPreviousSubscription = require("./Discount/PreviousSubscription");
 const originals = require("mongoose-originals");
 
-const Schema = mongoose.Schema;
-
-const Discount = new Schema(
+const Discount = new mongoose.Schema(
     {
         amount: Number,
         processor: {

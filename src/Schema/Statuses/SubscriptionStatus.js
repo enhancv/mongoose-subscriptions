@@ -1,7 +1,5 @@
 const mongoose = require("mongoose");
 
-const Schema = mongoose.Schema;
-
 const ACTIVE = "Active";
 const CANCELED = "Canceled";
 const EXPIRED = "Expired";
@@ -10,7 +8,7 @@ const PENDING = "Pending";
 
 const statuses = [ACTIVE, CANCELED, EXPIRED, PAST_DUE, PENDING];
 
-const SubscriptionStatus = new Schema(
+const SubscriptionStatus = new mongoose.Schema(
     {
         status: {
             type: String,

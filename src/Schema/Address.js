@@ -2,9 +2,7 @@ const mongoose = require("mongoose");
 const shortid = require("shortid");
 const ProcessorItem = require("./ProcessorItem");
 
-const Schema = mongoose.Schema;
-
-const Address = new Schema({
+const Address = new mongoose.Schema({
     _id: {
         type: String,
         default: shortid.generate,

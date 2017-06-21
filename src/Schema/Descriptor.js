@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
 
-const Schema = mongoose.Schema;
-
-const Descriptor = new Schema(
+const Descriptor = new mongoose.Schema(
     {
         name: {
             type: String,

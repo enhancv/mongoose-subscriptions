@@ -3,9 +3,7 @@ const CouponError = require("../CouponError");
 const CouponAmount = require("./Coupon/Amount");
 const CouponPercent = require("./Coupon/Percent");
 
-const Schema = mongoose.Schema;
-
-const Coupon = new Schema({
+const Coupon = new mongoose.Schema({
     name: String,
     description: String,
     numberOfBillingCycles: {

@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
 
-const Schema = mongoose.Schema;
-
-const PayPalAccount = new Schema(
+const PayPalAccount = new mongoose.Schema(
     {
         email: String,
         name: String,

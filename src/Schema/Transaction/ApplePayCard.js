@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
 
-const Schema = mongoose.Schema;
-
-const ApplePayCard = new Schema(
+const ApplePayCard = new mongoose.Schema(
     {
         paymentInstrumentName: String,
         cardType: String,

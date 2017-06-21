@@ -10,9 +10,7 @@ const PayPalAccount = require("./Transaction/PayPalAccount");
 const ApplePayCard = require("./Transaction/ApplePayCard");
 const AndroidPayCard = require("./Transaction/AndroidPayCard");
 
-const Schema = mongoose.Schema;
-
-const Transaction = new Schema({
+const Transaction = new mongoose.Schema({
     _id: String,
     processor: {
         type: ProcessorItem,

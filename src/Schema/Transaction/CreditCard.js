@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
 
-const Schema = mongoose.Schema;
-
-const CreditCard = new Schema(
+const CreditCard = new mongoose.Schema(
     {
         maskedNumber: String,
         cardType: String,

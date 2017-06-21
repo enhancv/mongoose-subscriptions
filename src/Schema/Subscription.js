@@ -8,9 +8,7 @@ const Discount = require("./Discount");
 const Plan = require("./Plan");
 const SubscriptionStatus = require("./Statuses/SubscriptionStatus");
 
-const Schema = mongoose.Schema;
-
-const Subscription = new Schema({
+const Subscription = new mongoose.Schema({
     _id: {
         type: String,
         default: shortid.generate,

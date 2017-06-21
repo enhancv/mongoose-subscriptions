@@ -1,13 +1,11 @@
 const mongoose = require("mongoose");
 
-const Schema = mongoose.Schema;
-
 const INITIAL = "inital";
 const CHANGED = "changed";
 const LOCAL = "local";
 const SAVED = "saved";
 
-const ProcessorItem = new Schema(
+const ProcessorItem = new mongoose.Schema(
     {
         id: String,
         state: {

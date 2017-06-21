@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
 
-const Schema = mongoose.Schema;
-
-const Status = new Schema(
+const Status = new mongoose.Schema(
     {
         status: String,
         timestamp: Date,

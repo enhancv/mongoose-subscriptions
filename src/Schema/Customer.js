@@ -7,9 +7,7 @@ const ProcessorItem = require("./ProcessorItem");
 const SubscriptionStatus = require("./Statuses/SubscriptionStatus");
 const DiscountPreviousSubscription = require("./Discount/PreviousSubscription");
 
-const Schema = mongoose.Schema;
-
-const Customer = new Schema({
+const Customer = new mongoose.Schema({
     processor: {
         type: ProcessorItem,
         default: ProcessorItem,
