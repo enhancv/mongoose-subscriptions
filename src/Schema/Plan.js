@@ -20,6 +20,7 @@ const Plan = new Schema(
             type: Number,
             default: 1,
         },
+        name: String,
     },
     { _id: false }
 );

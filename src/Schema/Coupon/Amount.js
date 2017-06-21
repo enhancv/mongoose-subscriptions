@@ -10,7 +10,7 @@ const CouponAmount = new Schema({
 });
 
 CouponAmount.methods.currentAmount = function currentAmount(subscription) {
-    return Math.min(subscription.price, this.amount);
+    return Math.min(subscription.plan.price, this.amount);
 };
 
 module.exports = CouponAmount;
