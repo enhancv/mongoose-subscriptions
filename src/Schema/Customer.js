@@ -157,7 +157,12 @@ function validSubscriptions(activeDate) {
     return this.subscriptions
         .filter(item => item.firstBillingDate < date)
         .filter(item => item.paidThroughDate >= date)
-        .sort((a, b) => b.plan.level - a.plan.level);
+        .filter(item => item.hasActiveStatus)
+        .sort((a, b) => {
+            return b.plan.level === a.plan.level
+                ? b.paidThroughDate.getTime() - a.paidThroughDate.getTime()
+                : b.plan.level - a.plan.level;
+        });
 }
 
 function subscription(activeDate) {

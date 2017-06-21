@@ -45,6 +45,10 @@ const Subscription = new Schema({
     },
 });
 
+Subscription.virtual("hasActiveStatus").get(function hasActiveStatus() {
+    return Boolean(this.statusHistory.find(event => event.status === SubscriptionStatus.ACTIVE));
+});
+
 Subscription.virtual("nextBillingDate")
     .get(function getNextBillingDate() {
         return this.paidThroughDate;
