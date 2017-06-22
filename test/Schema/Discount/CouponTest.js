@@ -54,6 +54,18 @@ describe(
             assert.equal(result, null);
         });
 
+        it("DiscountCoupon should apply coupon numberOfBillingCycles", function() {
+            const result = new this.SubscriptionTest(this.subscription).discounts.create(
+                DiscountCoupon.build(
+                    this.subscription,
+                    new Coupon.CouponAmount({ amount: 10, numberOfBillingCycles: 4 })
+                )
+            );
+
+            assert.equal(4, result.coupon.numberOfBillingCycles);
+            assert.equal(4, result.numberOfBillingCycles);
+        });
+
         const fields = [
             {
                 name: "is used more than the max",

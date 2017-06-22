@@ -43,6 +43,7 @@ DiscountCoupon.build = function build(subscription, coupon, currentDate) {
     return {
         coupon,
         amount: amount.toFixed(2),
+        numberOfBillingCycles: coupon.numberOfBillingCycles,
         __t: "DiscountCoupon",
         name: coupon.name,
     };
