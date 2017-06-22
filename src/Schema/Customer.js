@@ -62,12 +62,14 @@ function markChanged() {
     return this;
 }
 
-function cancelProcessor(processor, id) {
-    return processor.cancelSubscription(this, id).then(customer => customer.save());
+function cancelProcessor(processor, subscriptionId) {
+    return processor.cancelSubscription(this, subscriptionId).then(customer => customer.save());
 }
 
-function refundProcessor(processor, id, amount) {
-    return processor.refundTransaction(this, id, amount).then(customer => customer.save());
+function refundProcessor(processor, transactionId, amount) {
+    return processor
+        .refundTransaction(this, transactionId, amount)
+        .then(customer => customer.save());
 }
 
 function loadProcessor(processor) {
@@ -106,9 +108,12 @@ function defaultPaymentMethod() {
 
 function addPaymentMethodNonce(nonce, address) {
     const paymentMethod = this.paymentMethods.create({
-        billingAddressId: address._id,
-        nonce,
+        nonce: nonce,
     });
+
+    if (address) {
+        paymentMethod.billingAddressId = address._id;
+    }
 
     this.paymentMethods.push(paymentMethod);
     this.defaultPaymentMethodId = paymentMethod._id;
@@ -129,18 +134,21 @@ function addSubscription(plan, paymentMethod, activeDate) {
         .filter(item => item.plan.level < plan.level)
         .filter(item => item.processor.state !== ProcessorItem.LOCAL);
 
-    const sub = this.subscriptions
+    const subscription = this.subscriptions
         .create({
             plan,
-            paymentMethodId: paymentMethod._id,
             firstBillingDate: waitForSubs.length ? waitForSubs[0].paidThroughDate : date,
             price: plan.price,
         })
         .addDiscounts(newSub => [DiscountPreviousSubscription.build(newSub, refundableSubs[0])]);
 
-    this.subscriptions.push(sub);
+    if (paymentMethod) {
+        paymentMethod.paymentMethodId = paymentMethod._id;
+    }
 
-    return sub;
+    this.subscriptions.push(subscription);
+
+    return subscription;
 }
 
 function activeSubscriptions(activeDate) {

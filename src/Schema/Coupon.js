@@ -27,23 +27,32 @@ const Coupon = new mongoose.Schema({
 });
 
 function isExpired(currentDate) {
-    const date = (currentDate && new Date(currentDate)) || Date.now();
+    const date = currentDate ? new Date(currentDate) : Date.now();
 
     return Boolean(this.expireAt && date > this.expireAt);
+}
+
+function isPending(currentDate) {
+    const date = currentDate ? new Date(currentDate) : Date.now();
+
+    return Boolean(this.startAt && date < this.startAt);
 }
 
 function isUseLimitReached() {
     return Boolean(this.usedCountMax && this.usedCount > this.usedCountMax);
 }
 
+Coupon.method("isPending", isPending);
 Coupon.method("isExpired", isExpired);
 Coupon.method("isUseLimitReached", isUseLimitReached);
 
-function validateState(coupon) {
+function validateState(coupon, currentDate) {
     if (coupon === null) {
         return new CouponError("Invalid promocode");
-    } else if (coupon.isExpired()) {
+    } else if (coupon.isExpired(currentDate)) {
         return new CouponError("Promocode expired");
+    } else if (coupon.isPending(currentDate)) {
+        return new CouponError("Promocode not yet active");
     } else if (coupon.isUseLimitReached()) {
         return new CouponError("Promocode limit reached");
     }

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Coupon = require("../../Coupon");
 
 const Schema = mongoose.Schema;
 
@@ -17,24 +18,11 @@ const DiscountCoupon = new Schema(
 );
 
 DiscountCoupon.build = function build(subscription, coupon, currentDate) {
-    if (!coupon) {
+    if (Coupon.validateState(coupon, currentDate)) {
         return null;
     }
 
     const amount = coupon.currentAmount(subscription);
-    const today = currentDate || new Date();
-
-    if (coupon.usedCount >= coupon.usedCountMax) {
-        return null;
-    }
-
-    if (coupon.startAt && coupon.startAt > today) {
-        return null;
-    }
-
-    if (coupon.expireAt && coupon.expireAt < today) {
-        return null;
-    }
 
     if (!amount) {
         return null;
