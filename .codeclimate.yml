@@ -1,0 +1,4 @@
+engines:
+  # We're using prettier
+  eslint:
+    enabled: false

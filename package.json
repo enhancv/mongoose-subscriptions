@@ -1,6 +1,6 @@
 {
     "name": "mongoose-subscriptions",
-    "version": "1.7.13",
+    "version": "1.7.14",
     "description": "Processor agnostic payment subscription backend",
     "main": "src/index.js",
     "repository": "git@github.com:enhancv/mongoose-subscriptions.git",
@@ -12,7 +12,7 @@
         "shortid": "^2.2.8"
     },
     "scripts": {
-        "lint": "node node_modules/.bin/prettier --write --print-width=80 --trailing-comma=es5 --tab-width=4 {src,test}/**/*.js",
+        "lint": "node node_modules/.bin/prettier --list-different --print-width=100 --trailing-comma=es5 --tab-width=4 {src/*.js,src/**/*.js,test/*.js,test/**/*.js}",
         "coverage": "node node_modules/.bin/istanbul cover node_modules/mocha/bin/_mocha -- --recursive",
         "test": "node node_modules/.bin/mocha --recursive"
     },

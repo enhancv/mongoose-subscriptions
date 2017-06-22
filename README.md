@@ -4,6 +4,7 @@ Mongoose Subscriptions
 [![Build Status](https://travis-ci.org/enhancv/mongoose-subscriptions.svg?branch=master)](https://travis-ci.org/enhancv/mongoose-subscriptions)
 [![Code Climate](https://codeclimate.com/github/enhancv/mongoose-subscriptions/badges/gpa.svg)](https://codeclimate.com/github/enhancv/mongoose-subscriptions)
 [![Test Coverage](https://codeclimate.com/github/enhancv/mongoose-subscriptions/badges/coverage.svg)](https://codeclimate.com/github/enhancv/mongoose-subscriptions/coverage)
+[![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 
 Processor agnostic payment subscription backend. It provides some premitive mongoose models to model subscriptions, namely **Customer** and **Coupon** and, by using an adapter syncs the state in the database to the state in the payment subscription, transparently updating payment methods, subscriptions, trials and promotions.
 

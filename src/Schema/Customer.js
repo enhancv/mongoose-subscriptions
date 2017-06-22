@@ -123,14 +123,13 @@ function addPaymentMethodNonce(nonce, address) {
 
 function addSubscription(plan, paymentMethod, activeDate) {
     const date = activeDate || new Date();
+    const nonTrialSubs = this.validSubscriptions(date).filter(item => !item.isTrial);
 
-    const waitForSubs = this.validSubscriptions(date)
-        .filter(item => !item.isTrial)
+    const waitForSubs = nonTrialSubs
         .filter(item => item.plan.level >= plan.level)
         .sort((a, b) => a.paidThroughDate < b.paidThroughDate);
 
-    const refundableSubs = this.validSubscriptions(date)
-        .filter(item => !item.isTrial)
+    const refundableSubs = nonTrialSubs
         .filter(item => item.plan.level < plan.level)
         .filter(item => item.processor.state !== ProcessorItem.LOCAL);
 
