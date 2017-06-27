@@ -136,10 +136,12 @@ function addSubscription(plan, paymentMethod, activeDate) {
     const subscription = this.subscriptions
         .create({
             plan,
-            firstBillingDate: waitForSubs.length ? waitForSubs[0].paidThroughDate : date,
+            firstBillingDate: waitForSubs.length ? waitForSubs[0].paidThroughDate : null,
             price: plan.price,
         })
-        .addDiscounts(newSub => [DiscountPreviousSubscription.build(newSub, refundableSubs[0])]);
+        .addDiscounts(newSub => [
+            DiscountPreviousSubscription.build(newSub, refundableSubs[0], activeDate),
+        ]);
 
     if (paymentMethod) {
         paymentMethod.paymentMethodId = paymentMethod._id;

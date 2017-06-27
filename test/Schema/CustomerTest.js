@@ -501,7 +501,7 @@ describe(
                     level: 1,
                 },
                 expected: {
-                    firstBillingDate: "2017-01-10",
+                    firstBillingDate: null,
                     discount: false,
                 },
             },
@@ -522,7 +522,7 @@ describe(
                     level: 2,
                 },
                 expected: {
-                    firstBillingDate: "2017-01-10",
+                    firstBillingDate: null,
                     discount: false,
                 },
             },
@@ -544,7 +544,7 @@ describe(
                     level: 2,
                 },
                 expected: {
-                    firstBillingDate: "2017-01-10",
+                    firstBillingDate: null,
                     discount: false,
                 },
             },
@@ -566,7 +566,7 @@ describe(
                     level: 2,
                 },
                 expected: {
-                    firstBillingDate: "2017-02-02",
+                    firstBillingDate: new Date("2017-02-02"),
                     discount: false,
                 },
             },
@@ -588,7 +588,7 @@ describe(
                     level: 2,
                 },
                 expected: {
-                    firstBillingDate: "2017-02-02",
+                    firstBillingDate: new Date("2017-02-02"),
                     discount: false,
                 },
             },
@@ -610,7 +610,7 @@ describe(
                     level: 2,
                 },
                 expected: {
-                    firstBillingDate: "2017-01-10",
+                    firstBillingDate: null,
                     discount: 7.42,
                 },
             },
@@ -632,7 +632,7 @@ describe(
                     level: 2,
                 },
                 expected: {
-                    firstBillingDate: "2017-02-02",
+                    firstBillingDate: new Date("2017-02-02"),
                     discount: false,
                 },
             },
@@ -654,7 +654,7 @@ describe(
                     level: 2,
                 },
                 expected: {
-                    firstBillingDate: "2017-01-10",
+                    firstBillingDate: null,
                     discount: 7.42,
                 },
             },
@@ -676,7 +676,7 @@ describe(
                     level: 2,
                 },
                 expected: {
-                    firstBillingDate: "2017-01-10",
+                    firstBillingDate: null,
                     discount: false,
                 },
             },
@@ -708,7 +708,7 @@ describe(
                     level: 2,
                 },
                 expected: {
-                    firstBillingDate: "2017-02-10",
+                    firstBillingDate: new Date("2017-02-10"),
                     discount: false,
                 },
             },
@@ -740,7 +740,7 @@ describe(
                     level: 2,
                 },
                 expected: {
-                    firstBillingDate: "2017-02-02",
+                    firstBillingDate: new Date("2017-02-02"),
                     discount: false,
                 },
             },
@@ -787,10 +787,7 @@ describe(
                     );
                     const resultDiscount = result.discounts[0] ? result.discounts[0].amount : false;
 
-                    assert.deepEqual(
-                        result.firstBillingDate,
-                        new Date(test.expected.firstBillingDate)
-                    );
+                    assert.deepEqual(result.firstBillingDate, test.expected.firstBillingDate);
                     assert.equal(resultDiscount, test.expected.discount);
                     assert.equal(customer.subscriptions.id(result._id), result);
                 });

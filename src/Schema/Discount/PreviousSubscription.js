@@ -12,14 +12,16 @@ const DiscountPreviousSubscription = new Schema(
     { _id: false }
 );
 
-DiscountPreviousSubscription.build = function build(subscription, previous) {
+DiscountPreviousSubscription.build = function build(subscription, previous, currentDate) {
     if (!previous || !previous.price) {
         return null;
     }
 
-    const prevEnd = previous.paidThroughDate.getTime();
-    const prevStart = previous.firstBillingDate.getTime();
-    const subStart = subscription.firstBillingDate.getTime();
+    const date = currentDate || new Date();
+
+    const prevEnd = (previous.paidThroughDate || date).getTime();
+    const prevStart = (previous.firstBillingDate || date).getTime();
+    const subStart = (subscription.firstBillingDate || date).getTime();
 
     if (prevStart > subStart || prevEnd < subStart) {
         return null;
