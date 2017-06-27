@@ -789,6 +789,7 @@ describe(
 
                     assert.deepEqual(result.firstBillingDate, test.expected.firstBillingDate);
                     assert.equal(resultDiscount, test.expected.discount);
+                    assert.equal(customer.subscriptions.id(result._id).paymentMethodId, "three");
                     assert.equal(customer.subscriptions.id(result._id), result);
                 });
             });

@@ -144,7 +144,7 @@ function addSubscription(plan, paymentMethod, activeDate) {
         ]);
 
     if (paymentMethod) {
-        paymentMethod.paymentMethodId = paymentMethod._id;
+        subscription.paymentMethodId = paymentMethod._id;
     }
 
     this.subscriptions.push(subscription);
