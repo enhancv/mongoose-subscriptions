@@ -74,7 +74,7 @@ function refundProcessor(processor, transactionId, amount) {
 
 function loadProcessor(processor) {
     if (!this.processor.id) {
-        return Promise.resolve(this);
+        return this.save();
     }
     return processor.load(this).then(customer => customer.save());
 }

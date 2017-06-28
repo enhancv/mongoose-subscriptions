@@ -228,7 +228,11 @@ describe(
 
         it("Should not call loadProcessor for non-saved customers", function() {
             const spy = sinon.stub(this.processor, "load");
-            const customer = new Customer();
+            const customer = new Customer({
+                name: "Pesho Peshev",
+                phone: "+35988911111",
+                email: "seer@example.com",
+            });
 
             return customer.loadProcessor(this.processor).then(result => {
                 assert.equal(result, customer);
