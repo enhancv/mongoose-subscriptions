@@ -186,36 +186,29 @@ describe(
             const markChangedSpy = sinon.spy(this.customer, "markChanged");
             const spy = sinon.stub(this.processor, "save").resolves(this.customer);
 
-            return this.customer
-                .save()
-                .then(customer => customer.saveProcessor(this.processor))
-                .then(customer => {
-                    assert.equal(customer, this.customer);
-                    sinon.assert.calledOnce(markChangedSpy);
-                    sinon.assert.calledOnce(spy);
-                    sinon.assert.calledWith(spy, this.customer);
-                });
+            return this.customer.saveProcessor(this.processor).then(customer => {
+                assert.equal(customer, this.customer);
+                sinon.assert.calledOnce(markChangedSpy);
+                sinon.assert.calledOnce(spy);
+                sinon.assert.calledWith(spy, this.customer);
+            });
         });
 
         it("Should correctly apply cancelProcessor", function() {
             const spy = sinon.stub(this.processor, "cancelSubscription").resolves(this.customer);
 
-            return this.customer
-                .save()
-                .then(customer => customer.cancelProcessor(this.processor, "sub-id"))
-                .then(customer => {
-                    assert.equal(customer, this.customer);
-                    sinon.assert.calledOnce(spy);
-                    sinon.assert.calledWith(spy, this.customer, "sub-id");
-                });
+            return this.customer.cancelProcessor(this.processor, "sub-id").then(customer => {
+                assert.equal(customer, this.customer);
+                sinon.assert.calledOnce(spy);
+                sinon.assert.calledWith(spy, this.customer, "sub-id");
+            });
         });
 
         it("Should correctly apply refundProcessor", function() {
             const spy = sinon.stub(this.processor, "refundTransaction").resolves(this.customer);
 
             return this.customer
-                .save()
-                .then(customer => customer.refundProcessor(this.processor, "transaction-id", 123))
+                .refundProcessor(this.processor, "transaction-id", 123)
                 .then(customer => {
                     assert.equal(customer, this.customer);
                     sinon.assert.calledOnce(spy);
@@ -226,14 +219,21 @@ describe(
         it("Should correctly apply loadProcessor", function() {
             const spy = sinon.stub(this.processor, "load").resolves(this.customer);
 
-            return this.customer
-                .save()
-                .then(customer => customer.loadProcessor(this.processor))
-                .then(customer => {
-                    assert.equal(customer, this.customer);
-                    sinon.assert.calledOnce(spy);
-                    sinon.assert.calledWith(spy, this.customer);
-                });
+            return this.customer.loadProcessor(this.processor).then(customer => {
+                assert.equal(customer, this.customer);
+                sinon.assert.calledOnce(spy);
+                sinon.assert.calledWith(spy, this.customer);
+            });
+        });
+
+        it("Should not call loadProcessor for non-saved customers", function() {
+            const spy = sinon.stub(this.processor, "load");
+            const customer = new Customer();
+
+            return customer.loadProcessor(this.processor).then(result => {
+                assert.equal(result, customer);
+                sinon.assert.notCalled(spy);
+            });
         });
 
         const activeSubs = [
