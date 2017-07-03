@@ -345,7 +345,7 @@ lodash.keys@^3.0.0:
     lodash.isarguments "^3.0.0"
     lodash.isarray "^3.0.0"
 
-lodash@^4.14.0:
+lodash@^4.14.0, lodash@^4.17.4:
   version "4.17.4"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
 
@@ -404,9 +404,11 @@ mongodb@2.2.25:
     mongodb-core "2.1.9"
     readable-stream "2.1.5"
 
-mongoose-originals@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/mongoose-originals/-/mongoose-originals-1.1.0.tgz#f4c57537a3148b64b22e0e6b82129bd51f851fd4"
+mongoose-originals@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/mongoose-originals/-/mongoose-originals-1.2.0.tgz#59dac0a672a4dfef2cea508e39c5009a47d0198e"
+  dependencies:
+    lodash "^4.17.4"
 
 mongoose@^4.8.4:
   version "4.9.1"

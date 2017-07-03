@@ -133,7 +133,7 @@ describe(
             },
             {
                 name: "only payment",
-                payment: { email: "other@example.com" },
+                payment: { nonce: "some-nonce" },
                 expected: {
                     customer: false,
                     address: false,
@@ -178,6 +178,178 @@ describe(
                         customer.subscriptions[0].processor.state,
                         test.expected.sub ? "changed" : "saved"
                     );
+                });
+            });
+        });
+
+        const setDefaultPaymentMethod = [
+            {
+                name: "same payment type and new address data",
+                customer: {},
+                paymentMethod: { nonce: "nonce-1", __t: "PayPalAccount" },
+                address: { name: "Pesho Change" },
+                expected: {
+                    addresses: [
+                        {
+                            processor: { state: "changed", id: "id-address" },
+                            postalCode: "1000",
+                            extendedAddress: "floor 3",
+                            streetAddress: "Tsarigradsko Shose 4",
+                            locality: "Sofia",
+                            country: "BG",
+                            name: "Pesho Change",
+                            company: "Example company",
+                            phone: "123123123",
+                            _id: "one",
+                        },
+                    ],
+                    paymentMethods: [
+                        {
+                            processor: { state: "changed", id: "id-paymentMethod" },
+                            nonce: "nonce-1",
+                            __t: "PayPalAccount",
+                            billingAddressId: "one",
+                            email: "test@example.com",
+                            _id: "three",
+                        },
+                    ],
+                },
+            },
+            {
+                name: "different payment type",
+                customer: {},
+                paymentMethod: { nonce: "nonce-1", __t: "CreditCard", _id: "new-pt" },
+                address: { name: "Pesho Change" },
+                expected: {
+                    addresses: [
+                        {
+                            processor: { state: "changed", id: "id-address" },
+                            postalCode: "1000",
+                            extendedAddress: "floor 3",
+                            streetAddress: "Tsarigradsko Shose 4",
+                            locality: "Sofia",
+                            country: "BG",
+                            name: "Pesho Change",
+                            company: "Example company",
+                            phone: "123123123",
+                            _id: "one",
+                        },
+                    ],
+                    paymentMethods: [
+                        {
+                            processor: { state: "saved", id: "id-paymentMethod" },
+                            __t: "PayPalAccount",
+                            billingAddressId: "one",
+                            nonce: null,
+                            email: "test@example.com",
+                            _id: "three",
+                        },
+                        {
+                            billingAddressId: "one",
+                            __t: "CreditCard",
+                            nonce: "nonce-1",
+                            processor: { state: "inital" },
+                            _id: "new-pt",
+                        },
+                    ],
+                },
+            },
+            {
+                name: "Customer without default payment method and no address",
+                customer: { defaultPaymentMethodId: null },
+                paymentMethod: { nonce: "nonce-1", __t: "PayPalAccount", _id: "new-pt" },
+                expected: {
+                    addresses: [
+                        {
+                            processor: { state: "saved", id: "id-address" },
+                            postalCode: "1000",
+                            extendedAddress: "floor 3",
+                            streetAddress: "Tsarigradsko Shose 4",
+                            locality: "Sofia",
+                            country: "BG",
+                            name: "Pesho Peshev Stoevski",
+                            company: "Example company",
+                            phone: "123123123",
+                            _id: "one",
+                        },
+                    ],
+                    paymentMethods: [
+                        {
+                            processor: { state: "saved", id: "id-paymentMethod" },
+                            __t: "PayPalAccount",
+                            billingAddressId: "one",
+                            nonce: null,
+                            email: "test@example.com",
+                            _id: "three",
+                        },
+                        {
+                            __t: "PayPalAccount",
+                            nonce: "nonce-1",
+                            processor: { state: "inital" },
+                            _id: "new-pt",
+                        },
+                    ],
+                },
+            },
+            {
+                name: "Customer without default payment method new address",
+                customer: { defaultPaymentMethodId: null },
+                paymentMethod: { nonce: "nonce-1", __t: "PayPalAccount", _id: "new-pt" },
+                address: { name: "Pesho Change", _id: "new-addr" },
+                expected: {
+                    addresses: [
+                        {
+                            processor: { state: "saved", id: "id-address" },
+                            postalCode: "1000",
+                            extendedAddress: "floor 3",
+                            streetAddress: "Tsarigradsko Shose 4",
+                            locality: "Sofia",
+                            country: "BG",
+                            name: "Pesho Peshev Stoevski",
+                            company: "Example company",
+                            phone: "123123123",
+                            _id: "one",
+                        },
+                        {
+                            processor: { state: "inital" },
+                            name: "Pesho Change",
+                            _id: "new-addr",
+                        },
+                    ],
+                    paymentMethods: [
+                        {
+                            processor: { state: "saved", id: "id-paymentMethod" },
+                            __t: "PayPalAccount",
+                            billingAddressId: "one",
+                            nonce: null,
+                            email: "test@example.com",
+                            _id: "three",
+                        },
+                        {
+                            __t: "PayPalAccount",
+                            nonce: "nonce-1",
+                            billingAddressId: "new-addr",
+                            processor: { state: "inital" },
+                            _id: "new-pt",
+                        },
+                    ],
+                },
+            },
+        ];
+
+        setDefaultPaymentMethod.forEach(function(test) {
+            it(`Should process setDefaultPaymentMethod for ${test.name}`, function() {
+                return this.customer.save().then(customer => {
+                    Object.assign(customer, test.customer);
+                    const paymentMethod = customer.setDefaultPaymentMethod(
+                        test.paymentMethod,
+                        test.address
+                    );
+
+                    const result = customer.markChanged().toObject();
+
+                    assert.deepEqual(result.addresses, test.expected.addresses);
+                    assert.deepEqual(result.paymentMethods, test.expected.paymentMethods);
                 });
             });
         });

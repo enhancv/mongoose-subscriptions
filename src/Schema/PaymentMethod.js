@@ -5,6 +5,7 @@ const CreditCard = require("./PaymentMethod/CreditCard");
 const PayPalAccount = require("./PaymentMethod/PayPalAccount");
 const ApplePayCard = require("./PaymentMethod/ApplePayCard");
 const AndroidPayCard = require("./PaymentMethod/AndroidPayCard");
+const originals = require("mongoose-originals");
 
 const PaymentMethod = new mongoose.Schema({
     _id: {
@@ -28,5 +29,13 @@ PaymentMethod.CreditCard = CreditCard;
 PaymentMethod.PayPalAccount = PayPalAccount;
 PaymentMethod.ApplePayCard = ApplePayCard;
 PaymentMethod.AndroidPayCard = AndroidPayCard;
+
+function billingAddress() {
+    return this.ownerDocument().addresses.id(this.billingAddressId);
+}
+
+PaymentMethod.method("billingAddress", billingAddress);
+
+PaymentMethod.plugin(originals, { fields: ["billingAddressId", "nonce"] });
 
 module.exports = PaymentMethod;

@@ -82,7 +82,21 @@ Subscription.methods.addDiscounts = function find(callback) {
     return this;
 };
 
-Subscription.plugin(originals, { fields: ["discounts", "status"] });
+Subscription.plugin(originals, {
+    fields: [
+        "discounts",
+        "plan",
+        "paymentMethodId",
+        "firstBillingDate",
+        "paidThroughDate",
+        "status",
+        "price",
+        "descriptor",
+        "isTrial",
+        "trialDuration",
+        "trialDurationUnit",
+    ],
+});
 
 Subscription.path("discounts").discriminator("DiscountAmount", Discount.DiscountAmount);
 Subscription.path("discounts").discriminator("DiscountPercent", Discount.DiscountPercent);

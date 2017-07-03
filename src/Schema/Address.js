@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const shortid = require("shortid");
 const ProcessorItem = require("./ProcessorItem");
+const originals = require("mongoose-originals");
 
 const Address = new mongoose.Schema({
     _id: {
@@ -21,6 +22,19 @@ const Address = new mongoose.Schema({
     postalCode: String,
     createdAt: Date,
     updatedAt: Date,
+});
+
+Address.plugin(originals, {
+    fields: [
+        "phone",
+        "company",
+        "name",
+        "country",
+        "locality",
+        "streetAddress",
+        "extendedAddress",
+        "postalCode",
+    ],
 });
 
 module.exports = Address;

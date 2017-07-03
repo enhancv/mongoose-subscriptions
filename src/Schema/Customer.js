@@ -53,7 +53,11 @@ function markChanged() {
 
     ["addresses", "subscriptions", "paymentMethods"].forEach(collectionName => {
         this[collectionName].forEach((item, index) => {
-            if (item.processor.id && this.isModified(`${collectionName}.${index}`)) {
+            if (
+                item.processor.id &&
+                this.isModified(`${collectionName}.${index}`) &&
+                item.isChanged()
+            ) {
                 item.processor.state = ProcessorItem.CHANGED;
             }
         });
@@ -107,6 +111,38 @@ function addAddress(addressData) {
 
 function defaultPaymentMethod() {
     return this.paymentMethods.id(this.defaultPaymentMethodId);
+}
+
+function setDefaultPaymentMethod(paymentMethodData, addressData) {
+    const current = this.defaultPaymentMethod();
+    const currentAddress = current && current.billingAddress();
+    let paymentMethod;
+
+    if (current && paymentMethodData.__t === current.__t) {
+        paymentMethod = Object.assign(current, paymentMethodData);
+    } else {
+        paymentMethod = this.paymentMethods.create(paymentMethodData);
+        this.paymentMethods.push(paymentMethod);
+    }
+
+    if (addressData) {
+        let address;
+
+        if (currentAddress) {
+            address = Object.assign(currentAddress, addressData);
+        } else {
+            address = this.addresses.create(addressData);
+            this.addresses.push(address);
+        }
+
+        if (address._id) {
+            paymentMethod.billingAddressId = address._id;
+        }
+    }
+
+    this.defaultPaymentMethodId = paymentMethod;
+
+    return paymentMethod;
 }
 
 function addPaymentMethodNonce(nonce, address) {
@@ -188,6 +224,7 @@ Customer.method("cancelSubscriptions", cancelSubscriptions);
 Customer.method("addAddress", addAddress);
 Customer.method("defaultPaymentMethod", defaultPaymentMethod);
 Customer.method("addPaymentMethodNonce", addPaymentMethodNonce);
+Customer.method("setDefaultPaymentMethod", setDefaultPaymentMethod);
 Customer.method("addSubscription", addSubscription);
 Customer.method("activeSubscriptions", activeSubscriptions);
 Customer.method("validSubscriptions", validSubscriptions);
