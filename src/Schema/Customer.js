@@ -113,9 +113,17 @@ function defaultPaymentMethod() {
     return this.paymentMethods.id(this.defaultPaymentMethodId);
 }
 
+function getUnusedAddress() {
+    return this.addresses.find(address => {
+        return !this.paymentMethods.find(
+            paymentMethod => paymentMethod.billingAddressId === address.id
+        );
+    });
+}
+
 function setDefaultPaymentMethod(paymentMethodData, addressData) {
     const current = this.defaultPaymentMethod();
-    const currentAddress = current && current.billingAddress();
+    const currentAddress = (current && current.billingAddress()) || this.getUnusedAddress();
     let paymentMethod;
 
     if (current && paymentMethodData.__t === current.__t) {
@@ -215,6 +223,8 @@ function subscription(activeDate) {
     return this.validSubscriptions(activeDate)[0];
 }
 
+Customer.method("clearChanged", markChanged);
+Customer.method("getUnusedAddress", getUnusedAddress);
 Customer.method("markChanged", markChanged);
 Customer.method("cancelProcessor", cancelProcessor);
 Customer.method("refundProcessor", refundProcessor);

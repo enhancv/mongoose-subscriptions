@@ -182,9 +182,90 @@ describe(
             });
         });
 
+        it("Should return a correct vaule for getUnusedAddress", function() {
+            assert.equal(null, this.customer.getUnusedAddress());
+
+            this.customer.addresses.push(this.customer.addresses.create({ phone: "123123123" }));
+
+            assert.equal("123123123", this.customer.getUnusedAddress().phone);
+
+            this.customer.paymentMethods.push(
+                this.customer.paymentMethods.create({
+                    billingAddressId: this.customer.getUnusedAddress().id,
+                })
+            );
+
+            assert.equal(null, this.customer.getUnusedAddress());
+        });
+
         const setDefaultPaymentMethod = [
             {
                 name: "same payment type and new address data",
+                customer: {
+                    defaultPaymentMethodId: null,
+                    addresses: [
+                        {
+                            _id: "one",
+                            phone: "123123123",
+                            company: "Example company",
+                            name: "Pesho Peshev Stoevski",
+                            country: "BG",
+                            locality: "Sofia",
+                            streetAddress: "Tsarigradsko Shose 4",
+                            extendedAddress: "floor 3",
+                            postalCode: "1000",
+                            processor: { id: "id-address", state: "saved" },
+                        },
+                        {
+                            _id: "two",
+                            name: "Pesho Peshev Stoevski",
+                            processor: { id: "id-address", state: "saved" },
+                        },
+                    ],
+                },
+                paymentMethod: { nonce: "nonce-1", __t: "PayPalAccount", _id: "pm-1" },
+                address: { name: "Pesho Change" },
+                expected: {
+                    addresses: [
+                        {
+                            processor: { state: "saved", id: "id-address" },
+                            postalCode: "1000",
+                            extendedAddress: "floor 3",
+                            streetAddress: "Tsarigradsko Shose 4",
+                            locality: "Sofia",
+                            country: "BG",
+                            name: "Pesho Peshev Stoevski",
+                            company: "Example company",
+                            phone: "123123123",
+                            _id: "one",
+                        },
+                        {
+                            _id: "two",
+                            name: "Pesho Change",
+                            processor: { id: "id-address", state: "changed" },
+                        },
+                    ],
+                    paymentMethods: [
+                        {
+                            processor: { state: "saved", id: "id-paymentMethod" },
+                            nonce: null,
+                            __t: "PayPalAccount",
+                            billingAddressId: "one",
+                            email: "test@example.com",
+                            _id: "three",
+                        },
+                        {
+                            processor: { state: "inital" },
+                            nonce: "nonce-1",
+                            __t: "PayPalAccount",
+                            billingAddressId: "two",
+                            _id: "pm-1",
+                        },
+                    ],
+                },
+            },
+            {
+                name: "unused address data",
                 customer: {},
                 paymentMethod: { nonce: "nonce-1", __t: "PayPalAccount" },
                 address: { name: "Pesho Change" },
