@@ -39,8 +39,14 @@ DiscountCoupon.build = function build(subscription, coupon, currentDate) {
 
 DiscountCoupon.pre("save", function preSave(next) {
     if (this.coupon && this.isAddedToProcessor) {
-        this.coupon.usedCount += 1;
-        this.coupon.save(next);
+        const couponFind = this.coupon instanceof Coupon
+            ? Promise.resolve(this.coupon)
+            : Coupon.findById(this.coupon);
+
+        couponFind.then(coupon => {
+            coupon.usedCount += 1;
+            coupon.save(next);
+        });
     } else {
         next();
     }

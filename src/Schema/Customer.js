@@ -6,6 +6,7 @@ const Transaction = require("./Transaction");
 const ProcessorItem = require("./ProcessorItem");
 const SubscriptionStatus = require("./Statuses/SubscriptionStatus");
 const DiscountPreviousSubscription = require("./Discount/PreviousSubscription");
+const originals = require("mongoose-originals");
 
 const Customer = new mongoose.Schema({
     processor: {
@@ -67,13 +68,19 @@ function markChanged() {
 }
 
 function cancelProcessor(processor, subscriptionId) {
-    return processor.cancelSubscription(this, subscriptionId).then(customer => customer.save());
+    this.setSnapshotOriginal();
+    return processor.cancelSubscription(this, subscriptionId).then(customer => {
+        customer.clearSnapshotOriginal();
+        return customer.save();
+    });
 }
 
 function refundProcessor(processor, transactionId, amount) {
-    return processor
-        .refundTransaction(this, transactionId, amount)
-        .then(customer => customer.save());
+    this.setSnapshotOriginal();
+    return processor.refundTransaction(this, transactionId, amount).then(customer => {
+        customer.clearSnapshotOriginal();
+        return customer.save();
+    });
 }
 
 function loadProcessor(processor) {
@@ -84,8 +91,12 @@ function loadProcessor(processor) {
 }
 
 function saveProcessor(processor) {
+    this.setSnapshotOriginal();
     this.markChanged();
-    return processor.save(this).then(customer => customer.save());
+    return processor.save(this).then(customer => {
+        customer.clearSnapshotOriginal();
+        return customer.save();
+    });
 }
 
 function cancelSubscriptions() {
@@ -223,7 +234,10 @@ function subscription(activeDate) {
     return this.validSubscriptions(activeDate)[0];
 }
 
-Customer.method("clearChanged", markChanged);
+Customer.plugin(originals, {
+    fields: ["ipAddress", "name", "email", "phone", "defaultPaymentMethodId"],
+});
+
 Customer.method("getUnusedAddress", getUnusedAddress);
 Customer.method("markChanged", markChanged);
 Customer.method("cancelProcessor", cancelProcessor);

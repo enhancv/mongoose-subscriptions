@@ -213,5 +213,81 @@ describe(
                     assert.equal(updatedCoupon.usedCount, 2);
                 });
         });
+
+        it("DiscountCoupon should increment coupon upon use with only an id", function() {
+            const coupon = new Coupon.CouponAmount({ amount: 10, usedCount: 1, usedCountMax: 4 });
+
+            return coupon
+                .save()
+                .then(() => {
+                    const customer = new Customer({
+                        name: "Pesho Peshev",
+                        phone: "+35988911111",
+                        email: "seer@example.com",
+                        ipAddress: "10.0.0.2",
+                        defaultPaymentMethodId: "three",
+                        processor: { id: "id-customer", state: "saved" },
+                        addresses: [
+                            {
+                                _id: "one",
+                                company: "Example company",
+                                name: "Pesho Peshev Stoevski",
+                                country: "BG",
+                                locality: "Sofia",
+                                streetAddress: "Tsarigradsko Shose 4",
+                                extendedAddress: "floor 3",
+                                postalCode: "1000",
+                                processor: { id: "id-address", state: "saved" },
+                            },
+                        ],
+                        paymentMethods: [
+                            {
+                                _id: "three",
+                                __t: "PayPalAccount",
+                                email: "test@example.com",
+                                processor: { id: "id-paymentMethod", state: "saved" },
+                                billingAddressId: "one",
+                            },
+                        ],
+                        subscriptions: [
+                            {
+                                _id: "four",
+                                plan: this.plan,
+                                processor: { id: "id-subscription", state: "saved" },
+                                status: "Active",
+                                price: 30,
+                                discounts: [
+                                    {
+                                        coupon: coupon._id,
+                                        amount: 5,
+                                        numberOfBillingCycles: 2,
+                                        __t: "DiscountCoupon",
+                                        name: coupon.name,
+                                    },
+                                ],
+                                descriptor: {
+                                    name: "Enhancv*Pro Plan",
+                                    phone: "0888415433",
+                                    url: "enhancv.com",
+                                },
+                                paidThroughDate: "2017-03-03",
+                                paymentMethodId: "three",
+                            },
+                        ],
+                    });
+
+                    return customer.save();
+                })
+                .then(customer => {
+                    customer.subscriptions.id("four").discounts[0].processor.state = "saved";
+                    return customer.save();
+                })
+                .then(() => {
+                    return Coupon.CouponAmount.findOne({ _id: coupon._id });
+                })
+                .then(updatedCoupon => {
+                    assert.equal(updatedCoupon.usedCount, 2);
+                });
+        });
     })
 );

@@ -35,9 +35,10 @@ Discount.DiscountPreviousSubscription = DiscountPreviousSubscription;
 Discount.plugin(originals, { fields: ["processor"] });
 
 Discount.virtual("isAddedToProcessor").get(function isAddedToProcessor() {
+    const original = this.snapshotOriginal || this.original;
     return (
-        this.original &&
-        this.original.processor.state === ProcessorItem.INITIAL &&
+        original &&
+        original.processor.state === ProcessorItem.INITIAL &&
         this.processor.state === ProcessorItem.SAVED
     );
 });
