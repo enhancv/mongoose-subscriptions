@@ -115,7 +115,7 @@ function cancelSubscriptions() {
 
 function filterUnsavedSubscriptions() {
     this.subscriptions = this.subscriptions.filter(
-        sub => sub.processor.status !== ProcessorItem.INITIAL
+        sub => sub.processor.state !== ProcessorItem.INITIAL
     );
 
     return this;

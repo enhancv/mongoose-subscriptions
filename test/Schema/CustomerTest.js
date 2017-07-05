@@ -720,27 +720,60 @@ describe(
         it("Should correctly filter unsaved subscriptions", function() {
             this.customer.subscriptions = [
                 {
-                    plan: { processorId: `plan-1`, price: 10 },
-                    status: "Expired",
+                    paidThroughDate: "2017-07-19T15:07:37.967Z",
+                    firstBillingDate: "2017-07-05T15:07:37.967Z",
+                    plan: {
+                        name: "Basic",
+                        price: 4.99,
+                        processorId: "basic",
+                        level: 1,
+                        billingFrequency: 1,
+                    },
+                    _id: "s0",
+                    isTrial: true,
+                    statusHistory: [],
+                    discounts: [],
+                    processor: { state: "local" },
+                },
+                {
+                    plan: {
+                        name: "Pro - Quarterly",
+                        price: 44.97,
+                        processorId: "pro-quarterly",
+                        level: 2,
+                        billingFrequency: 3,
+                    },
+                    firstBillingDate: null,
+                    price: 44.97,
+                    _id: "s1",
+                    isTrial: false,
+                    statusHistory: [],
+                    discounts: [],
                     processor: { state: "inital" },
                 },
                 {
-                    plan: { processorId: `plan-2`, price: 10 },
-                    status: "Active",
-                    processor: { id: `sub-2`, state: "saved" },
-                },
-                {
-                    plan: { processorId: `plan-3`, price: 10 },
-                    status: "Past Due",
-                    processor: { id: `sub-3`, state: "saved" },
+                    plan: {
+                        name: "Pro - Quarterly",
+                        price: 44.97,
+                        processorId: "pro-quarterly",
+                        level: 2,
+                        billingFrequency: 3,
+                    },
+                    firstBillingDate: null,
+                    price: 44.97,
+                    _id: "s2",
+                    isTrial: false,
+                    statusHistory: [],
+                    discounts: [],
+                    processor: { state: "inital" },
                 },
             ];
 
             this.customer.filterUnsavedSubscriptions();
 
-            const expected = ["Expired", "Active", "Past Due"];
+            const expected = ["s0"];
 
-            assert.deepEqual(this.customer.subscriptions.map(item => item.status), expected);
+            assert.deepEqual(this.customer.subscriptions.map(item => item._id), expected);
         });
 
         it("Should correctly add address with data", function() {
