@@ -717,6 +717,32 @@ describe(
             assert.deepEqual(this.customer.subscriptions.map(item => item.status), expected);
         });
 
+        it("Should correctly filter unsaved subscriptions", function() {
+            this.customer.subscriptions = [
+                {
+                    plan: { processorId: `plan-1`, price: 10 },
+                    status: "Expired",
+                    processor: { state: "inital" },
+                },
+                {
+                    plan: { processorId: `plan-2`, price: 10 },
+                    status: "Active",
+                    processor: { id: `sub-2`, state: "saved" },
+                },
+                {
+                    plan: { processorId: `plan-3`, price: 10 },
+                    status: "Past Due",
+                    processor: { id: `sub-3`, state: "saved" },
+                },
+            ];
+
+            this.customer.filterUnsavedSubscriptions();
+
+            const expected = ["Expired", "Active", "Past Due"];
+
+            assert.deepEqual(this.customer.subscriptions.map(item => item.status), expected);
+        });
+
         it("Should correctly add address with data", function() {
             const addressData = {
                 company: "Example 2 company",

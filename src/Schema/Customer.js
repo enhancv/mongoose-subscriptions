@@ -87,7 +87,7 @@ function loadProcessor(processor) {
     if (!this.processor.id) {
         return this.save();
     }
-    return processor.load(this).then(customer => customer.save());
+    return processor.load(this).then(customer => customer.filterUnsavedSubscriptions().save());
 }
 
 function saveProcessor(processor) {
@@ -109,6 +109,14 @@ function cancelSubscriptions() {
     this.subscriptions.filter(sub => cancaleableStatuses.includes(sub.status)).forEach(sub => {
         sub.status = SubscriptionStatus.CANCELED;
     });
+
+    return this;
+}
+
+function filterUnsavedSubscriptions() {
+    this.subscriptions = this.subscriptions.filter(
+        sub => sub.processor.status !== ProcessorItem.INITIAL
+    );
 
     return this;
 }
@@ -240,6 +248,7 @@ Customer.plugin(originals, {
 
 Customer.method("getUnusedAddress", getUnusedAddress);
 Customer.method("markChanged", markChanged);
+Customer.method("filterUnsavedSubscriptions", filterUnsavedSubscriptions);
 Customer.method("cancelProcessor", cancelProcessor);
 Customer.method("refundProcessor", refundProcessor);
 Customer.method("loadProcessor", loadProcessor);
