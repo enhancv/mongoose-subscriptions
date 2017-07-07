@@ -7,6 +7,7 @@ const main = require("../../src");
 const NullProcessor = main.NullProcessor;
 const Customer = main.Customer;
 const assign = require("lodash/fp/assign");
+const pick = require("lodash/fp/pick");
 
 describe(
     "Customer",
@@ -55,11 +56,15 @@ describe(
                         plan: this.plan,
                         processor: { id: "id-subscription", state: "saved" },
                         status: "Active",
+                        price: 13.2,
                         descriptor: {
                             name: "Enhancv*Pro Plan",
                             phone: "0888415433",
                             url: "enhancv.com",
                         },
+                        trialDuration: 0,
+                        trialDurationUnit: "day",
+                        firstBillingDate: "2017-02-03",
                         paidThroughDate: "2017-03-03",
                         statusHistory: [{ status: "Active", timestamp: "2017-03-03" }],
                         paymentMethodId: "three",
@@ -149,6 +154,16 @@ describe(
                     address: false,
                     payment: false,
                     sub: true,
+                },
+            },
+            {
+                name: "change deleted status on subscription",
+                sub: { deleted: true },
+                expected: {
+                    customer: false,
+                    address: false,
+                    payment: false,
+                    sub: false,
                 },
             },
         ];
@@ -628,6 +643,16 @@ describe(
                         firstBillingDate: "2017-01-03",
                         paidThroughDate: "2017-02-03",
                     },
+                    {
+                        _id: "six",
+                        level: 2,
+                        status: "Active",
+                        isTrial: false,
+                        statusHistory: [{ status: "Active", timestamp: "2017-01-03" }],
+                        firstBillingDate: "2017-01-03",
+                        paidThroughDate: "2017-02-03",
+                        deleted: true,
+                    },
                 ],
                 expectedActive: ["three", "five", "two", "one"],
                 expectedValid: ["three", "five", "two", "one"],
@@ -648,6 +673,7 @@ describe(
                         },
                         isTrial: sub.isTrial,
                         status: sub.status,
+                        deleted: sub.deleted,
                         firstBillingDate: sub.firstBillingDate,
                         paidThroughDate: sub.paidThroughDate,
                         statusHistory: sub.statusHistory,

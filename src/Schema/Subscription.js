@@ -36,6 +36,7 @@ const Subscription = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    deleted: Boolean,
     trialDuration: Number,
     trialDurationUnit: {
         type: String,

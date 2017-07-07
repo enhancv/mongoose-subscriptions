@@ -219,15 +219,16 @@ function addSubscription(plan, paymentMethod, activeDate) {
 }
 
 function activeSubscriptions(activeDate) {
-    return this.validSubscriptions(activeDate).filter(
-        item => item.status === SubscriptionStatus.ACTIVE
-    );
+    return this.validSubscriptions(activeDate)
+        .filter(item => !item.deleted)
+        .filter(item => item.status === SubscriptionStatus.ACTIVE);
 }
 
 function validSubscriptions(activeDate) {
     const date = activeDate || new Date();
 
     return this.subscriptions
+        .filter(item => !item.deleted)
         .filter(item => item.firstBillingDate < date)
         .filter(item => item.paidThroughDate >= date)
         .filter(item => item.hasActiveStatus)
