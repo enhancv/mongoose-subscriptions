@@ -769,11 +769,47 @@ describe(
                 },
             ];
 
-            this.customer.filterUnsavedSubscriptions();
+            this.customer.addresses = [
+                {
+                    _id: "a-1",
+                    processor: { id: "id-address-1", state: "saved" },
+                },
+                {
+                    _id: "a-2",
+                    processor: { id: "id-address-2", state: "changed" },
+                },
+                {
+                    _id: "a-3",
+                    processor: { state: "inital" },
+                },
+            ];
 
-            const expected = ["s0"];
+            this.customer.paymentMethods = [
+                {
+                    _id: "pm-1",
+                    __t: "PayPalAccount",
+                    processor: { id: "id-paymentMethod-1", state: "saved" },
+                    billingAddressId: "a-1",
+                },
+                {
+                    _id: "pm-2",
+                    __t: "PayPalAccount",
+                    processor: { id: "id-paymentMethod-2", state: "changed" },
+                    billingAddressId: "a-2",
+                },
+                {
+                    _id: "pm-3",
+                    __t: "PayPalAccount",
+                    processor: { state: "inital" },
+                    billingAddressId: "a-3",
+                },
+            ];
 
-            assert.deepEqual(this.customer.subscriptions.map(item => item._id), expected);
+            this.customer.removeInitial();
+
+            assert.deepEqual(this.customer.subscriptions.map(item => item._id), ["s0"]);
+            assert.deepEqual(this.customer.paymentMethods.map(item => item._id), ["pm-1", "pm-2"]);
+            assert.deepEqual(this.customer.addresses.map(item => item._id), ["a-1", "a-2"]);
         });
 
         it("Should correctly add address with data", function() {

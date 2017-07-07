@@ -87,7 +87,7 @@ function loadProcessor(processor) {
     if (!this.processor.id) {
         return this.save();
     }
-    return processor.load(this).then(customer => customer.filterUnsavedSubscriptions().save());
+    return processor.load(this).then(customer => customer.removeInitial().save());
 }
 
 function saveProcessor(processor) {
@@ -113,10 +113,10 @@ function cancelSubscriptions() {
     return this;
 }
 
-function filterUnsavedSubscriptions() {
-    this.subscriptions = this.subscriptions.filter(
-        sub => sub.processor.state !== ProcessorItem.INITIAL
-    );
+function removeInitial() {
+    ["addresses", "paymentMethods", "subscriptions"].forEach(name => {
+        this[name] = this[name].filter(item => item.processor.state !== ProcessorItem.INITIAL);
+    });
 
     return this;
 }
@@ -248,7 +248,7 @@ Customer.plugin(originals, {
 
 Customer.method("getUnusedAddress", getUnusedAddress);
 Customer.method("markChanged", markChanged);
-Customer.method("filterUnsavedSubscriptions", filterUnsavedSubscriptions);
+Customer.method("removeInitial", removeInitial);
 Customer.method("cancelProcessor", cancelProcessor);
 Customer.method("refundProcessor", refundProcessor);
 Customer.method("loadProcessor", loadProcessor);
