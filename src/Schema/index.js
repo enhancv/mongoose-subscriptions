@@ -6,7 +6,8 @@ const Discount = require("./Discount");
 const PaymentMethod = require("./PaymentMethod");
 const Plan = require("./Plan");
 const ProcessorItem = require("./ProcessorItem");
-const Status = require("./Status");
+const SubscriptionStatus = require("./Statuses/SubscriptionStatus");
+const TransactionStatus = require("./Statuses/TransactionStatus");
 const Subscription = require("./Subscription");
 const Transaction = require("./Transaction");
 
@@ -19,7 +20,8 @@ module.exports = {
     PaymentMethod,
     Plan,
     ProcessorItem,
-    Status,
+    TransactionStatus,
+    SubscriptionStatus,
     Subscription,
     Transaction,
 };
