@@ -22,7 +22,7 @@ const Discount = new mongoose.Schema(
         currentBillingCycle: {
             type: Number,
             default: 1,
-            min: 1,
+            min: 0,
         },
         group: {
             type: String,

@@ -184,6 +184,17 @@ describe("Subscription", function() {
             ],
             expected: 2,
         },
+        {
+            name: "discount with 0 current billing cycle",
+            discounts: [
+                {
+                    amount: 20,
+                    numberOfBillingCycles: 3,
+                    currentBillingCycle: 0,
+                },
+            ],
+            expected: 4,
+        },
     ];
 
     numberOfFreeBillingCyclesTests.forEach(function(test) {
