@@ -18,6 +18,12 @@ const Discount = new mongoose.Schema(
             default: 1,
             min: 1,
         },
+        neverExpires: Boolean,
+        currentBillingCycle: {
+            type: Number,
+            default: 1,
+            min: 1,
+        },
         group: {
             type: String,
             default: "General",
@@ -41,6 +47,9 @@ Discount.virtual("isAddedToProcessor").get(function isAddedToProcessor() {
         original.processor.state === ProcessorItem.INITIAL &&
         this.processor.state === ProcessorItem.SAVED
     );
+});
+Discount.virtual("numberOfBillingcyclesLeft").get(function isAddedToProcessor() {
+    return this.numberOfBillingCycles - this.currentBillingCycle + 1;
 });
 
 module.exports = Discount;

@@ -22,6 +22,10 @@ ProcessorItem.CHANGED = CHANGED;
 ProcessorItem.SAVED = SAVED;
 ProcessorItem.LOCAL = LOCAL;
 
+ProcessorItem.method("isActive", function isActive() {
+    return [ProcessorItem.SAVED, ProcessorItem.CHANGED, ProcessorItem.LOCAL].includes(this.state);
+});
+
 ProcessorItem.validateIsSaved = function validateIsSaved(item, name) {
     if (!item || !item.processor || !item.processor.id || item.processor.state !== SAVED) {
         throw new Error(`${name || "Mongoose item"} not saved to processor`);

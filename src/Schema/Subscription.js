@@ -24,7 +24,13 @@ const Subscription = new mongoose.Schema({
     discounts: [Discount],
     paymentMethodId: String,
     firstBillingDate: Date,
+    nextBillingDate: Date,
     paidThroughDate: Date,
+    failureCount: Number,
+    daysPastDue: Number,
+    billingPeriodEndDate: Date,
+    billingPeriodStartDate: Date,
+    billingDayOfMonth: Number,
     status: {
         type: String,
         enum: SubscriptionStatus.Statuses,
@@ -42,21 +48,44 @@ const Subscription = new mongoose.Schema({
         type: String,
         enum: ["month", "day"],
     },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: Date,
 });
 
-Subscription.virtual("hasActiveStatus").get(function hasActiveStatus() {
-    return Boolean(this.statusHistory.find(event => event.status === SubscriptionStatus.ACTIVE));
+Subscription.virtual("numberOfFreeBillingCycles").get(function numberOfFreeBillingCycles() {
+    return this.discounts.reduce((max, current) => {
+        const discountsPrice = this.discounts
+            .filter(discount => {
+                return current.numberOfBillingcyclesLeft <= discount.numberOfBillingcyclesLeft;
+            })
+            .map(discount => discount.amount)
+            .reduce((sum, value) => sum + value, 0);
+
+        return discountsPrice >= this.price ? current.numberOfBillingcyclesLeft : max;
+    }, 0);
 });
 
-Subscription.virtual("nextBillingDate")
-    .get(function getNextBillingDate() {
-        return this.paidThroughDate;
-    })
-    .set(function setNextBillingDate(value) {
-        this.paidThroughDate = value;
-    });
+Subscription.method("initializeDates", function initializeDates() {
+    const firstBillingDate = this.firstBillingDate || this.createdAt;
 
-Subscription.methods.addDiscounts = function find(callback) {
+    this.paidThroughDate =
+        this.paidThroughDate || addmonths(firstBillingDate, this.plan.billingFrequency);
+
+    if (!this.nextBillingDate) {
+        this.nextBillingDate = new Date(this.paidThroughDate);
+        this.nextBillingDate.setDate(this.nextBillingDate.getDate() + 1);
+    }
+    this.billingPeriodStartDate = this.billingPeriodStartDate || firstBillingDate;
+    this.billingPeriodEndDate = this.billingPeriodEndDate || this.paidThroughDate;
+    this.billingDayOfMonth = this.billingDayOfMonth || firstBillingDate.getDate();
+});
+
+Subscription.pre("save", function(next) {
+    this.initializeDates();
+    next();
+});
+
+Subscription.method("addDiscounts", function addDiscounts(callback) {
     const newDiscounts = callback(this);
     const oldDiscounts = this.discounts;
 
@@ -71,17 +100,8 @@ Subscription.methods.addDiscounts = function find(callback) {
         .sort((a, b) => b.amount - a.amount)
         .slice(0, 1);
 
-    const discount = this.discounts[0];
-
-    if (discount && this.firstBillingDate && discount.amount === this.price) {
-        this.paidThroughDate = addmonths(
-            this.firstBillingDate,
-            this.plan.billingFrequency * discount.numberOfBillingCycles
-        );
-    }
-
     return this;
-};
+});
 
 Subscription.plugin(originals, {
     fields: [

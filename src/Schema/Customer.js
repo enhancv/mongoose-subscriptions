@@ -47,7 +47,7 @@ transactions.discriminator("TransactionPayPalAccount", Transaction.TransactionPa
 transactions.discriminator("TransactionApplePayCard", Transaction.TransactionApplePayCard);
 transactions.discriminator("TransactionAndroidPayCard", Transaction.TransactionAndroidPayCard);
 
-function markChanged() {
+Customer.method("markChanged", function markChanged() {
     if (this.processor.id && this.isModified("name email phone ipAddress defaultPaymentMethodId")) {
         this.processor.state = ProcessorItem.CHANGED;
     }
@@ -65,41 +65,41 @@ function markChanged() {
     });
 
     return this;
-}
+});
 
-function cancelProcessor(processor, subscriptionId) {
+Customer.method("cancelProcessor", function cancelProcessor(processor, subscriptionId) {
     this.setSnapshotOriginal();
     return processor.cancelSubscription(this, subscriptionId).then(customer => {
         customer.clearSnapshotOriginal();
         return customer.save();
     });
-}
+});
 
-function refundProcessor(processor, transactionId, amount) {
+Customer.method("refundProcessor", function refundProcessor(processor, transactionId, amount) {
     this.setSnapshotOriginal();
     return processor.refundTransaction(this, transactionId, amount).then(customer => {
         customer.clearSnapshotOriginal();
         return customer.save();
     });
-}
+});
 
-function loadProcessor(processor) {
+Customer.method("loadProcessor", function loadProcessor(processor) {
     if (!this.processor.id) {
         return this.save();
     }
     return processor.load(this).then(customer => customer.removeInitial().save());
-}
+});
 
-function saveProcessor(processor) {
+Customer.method("saveProcessor", function saveProcessor(processor) {
     this.setSnapshotOriginal();
     this.markChanged();
     return processor.save(this).then(customer => {
         customer.clearSnapshotOriginal();
         return customer.save();
     });
-}
+});
 
-function cancelSubscriptions() {
+Customer.method("cancelSubscriptions", function cancelSubscriptions() {
     const cancaleableStatuses = [
         SubscriptionStatus.PENDING,
         SubscriptionStatus.PAST_DUE,
@@ -111,36 +111,38 @@ function cancelSubscriptions() {
     });
 
     return this;
-}
+});
 
-function removeInitial() {
+Customer.method("removeInitial", function removeInitial() {
     ["addresses", "paymentMethods", "subscriptions"].forEach(name => {
         this[name] = this[name].filter(item => item.processor.state !== ProcessorItem.INITIAL);
     });
 
     return this;
-}
+});
 
-function addAddress(addressData) {
+Customer.method("addAddress", function addAddress(addressData) {
     const address = this.addresses.create(addressData);
     this.addresses.push(address);
 
     return address;
-}
+});
 
-function defaultPaymentMethod() {
+Customer.method("defaultPaymentMethod", function defaultPaymentMethod() {
     return this.paymentMethods.id(this.defaultPaymentMethodId);
-}
+});
 
-function getUnusedAddress() {
+Customer.method("getUnusedAddress", function getUnusedAddress() {
     return this.addresses.find(address => {
         return !this.paymentMethods.find(
             paymentMethod => paymentMethod.billingAddressId === address.id
         );
     });
-}
-
-function setDefaultPaymentMethod(paymentMethodData, addressData) {
+});
+Customer.method("setDefaultPaymentMethod", function setDefaultPaymentMethod(
+    paymentMethodData,
+    addressData
+) {
     const current = this.defaultPaymentMethod();
     const currentAddress = (current && current.billingAddress()) || this.getUnusedAddress();
     let paymentMethod;
@@ -170,9 +172,9 @@ function setDefaultPaymentMethod(paymentMethodData, addressData) {
     this.defaultPaymentMethodId = paymentMethod;
 
     return paymentMethod;
-}
+});
 
-function addPaymentMethodNonce(nonce, address) {
+Customer.method("addPaymentMethodNonce", function addPaymentMethodNonce(nonce, address) {
     const paymentMethod = this.paymentMethods.create({
         nonce: nonce,
     });
@@ -185,9 +187,9 @@ function addPaymentMethodNonce(nonce, address) {
     this.defaultPaymentMethodId = paymentMethod._id;
 
     return paymentMethod;
-}
+});
 
-function addSubscription(plan, paymentMethod, activeDate) {
+Customer.method("addSubscription", function addSubscription(plan, paymentMethod, activeDate) {
     const date = activeDate || new Date();
     const nonTrialSubs = this.validSubscriptions(date).filter(item => !item.isTrial);
 
@@ -216,52 +218,35 @@ function addSubscription(plan, paymentMethod, activeDate) {
     this.subscriptions.push(subscription);
 
     return subscription;
-}
+});
 
-function activeSubscriptions(activeDate) {
-    return this.validSubscriptions(activeDate)
-        .filter(item => !item.deleted)
-        .filter(item => item.status === SubscriptionStatus.ACTIVE);
-}
+Customer.method("activeSubscriptions", function activeSubscriptions(activeDate) {
+    return this.validSubscriptions(activeDate).filter(
+        item => item.status === SubscriptionStatus.ACTIVE
+    );
+});
 
-function validSubscriptions(activeDate) {
+Customer.method("validSubscriptions", function validSubscriptions(activeDate) {
     const date = activeDate || new Date();
 
     return this.subscriptions
         .filter(item => !item.deleted)
-        .filter(item => item.firstBillingDate < date)
-        .filter(item => item.paidThroughDate >= date)
-        .filter(item => item.hasActiveStatus)
+        .filter(item => item.billingPeriodStartDate < date)
+        .filter(item => item.billingPeriodEndDate >= date)
+        .filter(item => item.processor.isActive())
         .sort((a, b) => {
             return b.plan.level === a.plan.level
                 ? b.paidThroughDate.getTime() - a.paidThroughDate.getTime()
                 : b.plan.level - a.plan.level;
         });
-}
+});
 
-function subscription(activeDate) {
+Customer.method("subscription", function subscription(activeDate) {
     return this.validSubscriptions(activeDate)[0];
-}
+});
 
 Customer.plugin(originals, {
     fields: ["ipAddress", "name", "email", "phone", "defaultPaymentMethodId"],
 });
-
-Customer.method("getUnusedAddress", getUnusedAddress);
-Customer.method("markChanged", markChanged);
-Customer.method("removeInitial", removeInitial);
-Customer.method("cancelProcessor", cancelProcessor);
-Customer.method("refundProcessor", refundProcessor);
-Customer.method("loadProcessor", loadProcessor);
-Customer.method("saveProcessor", saveProcessor);
-Customer.method("cancelSubscriptions", cancelSubscriptions);
-Customer.method("addAddress", addAddress);
-Customer.method("defaultPaymentMethod", defaultPaymentMethod);
-Customer.method("addPaymentMethodNonce", addPaymentMethodNonce);
-Customer.method("setDefaultPaymentMethod", setDefaultPaymentMethod);
-Customer.method("addSubscription", addSubscription);
-Customer.method("activeSubscriptions", activeSubscriptions);
-Customer.method("validSubscriptions", validSubscriptions);
-Customer.method("subscription", subscription);
 
 module.exports = Customer;
