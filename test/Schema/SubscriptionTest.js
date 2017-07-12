@@ -12,24 +12,10 @@ describe("Subscription", function() {
 
     it("Should initialize dates correctly with initializeDates", function() {
         const sub = new this.SubscriptionTest({
-            _id: "four",
-            price: 20,
             plan: {
-                processorId: "new-plan-id",
-                price: 20,
-                currency: "USD",
                 billingFrequency: 2,
             },
-            processor: { id: "id-subscription", state: "saved" },
-            status: "Active",
-            discounts: [
-                {
-                    __t: "DiscountAmount",
-                    amount: 20,
-                },
-            ],
             firstBillingDate: "2017-03-03",
-            paymentMethodId: "three",
         });
 
         sub.initializeDates();
@@ -38,7 +24,47 @@ describe("Subscription", function() {
         assert.deepEqual(sub.billingPeriodStartDate, new Date("2017-03-03"));
         assert.deepEqual(sub.billingPeriodEndDate, new Date("2017-05-03"));
         assert.deepEqual(sub.nextBillingDate, new Date("2017-05-04"));
-        assert.equal(sub.billingDayOfMonth, 3);
+        assert.equal(sub.billingDayOfMonth, 4);
+    });
+
+    it("Should initialize dates correctly with initializeDates and trial in days", function() {
+        const sub = new this.SubscriptionTest({
+            plan: {
+                billingFrequency: 2,
+            },
+            firstBillingDate: "2017-03-03",
+            isTrial: true,
+            trialDuration: 4,
+            trialDurationUnit: "day",
+        });
+
+        sub.initializeDates();
+
+        assert.deepEqual(sub.paidThroughDate, new Date("2017-05-07"));
+        assert.deepEqual(sub.billingPeriodStartDate, new Date("2017-03-03"));
+        assert.deepEqual(sub.billingPeriodEndDate, new Date("2017-05-07"));
+        assert.deepEqual(sub.nextBillingDate, new Date("2017-05-08"));
+        assert.equal(sub.billingDayOfMonth, 8);
+    });
+
+    it("Should initialize dates correctly with initializeDates and trial in months", function() {
+        const sub = new this.SubscriptionTest({
+            plan: {
+                billingFrequency: 2,
+            },
+            firstBillingDate: "2017-03-03",
+            isTrial: true,
+            trialDuration: 2,
+            trialDurationUnit: "month",
+        });
+
+        sub.initializeDates();
+
+        assert.deepEqual(sub.paidThroughDate, new Date("2017-07-03"));
+        assert.deepEqual(sub.billingPeriodStartDate, new Date("2017-03-03"));
+        assert.deepEqual(sub.billingPeriodEndDate, new Date("2017-07-03"));
+        assert.deepEqual(sub.nextBillingDate, new Date("2017-07-04"));
+        assert.equal(sub.billingDayOfMonth, 4);
     });
 
     it("addDiscounts", function() {

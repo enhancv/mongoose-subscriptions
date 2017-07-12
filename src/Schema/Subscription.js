@@ -52,6 +52,27 @@ const Subscription = new mongoose.Schema({
     updatedAt: Date,
 });
 
+function adddays(date, days) {
+    const result = new Date(date);
+    result.setDate(date.getDate() + days);
+    return result;
+}
+
+function addTrial(isTrail, trialDuration, trialDurationUnit, date) {
+    if (isTrail) {
+        switch (trialDurationUnit) {
+            case "day":
+                return adddays(date, trialDuration);
+            case "month":
+                return addmonths(date, trialDuration);
+            default:
+                return date;
+        }
+    } else {
+        return date;
+    }
+}
+
 Subscription.virtual("numberOfFreeBillingCycles").get(function numberOfFreeBillingCycles() {
     return this.discounts.reduce((max, current) => {
         const discountsPrice = this.discounts
@@ -69,7 +90,13 @@ Subscription.method("initializeDates", function initializeDates() {
     const firstBillingDate = this.firstBillingDate || this.createdAt;
 
     this.paidThroughDate =
-        this.paidThroughDate || addmonths(firstBillingDate, this.plan.billingFrequency);
+        this.paidThroughDate ||
+        addTrial(
+            this.isTrial,
+            this.trialDuration,
+            this.trialDurationUnit,
+            addmonths(firstBillingDate, this.plan.billingFrequency)
+        );
 
     if (!this.nextBillingDate) {
         this.nextBillingDate = new Date(this.paidThroughDate);
@@ -77,7 +104,7 @@ Subscription.method("initializeDates", function initializeDates() {
     }
     this.billingPeriodStartDate = this.billingPeriodStartDate || firstBillingDate;
     this.billingPeriodEndDate = this.billingPeriodEndDate || this.paidThroughDate;
-    this.billingDayOfMonth = this.billingDayOfMonth || firstBillingDate.getDate();
+    this.billingDayOfMonth = this.billingDayOfMonth || this.nextBillingDate.getDate();
 });
 
 Subscription.pre("save", function(next) {
