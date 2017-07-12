@@ -41,7 +41,7 @@ describe("Subscription", function() {
         sub.initializeDates();
 
         assert.deepEqual(sub.paidThroughDate, new Date("2017-05-07"));
-        assert.deepEqual(sub.billingPeriodStartDate, new Date("2017-03-03"));
+        assert.deepEqual(sub.billingPeriodStartDate, new Date("2017-03-07"));
         assert.deepEqual(sub.billingPeriodEndDate, new Date("2017-05-07"));
         assert.deepEqual(sub.nextBillingDate, new Date("2017-05-08"));
         assert.equal(sub.billingDayOfMonth, 8);
@@ -61,7 +61,7 @@ describe("Subscription", function() {
         sub.initializeDates();
 
         assert.deepEqual(sub.paidThroughDate, new Date("2017-07-03"));
-        assert.deepEqual(sub.billingPeriodStartDate, new Date("2017-03-03"));
+        assert.deepEqual(sub.billingPeriodStartDate, new Date("2017-05-03"));
         assert.deepEqual(sub.billingPeriodEndDate, new Date("2017-07-03"));
         assert.deepEqual(sub.nextBillingDate, new Date("2017-07-04"));
         assert.equal(sub.billingDayOfMonth, 4);

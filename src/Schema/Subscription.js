@@ -98,11 +98,11 @@ Subscription.method("initializeDates", function initializeDates() {
             addmonths(firstBillingDate, this.plan.billingFrequency)
         );
 
-    if (!this.nextBillingDate) {
-        this.nextBillingDate = new Date(this.paidThroughDate);
-        this.nextBillingDate.setDate(this.nextBillingDate.getDate() + 1);
-    }
-    this.billingPeriodStartDate = this.billingPeriodStartDate || firstBillingDate;
+    this.nextBillingDate = this.nextBillingDate || adddays(this.paidThroughDate, 1);
+    this.billingPeriodStartDate =
+        this.billingPeriodStartDate ||
+        addTrial(this.isTrial, this.trialDuration, this.trialDurationUnit, firstBillingDate);
+
     this.billingPeriodEndDate = this.billingPeriodEndDate || this.paidThroughDate;
     this.billingDayOfMonth = this.billingDayOfMonth || this.nextBillingDate.getDate();
 });
