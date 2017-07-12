@@ -65,7 +65,6 @@ describe(
                         trialDuration: 0,
                         trialDurationUnit: "day",
                         firstBillingDate: "2017-02-03",
-                        paidThroughDate: "2017-03-03",
                         statusHistory: [{ status: "Active", timestamp: "2017-03-03" }],
                         paymentMethodId: "three",
                     },
@@ -753,7 +752,6 @@ describe(
         it("Should correctly filter unsaved subscriptions", function() {
             this.customer.subscriptions = [
                 {
-                    paidThroughDate: "2017-07-19T15:07:37.967Z",
                     firstBillingDate: "2017-07-05T15:07:37.967Z",
                     plan: {
                         name: "Basic",
