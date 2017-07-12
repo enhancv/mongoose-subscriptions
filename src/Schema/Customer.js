@@ -195,7 +195,7 @@ Customer.method("addSubscription", function addSubscription(plan, paymentMethod,
 
     const waitForSubs = nonTrialSubs
         .filter(item => item.plan.level >= plan.level)
-        .sort((a, b) => a.paidThroughDate < b.paidThroughDate);
+        .sort((a, b) => a.billingPeriodEndDate < b.billingPeriodEndDate);
 
     const refundableSubs = nonTrialSubs
         .filter(item => item.plan.level < plan.level)
@@ -204,7 +204,7 @@ Customer.method("addSubscription", function addSubscription(plan, paymentMethod,
     const subscription = this.subscriptions
         .create({
             plan,
-            firstBillingDate: waitForSubs.length ? waitForSubs[0].paidThroughDate : null,
+            firstBillingDate: waitForSubs.length ? waitForSubs[0].billingPeriodEndDate : null,
             price: plan.price,
         })
         .addDiscounts(newSub => [
@@ -236,7 +236,7 @@ Customer.method("validSubscriptions", function validSubscriptions(activeDate) {
         .filter(item => item.processor.isActive())
         .sort((a, b) => {
             return b.plan.level === a.plan.level
-                ? b.paidThroughDate.getTime() - a.paidThroughDate.getTime()
+                ? b.billingPeriodEndDate.getTime() - a.billingPeriodEndDate.getTime()
                 : b.plan.level - a.plan.level;
         });
 });
