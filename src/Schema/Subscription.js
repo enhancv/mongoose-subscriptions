@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const shortid = require("shortid");
 const addmonths = require("addmonths");
+const adddays = require("../adddays");
 const ProcessorItem = require("./ProcessorItem");
 const Descriptor = require("./Descriptor");
 const originals = require("mongoose-originals");
@@ -52,24 +53,14 @@ const Subscription = new mongoose.Schema({
     updatedAt: Date,
 });
 
-function adddays(date, days) {
-    const result = new Date(date);
-    result.setDate(date.getDate() + days);
-    return result;
-}
-
-function addTrial(isTrail, trialDuration, trialDurationUnit, date) {
-    if (isTrail) {
-        switch (trialDurationUnit) {
-            case "day":
-                return adddays(date, trialDuration);
-            case "month":
-                return addmonths(date, trialDuration);
-            default:
-                return date;
-        }
-    } else {
-        return date;
+function addTrial(trialDuration, trialDurationUnit, date) {
+    switch (trialDurationUnit) {
+        case "day":
+            return adddays(date, trialDuration);
+        case "month":
+            return addmonths(date, trialDuration);
+        default:
+            return date;
     }
 }
 
@@ -86,25 +77,25 @@ Subscription.virtual("numberOfFreeBillingCycles").get(function numberOfFreeBilli
     }, 0);
 });
 
-Subscription.method("initializeDates", function initializeDates() {
-    const firstBillingDate = this.firstBillingDate || this.createdAt;
-
-    this.paidThroughDate =
-        this.paidThroughDate ||
-        addTrial(
-            this.isTrial,
-            this.trialDuration,
-            this.trialDurationUnit,
-            addmonths(firstBillingDate, this.plan.billingFrequency)
-        );
-
-    this.nextBillingDate = this.nextBillingDate || adddays(this.paidThroughDate, 1);
-    this.billingPeriodStartDate =
-        this.billingPeriodStartDate ||
-        addTrial(this.isTrial, this.trialDuration, this.trialDurationUnit, firstBillingDate);
-
-    this.billingPeriodEndDate = this.billingPeriodEndDate || this.paidThroughDate;
-    this.billingDayOfMonth = this.billingDayOfMonth || this.nextBillingDate.getDate();
+Subscription.method("initializeDates", function initializeLocalDates() {
+    if (this.processor.state === ProcessorItem.LOCAL) {
+        if (this.isTrial) {
+            this.firstBillingDate =
+                this.firstBillingDate ||
+                addTrial(this.trialDuration, this.trialDurationUnit, this.createdAt);
+            this.nextBillingDate = this.nextBillingDate || this.firstBillingDate;
+            this.billingDayOfMonth = this.billingDayOfMonth || this.nextBillingDate.getDate();
+        } else {
+            this.firstBillingDate = this.firstBillingDate || this.createdAt;
+            this.paidThroughDate =
+                this.paidThroughDate ||
+                addmonths(this.firstBillingDate, this.plan.billingFrequency);
+            this.billingPeriodStartDate = this.billingPeriodStartDate || this.firstBillingDate;
+            this.billingPeriodEndDate = this.billingPeriodEndDate || this.paidThroughDate;
+            this.nextBillingDate = this.nextBillingDate || adddays(this.paidThroughDate, 1);
+            this.billingDayOfMonth = this.billingDayOfMonth || this.nextBillingDate.getDate();
+        }
+    }
 });
 
 Subscription.pre("save", function(next) {

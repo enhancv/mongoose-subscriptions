@@ -8,6 +8,7 @@ const NullProcessor = main.NullProcessor;
 const Customer = main.Customer;
 const assign = require("lodash/fp/assign");
 const pick = require("lodash/fp/pick");
+const initializeSubscriptionDates = require("../initializeSubscriptionDates");
 
 describe(
     "Customer",
@@ -70,6 +71,10 @@ describe(
                     },
                 ],
             });
+
+            this.customer.subscriptions = this.customer.subscriptions.map(sub =>
+                initializeSubscriptionDates(sub)
+            );
 
             this.processor = new NullProcessor();
         });
@@ -688,6 +693,10 @@ describe(
                     };
                 });
 
+                this.customer.subscriptions = this.customer.subscriptions.map(sub =>
+                    initializeSubscriptionDates(sub)
+                );
+
                 return this.customer.save().then(customer => {
                     const nowDate = new Date("2017-01-10");
                     const active = customer.activeSubscriptions(nowDate);
@@ -1129,6 +1138,10 @@ describe(
                         paymentMethodId: "three",
                     };
                 });
+
+                this.customer.subscriptions = this.customer.subscriptions.map(sub =>
+                    initializeSubscriptionDates(sub)
+                );
 
                 const newPlan = {
                     processorId: `new-plan-${test.plan.level}`,

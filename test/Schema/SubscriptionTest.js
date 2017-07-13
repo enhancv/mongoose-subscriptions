@@ -15,6 +15,7 @@ describe("Subscription", function() {
             plan: {
                 billingFrequency: 2,
             },
+            processor: { state: "local" },
             firstBillingDate: "2017-03-03",
         });
 
@@ -32,7 +33,8 @@ describe("Subscription", function() {
             plan: {
                 billingFrequency: 2,
             },
-            firstBillingDate: "2017-03-03",
+            processor: { state: "local" },
+            createdAt: "2017-03-03",
             isTrial: true,
             trialDuration: 4,
             trialDurationUnit: "day",
@@ -40,11 +42,12 @@ describe("Subscription", function() {
 
         sub.initializeDates();
 
-        assert.deepEqual(sub.paidThroughDate, new Date("2017-05-07"));
-        assert.deepEqual(sub.billingPeriodStartDate, new Date("2017-03-07"));
-        assert.deepEqual(sub.billingPeriodEndDate, new Date("2017-05-07"));
-        assert.deepEqual(sub.nextBillingDate, new Date("2017-05-08"));
-        assert.equal(sub.billingDayOfMonth, 8);
+        assert.deepEqual(sub.firstBillingDate, new Date("2017-03-07"));
+        assert.deepEqual(sub.paidThroughDate, null);
+        assert.deepEqual(sub.billingPeriodStartDate, null);
+        assert.deepEqual(sub.billingPeriodEndDate, null);
+        assert.deepEqual(sub.nextBillingDate, new Date("2017-03-07"));
+        assert.equal(sub.billingDayOfMonth, 7);
     });
 
     it("Should initialize dates correctly with initializeDates and trial in months", function() {
@@ -52,7 +55,8 @@ describe("Subscription", function() {
             plan: {
                 billingFrequency: 2,
             },
-            firstBillingDate: "2017-03-03",
+            processor: { state: "local" },
+            createdAt: "2017-03-03",
             isTrial: true,
             trialDuration: 2,
             trialDurationUnit: "month",
@@ -60,11 +64,12 @@ describe("Subscription", function() {
 
         sub.initializeDates();
 
-        assert.deepEqual(sub.paidThroughDate, new Date("2017-07-03"));
-        assert.deepEqual(sub.billingPeriodStartDate, new Date("2017-05-03"));
-        assert.deepEqual(sub.billingPeriodEndDate, new Date("2017-07-03"));
-        assert.deepEqual(sub.nextBillingDate, new Date("2017-07-04"));
-        assert.equal(sub.billingDayOfMonth, 4);
+        assert.deepEqual(sub.firstBillingDate, new Date("2017-05-03"));
+        assert.deepEqual(sub.paidThroughDate, null);
+        assert.deepEqual(sub.billingPeriodStartDate, null);
+        assert.deepEqual(sub.billingPeriodEndDate, null);
+        assert.deepEqual(sub.nextBillingDate, new Date("2017-05-03"));
+        assert.equal(sub.billingDayOfMonth, 3);
     });
 
     it("addDiscounts", function() {
@@ -245,7 +250,7 @@ describe("Subscription", function() {
         });
     });
 
-    it("addDiscounts and numberOfFreeBillingCycles", function() {
+    it("addDiscounts", function() {
         const sub = new this.SubscriptionTest({
             _id: "four",
             price: 20,
@@ -267,22 +272,18 @@ describe("Subscription", function() {
             paymentMethodId: "three",
         });
 
-        sub
-            .addDiscounts(subscription => {
-                return [
-                    {
-                        __t: "DiscountPercent",
-                        amount: 20,
-                        percent: 100,
-                        numberOfBillingCycles: 3,
-                        currentBillingCycle: 2,
-                    },
-                ];
-            })
-            .initializeDates();
+        sub.addDiscounts(subscription => {
+            return [
+                {
+                    __t: "DiscountPercent",
+                    amount: 20,
+                    percent: 100,
+                    numberOfBillingCycles: 3,
+                    currentBillingCycle: 2,
+                },
+            ];
+        });
 
-        assert.deepEqual(new Date("2017-03-31T00:00:00.000Z"), sub.paidThroughDate);
-        assert.deepEqual(new Date("2017-04-01T00:00:00.000Z"), sub.nextBillingDate);
         assert.equal(2, sub.numberOfFreeBillingCycles);
     });
 });
