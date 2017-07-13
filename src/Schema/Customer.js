@@ -231,8 +231,7 @@ Customer.method("validSubscriptions", function validSubscriptions(activeDate) {
 
     return this.subscriptions
         .filter(item => !item.deleted)
-        .filter(item => item.billingPeriodStartDate < date)
-        .filter(item => item.billingPeriodEndDate >= date)
+        .filter(item => item.inBillingPeriod(date))
         .filter(item => item.processor.isActive())
         .sort((a, b) => {
             return b.plan.level === a.plan.level

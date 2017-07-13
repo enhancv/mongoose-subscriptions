@@ -121,6 +121,17 @@ Subscription.method("addDiscounts", function addDiscounts(callback) {
     return this;
 });
 
+Subscription.method("inBillingPeriod", function isValid(activeDate) {
+    const date = activeDate || new Date();
+
+    if (this.isTrial) {
+        const start = addTrial(-this.trialDuration, this.trialDurationUnit, this.firstBillingDate);
+        return start <= date && date <= this.firstBillingDate;
+    } else {
+        return this.billingPeriodStartDate <= date && date <= this.billingPeriodEndDate;
+    }
+});
+
 Subscription.plugin(originals, {
     fields: [
         "discounts",
