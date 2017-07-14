@@ -1,6 +1,6 @@
 function adddays(date, days) {
     const result = new Date(date);
-    result.setDate(date.getDate() + days);
+    result.setUTCDate(date.getUTCDate() + days);
     return result;
 }
 

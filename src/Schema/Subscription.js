@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const shortid = require("shortid");
 const addmonths = require("addmonths");
 const adddays = require("../adddays");
+const startofday = require("../startofday");
 const ProcessorItem = require("./ProcessorItem");
 const Descriptor = require("./Descriptor");
 const originals = require("mongoose-originals");
@@ -121,14 +122,19 @@ Subscription.method("addDiscounts", function addDiscounts(callback) {
     return this;
 });
 
-Subscription.method("inBillingPeriod", function isValid(activeDate) {
-    const date = activeDate || new Date();
+Subscription.method("inBillingPeriod", function inBillingPeriod(activeDate) {
+    const startOfDay = startofday(activeDate || new Date(), 1);
+    const endOfDay = startofday(adddays(activeDate || new Date(), 1));
 
     if (this.isTrial) {
-        const start = addTrial(-this.trialDuration, this.trialDurationUnit, this.firstBillingDate);
-        return start <= date && date <= this.firstBillingDate;
+        const trialStartDate = addTrial(
+            -this.trialDuration,
+            this.trialDurationUnit,
+            this.firstBillingDate
+        );
+        return trialStartDate <= endOfDay && startOfDay <= this.firstBillingDate;
     } else {
-        return this.billingPeriodStartDate <= date && date <= this.billingPeriodEndDate;
+        return this.billingPeriodStartDate <= endOfDay && startOfDay <= this.billingPeriodEndDate;
     }
 });
 

@@ -1,10 +1,12 @@
 const addmonths = require("addmonths");
 const adddays = require("../src/adddays");
+const startofday = require("../src/startofday");
 
 function initializeSubscriptionDays(sub) {
-    sub.firstBillingDate = sub.firstBillingDate || sub.createdAt;
+    sub.firstBillingDate = startofday(sub.firstBillingDate || sub.createdAt);
     sub.paidThroughDate =
-        sub.paidThroughDate || addmonths(sub.firstBillingDate, sub.plan.billingFrequency);
+        sub.paidThroughDate ||
+        startofday(addmonths(sub.firstBillingDate, sub.plan.billingFrequency));
     sub.billingPeriodStartDate = sub.billingPeriodStartDate || sub.firstBillingDate;
     sub.billingPeriodEndDate = sub.billingPeriodEndDate || sub.paidThroughDate;
     sub.nextBillingDate = sub.nextBillingDate || adddays(sub.paidThroughDate, 1);

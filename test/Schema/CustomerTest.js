@@ -526,9 +526,87 @@ describe(
                         state: "saved",
                     },
                 ],
+                nowDate: new Date("2017-01-10"),
                 expectedActive: ["one"],
                 expectedValid: ["one"],
                 expectedSubscription: "one",
+            },
+            {
+                name: "Sub with tricky timing",
+                subs: [
+                    {
+                        level: 2,
+                        billingFrequency: 1,
+                        firstBillingDate: new Date("2017-07-14T00:00:00.000Z"),
+                        _id: "one",
+                        status: "Canceled",
+                        isTrial: false,
+                        discounts: [],
+                        state: "saved",
+                    },
+                ],
+                nowDate: new Date("2017-07-13T22:08:23.000Z"),
+                expectedActive: [],
+                expectedValid: ["one"],
+                expectedSubscription: "one",
+            },
+            {
+                name: "Switching subs",
+                subs: [
+                    {
+                        level: 2,
+                        billingFrequency: 1,
+                        firstBillingDate: new Date("2017-07-14T00:00:00.000Z"),
+                        _id: "one",
+                        status: "Canceled",
+                        isTrial: false,
+                        discounts: [],
+                        state: "saved",
+                    },
+                    {
+                        level: 2,
+                        billingFrequency: 1,
+                        firstBillingDate: new Date("2017-08-15T00:00:00.000Z"),
+                        _id: "two",
+                        status: "Active",
+                        isTrial: false,
+                        discounts: [],
+                        state: "saved",
+                    },
+                ],
+                nowDate: new Date("2017-08-14T22:08:23.000Z"),
+                expectedActive: ["two"],
+                expectedValid: ["two", "one"],
+                expectedSubscription: "two",
+            },
+            {
+                name: "Switching subs next day",
+                subs: [
+                    {
+                        level: 2,
+                        billingFrequency: 1,
+                        firstBillingDate: new Date("2017-07-14T00:00:00.000Z"),
+                        _id: "one",
+                        status: "Canceled",
+                        isTrial: false,
+                        discounts: [],
+                        state: "saved",
+                    },
+                    {
+                        level: 2,
+                        billingFrequency: 1,
+                        firstBillingDate: new Date("2017-08-15T00:00:00.000Z"),
+                        _id: "two",
+                        status: "Active",
+                        isTrial: false,
+                        discounts: [],
+                        state: "saved",
+                    },
+                ],
+                nowDate: new Date("2017-08-15T22:08:23.000Z"),
+                expectedActive: ["two"],
+                expectedValid: ["two"],
+                expectedSubscription: "two",
             },
             {
                 name: "With expired sub",
@@ -543,6 +621,7 @@ describe(
                         state: "saved",
                     },
                 ],
+                nowDate: new Date("2017-01-10"),
                 expectedActive: [],
                 expectedValid: [],
                 expectedSubscription: null,
@@ -560,6 +639,7 @@ describe(
                         state: "saved",
                     },
                 ],
+                nowDate: new Date("2017-01-10"),
                 expectedActive: [],
                 expectedValid: ["one"],
                 expectedSubscription: "one",
@@ -605,6 +685,7 @@ describe(
                         state: "inital",
                     },
                 ],
+                nowDate: new Date("2017-01-10"),
                 expectedActive: ["three"],
                 expectedValid: ["one", "three"],
                 expectedSubscription: "one",
@@ -669,6 +750,7 @@ describe(
                         deleted: true,
                     },
                 ],
+                nowDate: new Date("2017-01-10"),
                 expectedActive: ["three", "five", "two", "one"],
                 expectedValid: ["three", "five", "two", "one"],
                 expectedSubscription: "three",
@@ -702,7 +784,7 @@ describe(
                 );
 
                 return this.customer.save().then(customer => {
-                    const nowDate = new Date("2017-01-10");
+                    const nowDate = test.nowDate;
                     const active = customer.activeSubscriptions(nowDate);
                     const valid = customer.validSubscriptions(nowDate);
                     const subscription = customer.subscription(nowDate);
