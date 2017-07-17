@@ -87,7 +87,7 @@ Customer.method("loadProcessor", function loadProcessor(processor) {
     if (!this.processor.id) {
         return this.save();
     }
-    return processor.load(this).then(customer => customer.removeInitial().save());
+    return processor.load(this.resetProcessor()).then(customer => customer.save());
 });
 
 Customer.method("saveProcessor", function saveProcessor(processor) {
@@ -113,9 +113,12 @@ Customer.method("cancelSubscriptions", function cancelSubscriptions() {
     return this;
 });
 
-Customer.method("removeInitial", function removeInitial() {
+Customer.method("resetProcessor", function resetProcessor() {
     ["addresses", "paymentMethods", "subscriptions"].forEach(name => {
         this[name] = this[name].filter(item => item.processor.state !== ProcessorItem.INITIAL);
+        this[name]
+            .filter(item => item.processor.state === ProcessorItem.CHANGED)
+            .forEach(item => (item.processor.state = ProcessorItem.SAVED));
     });
 
     return this;

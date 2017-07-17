@@ -844,7 +844,7 @@ describe(
             assert.deepEqual(this.customer.subscriptions.map(item => item.status), expected);
         });
 
-        it("Should correctly filter unsaved subscriptions", function() {
+        it("Should correctly filter unsaved and changed subscriptions", function() {
             this.customer.subscriptions = [
                 {
                     firstBillingDate: "2017-07-05T15:07:37.967Z",
@@ -893,6 +893,21 @@ describe(
                     discounts: [],
                     processor: { state: "inital" },
                 },
+                {
+                    firstBillingDate: "2017-07-05T15:07:37.967Z",
+                    plan: {
+                        name: "Basic",
+                        price: 4.99,
+                        processorId: "basic",
+                        level: 1,
+                        billingFrequency: 1,
+                    },
+                    _id: "s3",
+                    isTrial: false,
+                    statusHistory: [],
+                    discounts: [],
+                    processor: { state: "changed" },
+                },
             ];
 
             this.customer.addresses = [
@@ -931,11 +946,12 @@ describe(
                 },
             ];
 
-            this.customer.removeInitial();
+            this.customer.resetProcessor();
 
-            assert.deepEqual(this.customer.subscriptions.map(item => item._id), ["s0"]);
+            assert.deepEqual(this.customer.subscriptions.map(item => item._id), ["s0", "s3"]);
             assert.deepEqual(this.customer.paymentMethods.map(item => item._id), ["pm-1", "pm-2"]);
             assert.deepEqual(this.customer.addresses.map(item => item._id), ["a-1", "a-2"]);
+            assert.equal(this.customer.subscriptions.id("s3").processor.state, "saved");
         });
 
         it("Should correctly add address with data", function() {
