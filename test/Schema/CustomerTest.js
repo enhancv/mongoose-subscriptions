@@ -998,6 +998,7 @@ describe(
                     firstBillingDate: null,
                     discount: false,
                 },
+                nowDate: new Date("2017-01-10"),
             },
             {
                 name: "do not take lower level trials into account",
@@ -1018,6 +1019,7 @@ describe(
                     firstBillingDate: null,
                     discount: false,
                 },
+                nowDate: new Date("2017-01-10"),
             },
             {
                 name: "do not take higher level trials into account",
@@ -1038,6 +1040,7 @@ describe(
                     firstBillingDate: null,
                     discount: false,
                 },
+                nowDate: new Date("2017-01-10"),
             },
             {
                 name: "start after previous plan of equal level",
@@ -1058,6 +1061,7 @@ describe(
                     firstBillingDate: new Date("2017-02-02"),
                     discount: false,
                 },
+                nowDate: new Date("2017-01-10"),
             },
             {
                 name: "start after previous plan of higher level",
@@ -1078,6 +1082,7 @@ describe(
                     firstBillingDate: new Date("2017-02-02"),
                     discount: false,
                 },
+                nowDate: new Date("2017-01-10"),
             },
             {
                 name: "discount based on previous plan of lower level",
@@ -1098,6 +1103,7 @@ describe(
                     firstBillingDate: null,
                     discount: 7.42,
                 },
+                nowDate: new Date("2017-01-10"),
             },
             {
                 name: "start after previous canceled subscription",
@@ -1118,6 +1124,7 @@ describe(
                     firstBillingDate: new Date("2017-02-02"),
                     discount: false,
                 },
+                nowDate: new Date("2017-01-10"),
             },
             {
                 name: "start discount previous canceled subscription of lower level",
@@ -1138,6 +1145,7 @@ describe(
                     firstBillingDate: null,
                     discount: 7.42,
                 },
+                nowDate: new Date("2017-01-10"),
             },
             {
                 name: "no discount of local subscriptions",
@@ -1158,6 +1166,7 @@ describe(
                     firstBillingDate: null,
                     discount: false,
                 },
+                nowDate: new Date("2017-01-10"),
             },
             {
                 name: "start after latest subscription",
@@ -1186,6 +1195,7 @@ describe(
                     firstBillingDate: new Date("2017-02-08"),
                     discount: false,
                 },
+                nowDate: new Date("2017-01-10"),
             },
             {
                 name: "ignore pending subscriptions",
@@ -1214,11 +1224,41 @@ describe(
                     firstBillingDate: new Date("2017-02-02"),
                     discount: false,
                 },
+                nowDate: new Date("2017-01-10"),
+            },
+            {
+                name: "choose the best subscription before adding",
+                subs: [
+                    {
+                        _id: "one",
+                        level: 1,
+                        status: "Canceled",
+                        processorState: "saved",
+                        isTrial: false,
+                        firstBillingDate: "2017-07-17T00:00:00.000Z",
+                    },
+                    {
+                        _id: "two",
+                        level: 3,
+                        status: "Active",
+                        processorState: "saved",
+                        isTrial: false,
+                        firstBillingDate: "2017-07-17T00:00:00.000Z",
+                    },
+                ],
+                plan: {
+                    level: 2,
+                },
+                nowDate: new Date("2017-07-17 08:56:35.000Z"),
+                expected: {
+                    firstBillingDate: new Date("2017-08-17"),
+                    discount: false,
+                },
             },
         ];
 
         addSubscription.forEach(function(test) {
-            it(`Should addSubscription, ${test.name}`, function() {
+            it.only(`Should addSubscription, ${test.name}`, function() {
                 this.customer.subscriptions = test.subs.map(sub => {
                     return {
                         _id: sub._id,
@@ -1251,7 +1291,7 @@ describe(
                     billingFrequency: 1,
                     level: test.plan.level,
                 };
-                const nowDate = new Date("2017-01-10");
+                const nowDate = test.nowDate;
 
                 return this.customer.save().then(customer => {
                     const result = customer.addSubscription(

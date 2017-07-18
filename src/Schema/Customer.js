@@ -198,7 +198,7 @@ Customer.method("addSubscription", function addSubscription(plan, paymentMethod,
 
     const waitForSubs = nonTrialSubs
         .filter(item => item.plan.level >= plan.level)
-        .sort((a, b) => a.billingPeriodEndDate < b.billingPeriodEndDate);
+        .sort((a, b) => (b.billingPeriodEndDate < a.billingPeriodEndDate ? -1 : 1));
 
     const refundableSubs = nonTrialSubs
         .filter(item => item.plan.level < plan.level)
