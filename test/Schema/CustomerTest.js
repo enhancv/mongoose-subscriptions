@@ -1258,7 +1258,7 @@ describe(
         ];
 
         addSubscription.forEach(function(test) {
-            it.only(`Should addSubscription, ${test.name}`, function() {
+            it(`Should addSubscription, ${test.name}`, function() {
                 this.customer.subscriptions = test.subs.map(sub => {
                     return {
                         _id: sub._id,
