@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
 const shortid = require("shortid");
-const addmonths = require("addmonths");
-const adddays = require("../adddays");
-const startofday = require("../startofday");
+const XDate = require("xdate");
 const ProcessorItem = require("./ProcessorItem");
 const Descriptor = require("./Descriptor");
 const originals = require("mongoose-originals");
@@ -57,9 +55,9 @@ const Subscription = new mongoose.Schema({
 function addTrial(trialDuration, trialDurationUnit, date) {
     switch (trialDurationUnit) {
         case "day":
-            return adddays(date, trialDuration);
+            return new XDate(date, true).addDays(trialDuration);
         case "month":
-            return addmonths(date, trialDuration);
+            return new XDate(date, true).addMonths(trialDuration);
         default:
             return date;
     }
@@ -90,10 +88,11 @@ Subscription.method("initializeDates", function initializeLocalDates() {
             this.firstBillingDate = this.firstBillingDate || this.createdAt;
             this.paidThroughDate =
                 this.paidThroughDate ||
-                addmonths(this.firstBillingDate, this.plan.billingFrequency);
+                new XDate(this.firstBillingDate, true).addMonths(this.plan.billingFrequency);
             this.billingPeriodStartDate = this.billingPeriodStartDate || this.firstBillingDate;
             this.billingPeriodEndDate = this.billingPeriodEndDate || this.paidThroughDate;
-            this.nextBillingDate = this.nextBillingDate || adddays(this.paidThroughDate, 1);
+            this.nextBillingDate =
+                this.nextBillingDate || new XDate(this.paidThroughDate, true).addDays(1);
             this.billingDayOfMonth = this.billingDayOfMonth || this.nextBillingDate.getDate();
         }
     }
@@ -123,8 +122,9 @@ Subscription.method("addDiscounts", function addDiscounts(callback) {
 });
 
 Subscription.method("inBillingPeriod", function inBillingPeriod(activeDate) {
-    const startOfDay = startofday(activeDate || new Date(), 1);
-    const endOfDay = startofday(adddays(activeDate || new Date(), 1));
+    const date = activeDate || new Date();
+    const startOfDay = new XDate(date, true).clearTime();
+    const endOfDay = new XDate(date, true).addDays(1).clearTime();
 
     if (this.isTrial) {
         const trialStartDate = addTrial(

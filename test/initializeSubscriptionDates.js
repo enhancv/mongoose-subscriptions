@@ -1,15 +1,13 @@
-const addmonths = require("addmonths");
-const adddays = require("../src/adddays");
-const startofday = require("../src/startofday");
+const XDate = require("xdate");
 
 function initializeSubscriptionDays(sub) {
-    sub.firstBillingDate = startofday(sub.firstBillingDate || sub.createdAt);
+    sub.firstBillingDate = new XDate(sub.firstBillingDate || sub.createdAt, true).clearTime();
     sub.paidThroughDate =
         sub.paidThroughDate ||
-        startofday(addmonths(sub.firstBillingDate, sub.plan.billingFrequency));
+        new XDate(sub.firstBillingDate, true).addMonths(sub.plan.billingFrequency).clearTime();
     sub.billingPeriodStartDate = sub.billingPeriodStartDate || sub.firstBillingDate;
     sub.billingPeriodEndDate = sub.billingPeriodEndDate || sub.paidThroughDate;
-    sub.nextBillingDate = sub.nextBillingDate || adddays(sub.paidThroughDate, 1);
+    sub.nextBillingDate = sub.nextBillingDate || new XDate(sub.paidThroughDate).addDays(1);
     sub.billingDayOfMonth = sub.billingDayOfMonth || sub.nextBillingDate.getDate();
 
     return sub;

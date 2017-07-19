@@ -5,6 +5,7 @@ const sinon = require("sinon");
 const database = require("../database");
 const main = require("../../src");
 const NullProcessor = main.NullProcessor;
+const TransactionError = main.TransactionError;
 const Customer = main.Customer;
 const assign = require("lodash/fp/assign");
 const pick = require("lodash/fp/pick");
@@ -474,6 +475,38 @@ describe(
                 sinon.assert.calledOnce(spy);
                 sinon.assert.calledWith(spy, this.customer, "sub-id");
             });
+        });
+
+        it("Should have wokring transactions", function() {
+            return this.customer
+                .transactionBegin(new Date("2017-07-14T00:00:00.000Z"))
+                .then(customer => {
+                    let result = null;
+                    assert.throws(() => {
+                        result = customer.transactionBegin(new Date("2017-07-14T00:00:05.000Z"));
+                    }, TransactionError);
+                    return customer;
+                })
+                .then(customer => {
+                    return customer.transactionCommit();
+                })
+                .then(customer => {
+                    let result = null;
+                    assert.doesNotThrow(() => {
+                        result = customer.transactionBegin(new Date("2017-07-14T00:00:05.000Z"));
+                    }, TransactionError);
+                    return result;
+                })
+                .then(customer => {
+                    return customer.transactionRollback();
+                })
+                .then(customer => {
+                    let result = null;
+                    assert.doesNotThrow(() => {
+                        result = customer.transactionBegin(new Date("2017-07-14T00:00:05.000Z"));
+                    }, TransactionError);
+                    return result;
+                });
         });
 
         it("Should correctly apply refundProcessor", function() {

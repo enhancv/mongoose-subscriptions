@@ -6,7 +6,9 @@ const Transaction = require("./Transaction");
 const ProcessorItem = require("./ProcessorItem");
 const SubscriptionStatus = require("./Statuses/SubscriptionStatus");
 const DiscountPreviousSubscription = require("./Discount/PreviousSubscription");
+const TransactionError = require("../TransactionError");
 const originals = require("mongoose-originals");
+const XDate = require("xdate");
 
 const Customer = new mongoose.Schema({
     processor: {
@@ -26,6 +28,7 @@ const Customer = new mongoose.Schema({
         trim: true,
         match: /^([\w-.+]+@([\w-]+\.)+[\w-]{2,6})?$/,
     },
+    transactionStartedAt: Date,
     phone: String,
     addresses: [Address],
     paymentMethods: [PaymentMethod],
@@ -33,6 +36,8 @@ const Customer = new mongoose.Schema({
     subscriptions: [Subscription],
     transactions: [Transaction],
 });
+
+Customer.TRANSACTION_TIMEOUT = 30;
 
 const paymentMethods = Customer.path("paymentMethods");
 const transactions = Customer.path("transactions");
@@ -46,6 +51,26 @@ transactions.discriminator("TransactionCreditCard", Transaction.TransactionCredi
 transactions.discriminator("TransactionPayPalAccount", Transaction.TransactionPayPalAccount);
 transactions.discriminator("TransactionApplePayCard", Transaction.TransactionApplePayCard);
 transactions.discriminator("TransactionAndroidPayCard", Transaction.TransactionAndroidPayCard);
+
+Customer.method("transactionBegin", function transactionBegin(activeDate) {
+    const date = activeDate || new Date();
+    if (
+        this.transactionStartedAt &&
+        new XDate(this.transactionStartedAt).diffSeconds(date) < Customer.TRANSACTION_TIMEOUT
+    ) {
+        throw new TransactionError("Another payment operation is already in progress");
+    } else {
+        return this.set({ transactionStartedAt: date }).save();
+    }
+});
+
+Customer.method("transactionRollback", function transactionBegin(activeDate) {
+    return this.resetProcessor().set({ transactionStartedAt: null }).save();
+});
+
+Customer.method("transactionCommit", function transactionBegin(activeDate) {
+    return this.set({ transactionStartedAt: null }).save();
+});
 
 Customer.method("markChanged", function markChanged() {
     if (this.processor.id && this.isModified("name email phone ipAddress defaultPaymentMethodId")) {
