@@ -28,6 +28,57 @@ describe("Subscription", function() {
         assert.equal(sub.billingDayOfMonth, 4);
     });
 
+    it("Should calculate free billing cycles correctly without discounts", function() {
+        const sub = new this.SubscriptionTest({
+            plan: {
+                billingFrequency: 2,
+            },
+            processor: { state: "local" },
+            firstBillingDate: "2017-03-03",
+        });
+
+        sub.initializeDates();
+
+        assert.deepEqual(sub.numberOfFreeBillingCycles, 0);
+        assert.deepEqual(sub.paidThroughWithFreeDate, new Date("2017-05-03"));
+        assert.deepEqual(sub.nextBillingWithFreeDate, new Date("2017-05-04"));
+    });
+
+    it("Should calculate free billing cycles correctly with discounts", function() {
+        const sub = new this.SubscriptionTest({
+            plan: {
+                billingFrequency: 2,
+                price: 20,
+            },
+            discounts: [
+                {
+                    amount: 5,
+                    numberOfBillingCycles: 3,
+                    currentBillingCycle: 1,
+                },
+                {
+                    amount: 5,
+                    numberOfBillingCycles: 3,
+                    currentBillingCycle: 2,
+                },
+                {
+                    amount: 10,
+                    numberOfBillingCycles: 5,
+                    currentBillingCycle: 3,
+                },
+            ],
+            price: 20,
+            processor: { state: "local" },
+            firstBillingDate: "2017-03-03",
+        });
+
+        sub.initializeDates();
+
+        assert.deepEqual(sub.numberOfFreeBillingCycles, 2);
+        assert.deepEqual(sub.paidThroughWithFreeDate, new Date("2017-09-03"));
+        assert.deepEqual(sub.nextBillingWithFreeDate, new Date("2017-09-04"));
+    });
+
     it("Should initialize dates correctly with initializeDates and trial in days", function() {
         const sub = new this.SubscriptionTest({
             plan: {

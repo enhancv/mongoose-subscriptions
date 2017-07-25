@@ -76,6 +76,22 @@ Subscription.virtual("numberOfFreeBillingCycles").get(function numberOfFreeBilli
     }, 0);
 });
 
+Subscription.virtual("numberOfFreeMonths").get(function numberOfFreeMonths() {
+    return this.numberOfFreeBillingCycles * this.plan.billingFrequency;
+});
+
+Subscription.virtual("nextBillingWithFreeDate").get(function numberOfFreeMonths() {
+    return this.nextBillingDate
+        ? new XDate(this.nextBillingDate, true).addMonths(this.numberOfFreeMonths).toDate()
+        : null;
+});
+
+Subscription.virtual("paidThroughWithFreeDate").get(function numberOfFreeMonths() {
+    return this.paidThroughDate
+        ? new XDate(this.paidThroughDate, true).addMonths(this.numberOfFreeMonths).toDate()
+        : null;
+});
+
 Subscription.method("initializeDates", function initializeLocalDates() {
     if (this.processor.state === ProcessorItem.LOCAL) {
         if (this.isTrial) {
