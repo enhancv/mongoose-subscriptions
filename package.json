@@ -1,6 +1,6 @@
 {
     "name": "mongoose-subscriptions",
-    "version": "1.13.1",
+    "version": "1.13.2",
     "description": "Processor agnostic payment subscription backend",
     "main": "src/index.js",
     "repository": "git@github.com:enhancv/mongoose-subscriptions.git",
