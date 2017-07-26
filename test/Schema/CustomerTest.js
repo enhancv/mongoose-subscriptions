@@ -605,6 +605,27 @@ describe(
                 expectedSubscription: "one",
             },
             {
+                name: "Trial sub that trial has not yet ended",
+                subs: [
+                    {
+                        level: 2,
+                        billingFrequency: 1,
+                        firstBillingDate: new Date("2017-07-06T00:00:00.000Z"),
+                        billingPeriodStartDate: new Date("2017-07-06T00:00:00.000Z"),
+                        billingPeriodEndDate: new Date("2017-08-06T00:00:00.000Z"),
+                        _id: "one",
+                        status: "Canceled",
+                        isTrial: true,
+                        discounts: [],
+                        state: "saved",
+                    },
+                ],
+                nowDate: new Date("2017-06-01:08:23.000Z"),
+                expectedActive: [],
+                expectedValid: ["one"],
+                expectedSubscription: "one",
+            },
+            {
                 name: "Switching subs",
                 subs: [
                     {

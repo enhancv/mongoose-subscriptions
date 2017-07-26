@@ -154,17 +154,12 @@ Subscription.method("inBillingPeriod", function inBillingPeriod(activeDate) {
     const startOfDay = new XDate(date, true).clearTime();
     const endOfDay = new XDate(date, true).addDays(1).clearTime();
 
-    if (this.billingPeriodStartDate && this.billingPeriodEndDate) {
+    if (this.isTrial && startOfDay <= this.firstBillingDate) {
+        return true;
+    } else if (this.billingPeriodStartDate && this.billingPeriodEndDate) {
         const start = this.billingPeriodStartDate;
         const endDate = new XDate(this.billingPeriodEndWithFreeDate, true).addDays(1);
         return start <= endOfDay && startOfDay <= endDate;
-    } else if (this.isTrial) {
-        const trialStartDate = addTrial(
-            -this.trialDuration,
-            this.trialDurationUnit,
-            this.firstBillingDate
-        );
-        return trialStartDate <= endOfDay && startOfDay <= this.firstBillingDate;
     }
 });
 
