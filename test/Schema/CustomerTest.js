@@ -584,6 +584,27 @@ describe(
                 expectedSubscription: "one",
             },
             {
+                name: "Trial sub that trial has ended",
+                subs: [
+                    {
+                        level: 2,
+                        billingFrequency: 1,
+                        firstBillingDate: new Date("2017-07-06T00:00:00.000Z"),
+                        billingPeriodStartDate: new Date("2017-07-06T00:00:00.000Z"),
+                        billingPeriodEndDate: new Date("2017-08-06T00:00:00.000Z"),
+                        _id: "one",
+                        status: "Canceled",
+                        isTrial: true,
+                        discounts: [],
+                        state: "saved",
+                    },
+                ],
+                nowDate: new Date("2017-07-26:08:23.000Z"),
+                expectedActive: [],
+                expectedValid: ["one"],
+                expectedSubscription: "one",
+            },
+            {
                 name: "Switching subs",
                 subs: [
                     {
@@ -811,28 +832,30 @@ describe(
         activeSubs.forEach(function(test) {
             it(`Should get active subscriptions for ${test.name}`, function() {
                 this.customer.subscriptions = test.subs.map(sub => {
-                    return {
-                        _id: sub._id,
-                        plan: {
-                            processorId: `plan-${sub._id}`,
-                            price: 5,
-                            billingFrequency: sub.billingFrequency,
-                            level: sub.level,
-                        },
-                        isTrial: sub.isTrial,
-                        status: sub.status,
-                        deleted: sub.deleted,
-                        trialDuration: sub.trialDuration,
-                        trialDurationUnit: "day",
-                        firstBillingDate: sub.firstBillingDate,
-                        processor: { id: `sub-${sub._id}`, state: sub.state },
-                        paymentMethodId: "three",
-                    };
+                    return initializeSubscriptionDates(
+                        this.customer.subscriptions.create({
+                            _id: sub._id,
+                            plan: {
+                                processorId: `plan-${sub._id}`,
+                                price: 5,
+                                billingFrequency: sub.billingFrequency,
+                                level: sub.level,
+                            },
+                            isTrial: sub.isTrial,
+                            status: sub.status,
+                            discounts: sub.discounts,
+                            deleted: sub.deleted,
+                            trialDuration: sub.trialDuration,
+                            trialDurationUnit: "day",
+                            firstBillingDate: sub.firstBillingDate,
+                            billingPeriodStartDate: sub.billingPeriodStartDate,
+                            billingPeriodEndDate: sub.billingPeriodEndDate,
+                            paidThroughDate: sub.paidThroughDate,
+                            processor: { id: `sub-${sub._id}`, state: sub.state },
+                            paymentMethodId: "three",
+                        })
+                    );
                 });
-
-                this.customer.subscriptions = this.customer.subscriptions.map(sub =>
-                    initializeSubscriptionDates(sub)
-                );
 
                 return this.customer.save().then(customer => {
                     const nowDate = test.nowDate;

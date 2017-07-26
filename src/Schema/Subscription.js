@@ -86,6 +86,12 @@ Subscription.virtual("nextBillingWithFreeDate").get(function numberOfFreeMonths(
         : null;
 });
 
+Subscription.virtual("firstBillingWithFreeDate").get(function numberOfFreeMonths() {
+    return this.firstBillingDate
+        ? new XDate(this.firstBillingDate, true).addMonths(this.numberOfFreeMonths).toDate()
+        : null;
+});
+
 Subscription.virtual("paidThroughWithFreeDate").get(function numberOfFreeMonths() {
     return this.paidThroughDate
         ? new XDate(this.paidThroughDate, true).addMonths(this.numberOfFreeMonths).toDate()
@@ -148,17 +154,17 @@ Subscription.method("inBillingPeriod", function inBillingPeriod(activeDate) {
     const startOfDay = new XDate(date, true).clearTime();
     const endOfDay = new XDate(date, true).addDays(1).clearTime();
 
-    if (this.isTrial) {
+    if (this.billingPeriodStartDate && this.billingPeriodEndDate) {
+        const start = this.billingPeriodStartDate;
+        const endDate = new XDate(this.billingPeriodEndWithFreeDate, true).addDays(1);
+        return start <= endOfDay && startOfDay <= endDate;
+    } else if (this.isTrial) {
         const trialStartDate = addTrial(
             -this.trialDuration,
             this.trialDurationUnit,
             this.firstBillingDate
         );
         return trialStartDate <= endOfDay && startOfDay <= this.firstBillingDate;
-    } else if (this.billingPeriodStartDate && this.billingPeriodEndDate) {
-        const start = this.billingPeriodStartDate;
-        const endDate = new XDate(this.billingPeriodEndWithFreeDate, true).addDays(1);
-        return start <= endOfDay && startOfDay <= endDate;
     }
 });
 
