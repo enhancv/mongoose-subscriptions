@@ -74,9 +74,9 @@ describe("Subscription", function() {
 
         sub.initializeDates();
 
-        assert.deepEqual(sub.numberOfFreeBillingCycles, 2);
-        assert.deepEqual(sub.paidThroughWithFreeDate, new Date("2017-09-03"));
-        assert.deepEqual(sub.nextBillingWithFreeDate, new Date("2017-09-04"));
+        assert.deepEqual(sub.numberOfFreeBillingCycles, 1);
+        assert.deepEqual(sub.paidThroughWithFreeDate, new Date("2017-07-03"));
+        assert.deepEqual(sub.nextBillingWithFreeDate, new Date("2017-07-04"));
     });
 
     it("Should initialize dates correctly with initializeDates and trial in days", function() {
@@ -206,7 +206,7 @@ describe("Subscription", function() {
                     __t: "DiscountAmount",
                 },
             ],
-            expected: 2,
+            expected: 1,
         },
         {
             name: "several discounts without total price",
@@ -264,7 +264,7 @@ describe("Subscription", function() {
                     currentBillingCycle: 3,
                 },
             ],
-            expected: 2,
+            expected: 1,
         },
         {
             name: "discount with 0 current billing cycle",
@@ -275,7 +275,7 @@ describe("Subscription", function() {
                     currentBillingCycle: 0,
                 },
             ],
-            expected: 4,
+            expected: 3,
         },
     ];
 
@@ -335,6 +335,6 @@ describe("Subscription", function() {
             ];
         });
 
-        assert.equal(2, sub.numberOfFreeBillingCycles);
+        assert.equal(1, sub.numberOfFreeBillingCycles);
     });
 });

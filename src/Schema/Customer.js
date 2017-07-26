@@ -92,36 +92,41 @@ Customer.method("markChanged", function markChanged() {
     return this;
 });
 
-Customer.method("cancelProcessor", function cancelProcessor(processor, subscriptionId) {
-    this.setSnapshotOriginal();
-    return processor.cancelSubscription(this, subscriptionId).then(customer => {
-        customer.clearSnapshotOriginal();
-        return customer.save();
+Customer.method("execProcessor", function execProcessor() {
+    return this;
+});
+
+Customer.method("execProcessorWrapper", function execProcessorWrapper(fn) {
+    this.setSnapshotOriginal().execProcessor();
+    return fn().then(customer => {
+        customer.constructor.emit("execProcessor", customer);
+        return customer.clearSnapshotOriginal().save();
     });
 });
 
+Customer.method("cancelProcessor", function cancelProcessor(processor, subscriptionId) {
+    return this.execProcessorWrapper(
+        () => processor.cancelSubscription(this, subscriptionId),
+        true
+    );
+});
+
 Customer.method("refundProcessor", function refundProcessor(processor, transactionId, amount) {
-    this.setSnapshotOriginal();
-    return processor.refundTransaction(this, transactionId, amount).then(customer => {
-        customer.clearSnapshotOriginal();
-        return customer.save();
-    });
+    return this.execProcessorWrapper(
+        () => processor.refundTransaction(this, transactionId, amount),
+        true
+    );
 });
 
 Customer.method("loadProcessor", function loadProcessor(processor) {
     if (!this.processor.id) {
         return this.save();
     }
-    return processor.load(this.resetProcessor()).then(customer => customer.save());
+    return this.execProcessorWrapper(() => processor.load(this.resetProcessor()), true);
 });
 
 Customer.method("saveProcessor", function saveProcessor(processor) {
-    this.setSnapshotOriginal();
-    this.markChanged();
-    return processor.save(this).then(customer => {
-        customer.clearSnapshotOriginal();
-        return customer.save();
-    });
+    return this.execProcessorWrapper(() => processor.save(this.markChanged()), true);
 });
 
 Customer.method("cancelSubscriptions", function cancelSubscriptions() {
