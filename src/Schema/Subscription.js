@@ -92,6 +92,12 @@ Subscription.virtual("paidThroughWithFreeDate").get(function numberOfFreeMonths(
         : null;
 });
 
+Subscription.virtual("billingPeriodEndWithFreeDate").get(function numberOfFreeMonths() {
+    return this.billingPeriodEndDate
+        ? new XDate(this.billingPeriodEndDate, true).addMonths(this.numberOfFreeMonths).toDate()
+        : null;
+});
+
 Subscription.method("initializeDates", function initializeLocalDates() {
     if (this.processor.state === ProcessorItem.LOCAL) {
         if (this.isTrial) {
@@ -150,7 +156,9 @@ Subscription.method("inBillingPeriod", function inBillingPeriod(activeDate) {
         );
         return trialStartDate <= endOfDay && startOfDay <= this.firstBillingDate;
     } else {
-        return this.billingPeriodStartDate <= endOfDay && startOfDay <= this.billingPeriodEndDate;
+        const start = this.billingPeriodStartDate;
+        const endDate = new XDate(this.billingPeriodEndWithFreeDate, true).addDays(1);
+        return this.billingPeriodStartDate <= endOfDay && startOfDay <= endDate;
     }
 });
 

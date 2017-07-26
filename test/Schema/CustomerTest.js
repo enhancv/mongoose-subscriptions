@@ -638,7 +638,7 @@ describe(
                 ],
                 nowDate: new Date("2017-08-15T22:08:23.000Z"),
                 expectedActive: ["two"],
-                expectedValid: ["two"],
+                expectedValid: ["two", "one"],
                 expectedSubscription: "two",
             },
             {
@@ -674,6 +674,24 @@ describe(
                 ],
                 nowDate: new Date("2017-01-10"),
                 expectedActive: [],
+                expectedValid: ["one"],
+                expectedSubscription: "one",
+            },
+            {
+                name: "Last day sub",
+                subs: [
+                    {
+                        _id: "one",
+                        level: 2,
+                        status: "Active",
+                        isTrial: false,
+                        firstBillingDate: "2017-06-26",
+                        billingFrequency: 1,
+                        state: "saved",
+                    },
+                ],
+                nowDate: new Date("2017-07-27"),
+                expectedActive: ["one"],
                 expectedValid: ["one"],
                 expectedSubscription: "one",
             },
