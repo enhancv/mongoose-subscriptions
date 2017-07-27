@@ -287,7 +287,7 @@ describe(
             {
                 name: "unused address data",
                 customer: {},
-                paymentMethod: { nonce: "nonce-1", __t: "PayPalAccount" },
+                paymentMethod: { nonce: "nonce-1", __t: "PayPalAccount", _id: "new-pt" },
                 address: { name: "Pesho Change" },
                 expected: {
                     addresses: [
@@ -306,12 +306,19 @@ describe(
                     ],
                     paymentMethods: [
                         {
-                            processor: { state: "changed", id: "id-paymentMethod" },
-                            nonce: "nonce-1",
+                            processor: { state: "saved", id: "id-paymentMethod" },
+                            nonce: null,
                             __t: "PayPalAccount",
                             billingAddressId: "one",
                             email: "test@example.com",
                             _id: "three",
+                        },
+                        {
+                            __t: "PayPalAccount",
+                            nonce: "nonce-1",
+                            billingAddressId: "one",
+                            processor: { state: "inital" },
+                            _id: "new-pt",
                         },
                     ],
                 },
@@ -348,6 +355,45 @@ describe(
                         {
                             billingAddressId: "one",
                             __t: "CreditCard",
+                            nonce: "nonce-1",
+                            processor: { state: "inital" },
+                            _id: "new-pt",
+                        },
+                    ],
+                },
+            },
+            {
+                name: "same payment type, but paypal",
+                customer: {},
+                paymentMethod: { nonce: "nonce-1", __t: "PayPalAccount", _id: "new-pt" },
+                address: { name: "Pesho Change" },
+                expected: {
+                    addresses: [
+                        {
+                            processor: { state: "changed", id: "id-address" },
+                            postalCode: "1000",
+                            extendedAddress: "floor 3",
+                            streetAddress: "Tsarigradsko Shose 4",
+                            locality: "Sofia",
+                            country: "BG",
+                            name: "Pesho Change",
+                            company: "Example company",
+                            phone: "123123123",
+                            _id: "one",
+                        },
+                    ],
+                    paymentMethods: [
+                        {
+                            processor: { state: "saved", id: "id-paymentMethod" },
+                            __t: "PayPalAccount",
+                            billingAddressId: "one",
+                            nonce: null,
+                            email: "test@example.com",
+                            _id: "three",
+                        },
+                        {
+                            billingAddressId: "one",
+                            __t: "PayPalAccount",
                             nonce: "nonce-1",
                             processor: { state: "inital" },
                             _id: "new-pt",
@@ -440,8 +486,7 @@ describe(
 
         setDefaultPaymentMethod.forEach(function(test) {
             it(`Should process setDefaultPaymentMethod for ${test.name}`, function() {
-                return this.customer.save().then(customer => {
-                    Object.assign(customer, test.customer);
+                return this.customer.set(test.customer).save().then(customer => {
                     const paymentMethod = customer.setDefaultPaymentMethod(
                         test.paymentMethod,
                         test.address
@@ -451,6 +496,7 @@ describe(
 
                     assert.deepEqual(result.addresses, test.expected.addresses);
                     assert.deepEqual(result.paymentMethods, test.expected.paymentMethods);
+                    assert.deepEqual(result.defaultPaymentMethodId, test.paymentMethod._id);
                 });
             });
         });

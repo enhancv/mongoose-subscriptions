@@ -180,7 +180,7 @@ Customer.method("setDefaultPaymentMethod", function setDefaultPaymentMethod(
     const currentAddress = (current && current.billingAddress()) || this.getUnusedAddress();
     let paymentMethod;
 
-    if (current && paymentMethodData.__t === current.__t) {
+    if (current && paymentMethodData.__t === current.__t && current.__t !== "PayPalAccount") {
         paymentMethod = Object.assign(current, paymentMethodData);
     } else {
         paymentMethod = this.paymentMethods.create(paymentMethodData);
