@@ -268,7 +268,7 @@ Customer.method("validSubscriptions", function validSubscriptions(activeDate) {
         .filter(item => item.processor.isActive())
         .sort((a, b) => {
             return b.plan.level === a.plan.level
-                ? b.billingPeriodEndDate.getTime() - a.billingPeriodEndDate.getTime()
+                ? b.billingPeriodEndDate < a.billingPeriodEndDate ? -1 : 1
                 : b.plan.level - a.plan.level;
         });
 });
