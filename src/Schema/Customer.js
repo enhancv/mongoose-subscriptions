@@ -64,11 +64,11 @@ Customer.method("transactionBegin", function transactionBegin(activeDate) {
     }
 });
 
-Customer.method("transactionRollback", function transactionBegin(activeDate) {
+Customer.method("transactionRollback", function transactionRollback(activeDate) {
     return this.resetProcessor().set({ transactionStartedAt: null }).save();
 });
 
-Customer.method("transactionCommit", function transactionBegin(activeDate) {
+Customer.method("transactionCommit", function transactionCommit(activeDate) {
     return this.set({ transactionStartedAt: null }).save();
 });
 
