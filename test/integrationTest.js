@@ -91,6 +91,7 @@ describe(
                         price: 4.99,
                         _id: "rkZglz2drb",
                         billingDayOfMonth: 16,
+                        currentBillingCycle: 2,
                         billingPeriodEndDate: new Date("2017-08-15T00:00:00.000Z"),
                         billingPeriodStartDate: new Date("2017-07-16T00:00:00.000Z"),
                         descriptor: {
@@ -130,6 +131,7 @@ describe(
                         },
                         status: "Active",
                         price: 65.94,
+                        currentBillingCycle: 1,
                         firstBillingDate: new Date("2017-07-16T00:00:00.000Z"),
                         paymentMethodId: "Skgefh_HW",
                         nextBillingDate: new Date("2018-01-16T00:00:00.000Z"),

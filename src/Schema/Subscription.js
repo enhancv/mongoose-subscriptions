@@ -28,6 +28,10 @@ const Subscription = new mongoose.Schema({
     paidThroughDate: Date,
     failureCount: Number,
     daysPastDue: Number,
+    currentBillingCycle: {
+        type: Number,
+        min: 0,
+    },
     billingPeriodEndDate: Date,
     billingPeriodStartDate: Date,
     billingDayOfMonth: Number,
