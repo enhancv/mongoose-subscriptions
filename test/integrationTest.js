@@ -326,6 +326,7 @@ describe(
                         discounts: [],
                         statusHistory: [],
                         isTrial: false,
+                        currentBillingCycle: 0,
                         createdAt: user.subscriptions[2].createdAt,
                         price: 19.99,
                         firstBillingDate: new Date("2018-01-15"),
