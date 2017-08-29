@@ -31,6 +31,7 @@ const Subscription = new mongoose.Schema({
     currentBillingCycle: {
         type: Number,
         min: 0,
+        default: 0,
     },
     billingPeriodEndDate: Date,
     billingPeriodStartDate: Date,
