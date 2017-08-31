@@ -501,6 +501,137 @@ describe(
             });
         });
 
+        const setDefaultPaymentMethodAddress = [
+            {
+                name: "unused address data",
+                customer: {
+                    addresses: [
+                        {
+                            _id: "two",
+                            name: "Pesho Peshev Stoevski",
+                            processor: { id: "id-address", state: "saved" },
+                        },
+                    ],
+                    paymentMethods: [],
+                    defaultPaymentMethodId: null,
+                },
+                address: { name: "Pesho Change" },
+                expected: {
+                    addresses: [
+                        {
+                            processor: { state: "changed", id: "id-address" },
+                            name: "Pesho Change",
+                            _id: "two",
+                        },
+                    ],
+                    paymentMethods: [],
+                },
+            },
+            {
+                name: "Customer without default payment method new address",
+                customer: {},
+                address: { name: "Pesho Change" },
+                expected: {
+                    addresses: [
+                        {
+                            processor: { state: "changed", id: "id-address" },
+                            postalCode: "1000",
+                            extendedAddress: "floor 3",
+                            streetAddress: "Tsarigradsko Shose 4",
+                            locality: "Sofia",
+                            country: "BG",
+                            name: "Pesho Change",
+                            company: "Example company",
+                            phone: "123123123",
+                            _id: "one",
+                        },
+                    ],
+                    paymentMethods: [
+                        {
+                            processor: { state: "saved", id: "id-paymentMethod" },
+                            __t: "PayPalAccount",
+                            billingAddressId: "one",
+                            nonce: null,
+                            email: "test@example.com",
+                            _id: "three",
+                        },
+                    ],
+                },
+            },
+            {
+                name: "Customer without addresses",
+                customer: {
+                    addresses: [],
+                },
+                address: { name: "Pesho New", _id: "new-addr" },
+                expected: {
+                    addresses: [
+                        {
+                            processor: { state: "inital" },
+                            name: "Pesho New",
+                            _id: "new-addr",
+                        },
+                    ],
+                    paymentMethods: [
+                        {
+                            processor: { state: "changed", id: "id-paymentMethod" },
+                            __t: "PayPalAccount",
+                            billingAddressId: "new-addr",
+                            nonce: null,
+                            email: "test@example.com",
+                            _id: "three",
+                        },
+                    ],
+                },
+            },
+            {
+                name: "Customer without initial paymentMethod",
+                customer: {
+                    addresses: [],
+                    paymentMethods: [
+                        {
+                            processor: { state: "inital" },
+                            __t: "PayPalAccount",
+                            email: "test@example.com",
+                            _id: "three",
+                        },
+                    ],
+                },
+                address: { name: "Pesho New", _id: "new-addr" },
+                expected: {
+                    addresses: [
+                        {
+                            processor: { state: "inital" },
+                            name: "Pesho New",
+                            _id: "new-addr",
+                        },
+                    ],
+                    paymentMethods: [
+                        {
+                            processor: { state: "inital" },
+                            __t: "PayPalAccount",
+                            billingAddressId: "new-addr",
+                            nonce: null,
+                            email: "test@example.com",
+                            _id: "three",
+                        },
+                    ],
+                },
+            },
+        ];
+
+        setDefaultPaymentMethodAddress.forEach(function(test) {
+            it(`Should process setDefaultPaymentMethodAddress for ${test.name}`, function() {
+                return this.customer.set(test.customer).save().then(customer => {
+                    customer.setDefaultPaymentMethodAddress(test.address);
+                    const result = customer.markChanged().toObject();
+
+                    assert.deepEqual(result.addresses, test.expected.addresses);
+                    assert.deepEqual(result.paymentMethods, test.expected.paymentMethods);
+                });
+            });
+        });
+
         it("Should correctly apply saveProcessor", function() {
             const markChangedSpy = sinon.spy(this.customer, "markChanged");
             const spy = sinon.stub(this.processor, "save").resolves(this.customer);

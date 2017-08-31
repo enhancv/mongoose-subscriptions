@@ -172,39 +172,55 @@ Customer.method("getUnusedAddress", function getUnusedAddress() {
         );
     });
 });
+
 Customer.method("setDefaultPaymentMethod", function setDefaultPaymentMethod(
     paymentMethodData,
     addressData
 ) {
     const current = this.defaultPaymentMethod();
-    const currentAddress = (current && current.billingAddress()) || this.getUnusedAddress();
     let paymentMethod;
 
     if (current && paymentMethodData.__t === current.__t && current.__t !== "PayPalAccount") {
         paymentMethod = Object.assign(current, paymentMethodData);
     } else {
-        paymentMethod = this.paymentMethods.create(paymentMethodData);
+        paymentMethod = this.paymentMethods.create(
+            Object.assign(
+                current ? { billingAddressId: current.billingAddressId } : {},
+                paymentMethodData
+            )
+        );
         this.paymentMethods.push(paymentMethod);
     }
 
+    this.defaultPaymentMethodId = paymentMethod._id;
+
     if (addressData) {
-        let address;
-
-        if (currentAddress) {
-            address = Object.assign(currentAddress, addressData);
-        } else {
-            address = this.addresses.create(addressData);
-            this.addresses.push(address);
-        }
-
-        if (address._id) {
-            paymentMethod.billingAddressId = address._id;
-        }
+        this.setDefaultPaymentMethodAddress(addressData);
     }
 
-    this.defaultPaymentMethodId = paymentMethod;
-
     return paymentMethod;
+});
+
+Customer.method("setDefaultPaymentMethodAddress", function setDefaultPaymentMethodAddress(
+    addressData
+) {
+    const current = this.defaultPaymentMethod();
+    const currentAddress = (current && current.billingAddress()) || this.getUnusedAddress();
+
+    let address;
+
+    if (currentAddress) {
+        address = Object.assign(currentAddress, addressData);
+    } else {
+        address = this.addresses.create(addressData);
+        this.addresses.push(address);
+    }
+
+    if (current && address._id) {
+        current.billingAddressId = address._id;
+    }
+
+    return address;
 });
 
 Customer.method("addPaymentMethodNonce", function addPaymentMethodNonce(nonce, address) {
