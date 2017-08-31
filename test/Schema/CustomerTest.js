@@ -769,6 +769,7 @@ describe(
                         firstBillingDate: new Date("2017-07-06T00:00:00.000Z"),
                         billingPeriodStartDate: new Date("2017-07-06T00:00:00.000Z"),
                         billingPeriodEndDate: new Date("2017-08-06T00:00:00.000Z"),
+                        paidThroughDate: new Date("2017-08-06T00:00:00.000Z"),
                         _id: "one",
                         status: "Canceled",
                         isTrial: true,
@@ -782,6 +783,28 @@ describe(
                 expectedSubscription: "one",
             },
             {
+                name: "Paid through date different than billingPeriodEndDate",
+                subs: [
+                    {
+                        level: 2,
+                        billingFrequency: 1,
+                        firstBillingDate: new Date("2017-06-01T00:00:00.000Z"),
+                        billingPeriodStartDate: new Date("2017-08-01T00:00:00.000Z"),
+                        billingPeriodEndDate: new Date("2017-08-31T00:00:00.000Z"),
+                        paidThroughDate: new Date("2017-07-31T00:00:00.000Z"),
+                        _id: "one",
+                        status: "Canceled",
+                        isTrial: true,
+                        discounts: [],
+                        state: "saved",
+                    },
+                ],
+                nowDate: new Date("2017-08-29:08:23.000Z"),
+                expectedActive: [],
+                expectedValid: [],
+                expectedSubscription: null,
+            },
+            {
                 name: "Trial sub that trial has not yet ended",
                 subs: [
                     {
@@ -790,6 +813,7 @@ describe(
                         firstBillingDate: new Date("2017-07-06T00:00:00.000Z"),
                         billingPeriodStartDate: new Date("2017-07-06T00:00:00.000Z"),
                         billingPeriodEndDate: new Date("2017-08-06T00:00:00.000Z"),
+                        paidThroughDate: new Date("2017-08-06T00:00:00.000Z"),
                         _id: "one",
                         status: "Canceled",
                         isTrial: true,
