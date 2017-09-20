@@ -39,9 +39,10 @@ DiscountCoupon.build = function build(subscription, coupon, currentDate) {
 
 DiscountCoupon.pre("save", function preSave(next) {
     if (this.coupon && this.isAddedToProcessor) {
-        const couponFind = this.coupon instanceof Coupon
-            ? Promise.resolve(this.coupon)
-            : Coupon.findById(this.coupon);
+        const couponFind =
+            this.coupon instanceof Coupon
+                ? Promise.resolve(this.coupon)
+                : Coupon.findById(this.coupon);
 
         couponFind.then(coupon => {
             coupon.usedCount += 1;

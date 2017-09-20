@@ -27,7 +27,9 @@ describe(
                     assert.ok(user instanceof Visitor, "user should be Visitor");
                     assert.ok(!(user instanceof Customer), "user should not be a Customer");
 
-                    return Customer.hydrate(user.toObject()).increment().save();
+                    return Customer.hydrate(user.toObject())
+                        .increment()
+                        .save();
                 })
                 .then(customer => {
                     assert.ok(customer instanceof User, "customer should be User");

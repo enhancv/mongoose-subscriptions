@@ -65,7 +65,9 @@ Customer.method("transactionBegin", function transactionBegin(activeDate) {
 });
 
 Customer.method("transactionRollback", function transactionRollback(activeDate) {
-    return this.resetProcessor().set({ transactionStartedAt: null }).save();
+    return this.resetProcessor()
+        .set({ transactionStartedAt: null })
+        .save();
 });
 
 Customer.method("transactionCommit", function transactionCommit(activeDate) {

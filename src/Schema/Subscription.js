@@ -149,23 +149,13 @@ Subscription.method("addDiscounts", function addDiscounts(callback) {
             return itemObject;
         });
 
-    let discountPreviousSubscription = null;
-    const discounts = allDiscounts.filter(item => {
-        if (item.__t === "DiscountPreviousSubscription") {
-            discountPreviousSubscription = item;
-            return false;
-        }
+    const preservedDiscounts = allDiscounts.filter(item => item.preserve);
 
-        return true;
-    });
-
-    this.discounts = discounts
+    this.discounts = allDiscounts
+        .filter(item => !item.preserve)
         .sort((a, b) => b.amount - a.amount)
-        .slice(0, 1);
-
-    if (discountPreviousSubscription) {
-        this.discounts.push(discountPreviousSubscription);
-    }
+        .slice(0, 1)
+        .concat(preservedDiscounts);
 
     return this;
 });
