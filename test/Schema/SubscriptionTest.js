@@ -170,6 +170,41 @@ describe("Subscription", function() {
         assert.deepEqual(new Date("2017-03-03"), sub.paidThroughDate, "Keep old paidThroughDate");
     });
 
+    it("addDiscounts when there are preserved discounts", function() {
+        const sub = new this.SubscriptionTest({
+            _id: "four",
+            price: 20,
+            plan: {
+                processorId: "new-plan-id",
+                price: 20,
+                currency: "USD",
+            },
+            processor: { id: "id-subscription", state: "saved" },
+            status: "Active",
+            discounts: [
+                {
+                    subscriptionId: "five",
+                    __t: "DiscountPreviousSubscription",
+                    amount: 10,
+                },
+            ],
+            paidThroughDate: "2017-03-03",
+            paymentMethodId: "three",
+        });
+
+        sub.addDiscounts(subscription => {
+            return [
+                {
+                    __t: "DiscountPercent",
+                    amount: 5,
+                    percent: 25,
+                },
+            ];
+        });
+
+        assert.equal(2, sub.discounts.length);
+    });
+
     const numberOfFreeBillingCyclesTests = [
         {
             name: "no discounts",

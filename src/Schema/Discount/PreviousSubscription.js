@@ -8,6 +8,10 @@ const Schema = mongoose.Schema;
 const DiscountPreviousSubscription = new Schema(
     {
         subscriptionId: String,
+        preserve: {
+            type: Boolean,
+            default: true,
+        },
     },
     { _id: false }
 );

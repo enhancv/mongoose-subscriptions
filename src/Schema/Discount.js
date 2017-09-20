@@ -24,9 +24,9 @@ const Discount = new mongoose.Schema(
             default: 0,
             min: 0,
         },
-        group: {
-            type: String,
-            default: "General",
+        preserve: {
+            type: Boolean,
+            default: false,
         },
         name: String,
     },

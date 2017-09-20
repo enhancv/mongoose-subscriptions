@@ -486,18 +486,21 @@ describe(
 
         setDefaultPaymentMethod.forEach(function(test) {
             it(`Should process setDefaultPaymentMethod for ${test.name}`, function() {
-                return this.customer.set(test.customer).save().then(customer => {
-                    const paymentMethod = customer.setDefaultPaymentMethod(
-                        test.paymentMethod,
-                        test.address
-                    );
+                return this.customer
+                    .set(test.customer)
+                    .save()
+                    .then(customer => {
+                        const paymentMethod = customer.setDefaultPaymentMethod(
+                            test.paymentMethod,
+                            test.address
+                        );
 
-                    const result = customer.markChanged().toObject();
+                        const result = customer.markChanged().toObject();
 
-                    assert.deepEqual(result.addresses, test.expected.addresses);
-                    assert.deepEqual(result.paymentMethods, test.expected.paymentMethods);
-                    assert.deepEqual(result.defaultPaymentMethodId, test.paymentMethod._id);
-                });
+                        assert.deepEqual(result.addresses, test.expected.addresses);
+                        assert.deepEqual(result.paymentMethods, test.expected.paymentMethods);
+                        assert.deepEqual(result.defaultPaymentMethodId, test.paymentMethod._id);
+                    });
             });
         });
 
@@ -622,13 +625,16 @@ describe(
 
         setDefaultPaymentMethodAddress.forEach(function(test) {
             it(`Should process setDefaultPaymentMethodAddress for ${test.name}`, function() {
-                return this.customer.set(test.customer).save().then(customer => {
-                    customer.setDefaultPaymentMethodAddress(test.address);
-                    const result = customer.markChanged().toObject();
+                return this.customer
+                    .set(test.customer)
+                    .save()
+                    .then(customer => {
+                        customer.setDefaultPaymentMethodAddress(test.address);
+                        const result = customer.markChanged().toObject();
 
-                    assert.deepEqual(result.addresses, test.expected.addresses);
-                    assert.deepEqual(result.paymentMethods, test.expected.paymentMethods);
-                });
+                        assert.deepEqual(result.addresses, test.expected.addresses);
+                        assert.deepEqual(result.paymentMethods, test.expected.paymentMethods);
+                    });
             });
         });
 

@@ -140,16 +140,22 @@ Subscription.method("addDiscounts", function addDiscounts(callback) {
     const newDiscounts = callback(this);
     const oldDiscounts = this.discounts;
 
-    this.discounts = oldDiscounts
+    const allDiscounts = oldDiscounts
         .concat(newDiscounts)
         .filter(item => item)
         .map(item => {
             const itemObject = this.discounts.create(item);
             itemObject.initOriginals();
             return itemObject;
-        })
+        });
+
+    const preservedDiscounts = allDiscounts.filter(item => item.preserve);
+
+    this.discounts = allDiscounts
+        .filter(item => !item.preserve)
         .sort((a, b) => b.amount - a.amount)
-        .slice(0, 1);
+        .slice(0, 1)
+        .concat(preservedDiscounts);
 
     return this;
 });
