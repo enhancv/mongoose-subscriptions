@@ -242,7 +242,9 @@ Customer.method("addPaymentMethodNonce", function addPaymentMethodNonce(nonce, a
 
 Customer.method("addSubscription", function addSubscription(plan, paymentMethod, activeDate) {
     const date = activeDate || new Date();
-    const nonTrialSubs = this.validSubscriptions(date).filter(item => !item.isTrial);
+    const nonTrialSubs = this.validSubscriptions(date).filter(
+        item => !(item.isTrial && item.processor.state === ProcessorItem.LOCAL)
+    );
 
     const waitForSubs = nonTrialSubs
         .filter(item => item.plan.level >= plan.level)
