@@ -1593,6 +1593,58 @@ describe(
                     discount: false,
                 },
             },
+            {
+                name: "test sub ",
+                subs: [
+                    {
+                        _id: "one",
+                        plan: {
+                            price: 19.99,
+                            processorId: "pro-monthly",
+                            name: "Pro - Monthly",
+                            record: "SubscriptionPlan",
+                            level: 2,
+                            billingFrequency: 1,
+                        },
+                        status: "Canceled",
+                        firstBillingDate: new Date("2017-08-29T00:00:00.000Z"),
+                        paymentMethodId: "BJFRxkDS0QW",
+                        paidThroughDate: new Date("2017-09-28T00:00:00.000Z"),
+                        billingPeriodStartDate: new Date("2017-08-29T00:00:00.000Z"),
+                        billingPeriodEndDate: new Date("2017-09-28T00:00:00.000Z"),
+                        nextBillingDate: new Date("2017-09-29T00:00:00.000Z"),
+                        trialDuration: 3,
+                        trialDurationUnit: "month",
+                        isTrial: true,
+                        statusHistory: [
+                            {
+                                timestamp: new Date("2017-09-04T21:56:51.000Z"),
+                                status: "Canceled",
+                                record: "SubscriptionStatus",
+                            },
+                            {
+                                timestamp: new Date("2017-08-29T12:14:31.000Z"),
+                                status: "Active",
+                                record: "SubscriptionStatus",
+                            },
+                            {
+                                timestamp: new Date("2017-05-28T21:46:37.000Z"),
+                                status: "Active",
+                                record: "SubscriptionStatus",
+                            },
+                        ],
+                        processorState: "saved",
+                    },
+                ],
+                plan: {
+                    level: 1,
+                },
+                nowDate: new Date("2017-09-04T21:56:53.000Z"),
+                expected: {
+                    firstBillingDate: new Date("2017-09-28"),
+                    discount: false,
+                },
+            },
         ];
 
         addSubscription.forEach(function(test) {
@@ -1607,9 +1659,15 @@ describe(
                             level: sub.level,
                         },
                         isTrial: sub.isTrial,
+                        trialDuration: sub.trialDuration,
+                        trialDurationUnit: sub.trialDurationUnit,
                         status: sub.status,
                         price: 10,
                         firstBillingDate: sub.firstBillingDate,
+                        paidThroughDate: sub.paidThroughDate,
+                        billingPeriodStartDate: sub.billingPeriodStartDate,
+                        billingPeriodEndDate: sub.billingPeriodEndDate,
+                        nextBillingDate: sub.nextBillingDate,
                         statusHistory: sub.statusHistory,
                         processor: {
                             id: `sub-${sub._id}`,
