@@ -162,11 +162,21 @@ describe("Subscription", function() {
                     __t: "DiscountPercent",
                     amount: 15,
                     percent: 75,
+                    numberOfBillingCycles: 1,
+                    currentBillingCycle: 1,
+                },
+                {
+                    __t: "DiscountPercent",
+                    amount: 15,
+                    percent: 75,
+                    numberOfBillingCycles: 1,
+                    currentBillingCycle: 0,
                 },
             ];
         });
 
         assert.equal("DiscountPercent", sub.discounts[0].__t);
+        assert.equal(0, sub.discounts[0].currentBillingCycle);
         assert.deepEqual(new Date("2017-03-03"), sub.paidThroughDate, "Keep old paidThroughDate");
     });
 

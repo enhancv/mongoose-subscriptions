@@ -153,7 +153,12 @@ Subscription.method("addDiscounts", function addDiscounts(callback) {
 
     this.discounts = allDiscounts
         .filter(item => !item.preserve)
-        .sort((a, b) => b.amount - a.amount)
+        .sort(
+            (a, b) =>
+                b.amount == a.amount
+                    ? b.numberOfBillingcyclesLeft - a.numberOfBillingcyclesLeft
+                    : b.amount - a.amount
+        )
         .slice(0, 1)
         .concat(preservedDiscounts);
 
