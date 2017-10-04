@@ -47,27 +47,50 @@ const User = mongoose.model('User', UserSchema);
 Structure
 ---------
 ```
-┌──────────────────┐
-│     Customer     │
-└┬┬┬┬┬─────────────┘
- │││││     ┌────────────────────────┐
- ││││└────▶│       [Address]        │
- ││││      └────────────────────────┘
- ││││    ┌────────────────────────┐
- │││└───▶│    [Payment Method]    │
- │││     └────────────────────────┘
- │││   ┌────────────────────────┐
- ││└──▶│     [Subscription]     │
- ││    └────────────────────────┘
- ││  ┌────────────────────────┐
- │└─▶│     [Transaction]      │
- │   └────────────────────────┘
- │  ┌────────────────────────┐
- └─▶│ defaultPaymentMethodId │
-    └────────────────────────┘
+   ┌────────────────────┐
+   │Customer            │
+   │--------            │
+   │User Info           │
+┌─▶│[Addresses]         │
+│  │[Payment Methods]   │
+│  │[Subscriptions]     │
+│  │[Transactions]      │
+│  └────────────────────┘
+│      ┌──────────────────────┐
+│      │Address               │
+│      │-------               │
+│      │ID                    │
+├──────│Street                │◀─┐
+│      │Country               │  │
+│      │etc.                  │  │
+│      └──────────────────────┘  │
+│      ┌──────────────────────┐──┘
+│      │Payment Method        │
+│      │--------------        │
+├──────│ID                    │◀─┐
+│      │addressId             │  │
+│      │processor token       │  │
+│      └──────────────────────┘  │
+│      ┌──────────────────────┐──┘
+│      │Subscription          │
+│      │------------          │
+│      │ID                    │
+├──────│paymentMethodId       │◀─┐
+│      │plan (id, price, name)│  │
+│      │billing dates         │  │
+│      └──────────────────────┘  │
+│      ┌──────────────────────┐  │
+│      │Transaction           │  │
+│      │-----------           │  │
+│      │ID                    │  │
+│      │plan                  │  │
+└──────│price                 │──┘
+       │subscriptionId        │
+       │payment Info          │
+       │dates                 │
+       └──────────────────────┘
 ```
-
-All the connections between objects are done with internal local ids, without using the ids from the payment processor. This way you can establish relationships between objects even before they are sent there.
+All the connections between objects are done with internal local ids, without using the ids from the payment processor. This way you can establish relationships between objects even before they are sent to the processor.
 
 ```javascript
 const customer = new Customer({
@@ -161,6 +184,7 @@ Methods that change the state of the object itself.
 | `.activeSubscriptions(activeDate)`                      | Return all subscriptions that currently have active state |
 | `.validSubscriptions(activeDate)`                       | Return all subs that are active based on firstBillingDate and paidThroughDate. Exclude all the subs that have not had an active status ever, and order by largest level first |
 | `.subscription(activeDate)`                             | Return the first object from validSubscriptions |
+| `.resetProcessor()`                                     | Remove any unsaved data e.g. "inital" addresses / payment methods / subscriptions. This is useful when there was an error but that data was already saved to the database.
 
 Methods that change the state in the processor (e.g. braintree). Take `processor` as a first argument.
 

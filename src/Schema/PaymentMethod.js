@@ -36,6 +36,6 @@ function billingAddress() {
 
 PaymentMethod.method("billingAddress", billingAddress);
 
-PaymentMethod.plugin(originals, { fields: ["billingAddressId", "nonce"] });
+PaymentMethod.plugin(originals, { fields: ["billingAddressId", "nonce", "processor"] });
 
 module.exports = PaymentMethod;

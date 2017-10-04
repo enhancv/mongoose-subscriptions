@@ -48,6 +48,7 @@ Discount.virtual("isAddedToProcessor").get(function isAddedToProcessor() {
         this.processor.state === ProcessorItem.SAVED
     );
 });
+
 Discount.virtual("numberOfBillingcyclesLeft").get(function isAddedToProcessor() {
     return this.numberOfBillingCycles - this.currentBillingCycle;
 });

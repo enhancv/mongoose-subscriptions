@@ -94,41 +94,32 @@ Customer.method("markChanged", function markChanged() {
     return this;
 });
 
-Customer.method("execProcessor", function execProcessor() {
-    return this;
-});
-
-Customer.method("execProcessorWrapper", function execProcessorWrapper(fn) {
-    this.setSnapshotOriginal().execProcessor();
-    return fn().then(customer => {
-        customer.constructor.emit("execProcessor", customer);
-        return customer.clearSnapshotOriginal().save();
-    });
-});
-
 Customer.method("cancelProcessor", function cancelProcessor(processor, subscriptionId) {
-    return this.execProcessorWrapper(
-        () => processor.cancelSubscription(this, subscriptionId),
-        true
-    );
+    this.setSnapshotOriginal();
+    return processor
+        .cancelSubscription(this, subscriptionId)
+        .then(customer => customer.clearSnapshotOriginal().save());
 });
 
 Customer.method("refundProcessor", function refundProcessor(processor, transactionId, amount) {
-    return this.execProcessorWrapper(
-        () => processor.refundTransaction(this, transactionId, amount),
-        true
-    );
+    this.setSnapshotOriginal();
+
+    return processor
+        .refundTransaction(this, transactionId, amount)
+        .then(customer => customer.clearSnapshotOriginal().save());
 });
 
 Customer.method("loadProcessor", function loadProcessor(processor) {
     if (!this.processor.id) {
         return this.save();
+    } else {
+        return processor.load(this.resetProcessor()).then(customer => customer.save());
     }
-    return this.execProcessorWrapper(() => processor.load(this.resetProcessor()), true);
 });
 
 Customer.method("saveProcessor", function saveProcessor(processor) {
-    return this.execProcessorWrapper(() => processor.save(this.markChanged()), true);
+    this.setSnapshotOriginal().markChanged();
+    return processor.save(this).then(customer => customer.save());
 });
 
 Customer.method("cancelSubscriptions", function cancelSubscriptions() {
@@ -182,9 +173,11 @@ Customer.method("setDefaultPaymentMethod", function setDefaultPaymentMethod(
     const current = this.defaultPaymentMethod();
     let paymentMethod;
 
+    // Modify an existing payment method if its the same type and is not Paypal
     if (current && paymentMethodData.__t === current.__t && current.__t !== "PayPalAccount") {
         paymentMethod = Object.assign(current, paymentMethodData);
     } else {
+        // Reuse the billing address of the previous payment method
         paymentMethod = this.paymentMethods.create(
             Object.assign(
                 current ? { billingAddressId: current.billingAddressId } : {},

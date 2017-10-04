@@ -1275,42 +1275,6 @@ describe(
             assert.equal(this.customer.addresses[1], result);
         });
 
-        it("Should test processor hooks", function() {
-            const spy = sinon.spy();
-
-            CustomerSchema.pre("execProcessor", function(next) {
-                spy("pre", this, 1);
-                next();
-            });
-
-            CustomerSchema.pre("execProcessor", function(next) {
-                spy("pre", this, 2);
-                next();
-            });
-
-            CustomerSchema.post("execProcessor", function() {
-                spy("post", this, 3);
-            });
-
-            CustomerSchema.post("execProcessor", function() {
-                spy("post", this, 4);
-            });
-
-            const CustomerTest = mongoose.model("CustomerTest", CustomerSchema);
-            const customer = new CustomerTest(this.customer.toObject());
-
-            return customer
-                .saveProcessor(this.processor)
-                .then(() => new Promise(resolve => setTimeout(resolve, 50)))
-                .then(() => {
-                    assert.deepEqual(spy.getCall(0).args, ["pre", customer, 1]);
-                    assert.deepEqual(spy.getCall(1).args, ["pre", customer, 2]);
-
-                    assert.deepEqual(spy.getCall(2).args, ["post", customer, 3]);
-                    assert.deepEqual(spy.getCall(3).args, ["post", customer, 4]);
-                });
-        });
-
         it("Should correctly add addPaymentMethodNonce", function() {
             const nonce = "test-nonce";
             const result = this.customer.addPaymentMethodNonce(nonce, this.customer.addresses[0]);
