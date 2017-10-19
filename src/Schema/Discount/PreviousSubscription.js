@@ -32,7 +32,11 @@ DiscountPreviousSubscription.build = function build(subscription, previous, curr
     }
 
     const remaining = (subStart - prevStart) / (prevEnd - prevStart);
-    const amount = previous.price - previous.price * remaining;
+    if (!remaining) {
+        return null;
+    }
+
+    const amount = previous.price;
 
     return {
         subscriptionId: previous._id,
