@@ -1403,7 +1403,7 @@ describe(
                 },
                 expected: {
                     firstBillingDate: null,
-                    discount: 7.42,
+                    discount: 10,
                 },
                 nowDate: new Date("2017-01-10"),
             },
@@ -1445,7 +1445,7 @@ describe(
                 },
                 expected: {
                     firstBillingDate: null,
-                    discount: 7.42,
+                    discount: 10,
                 },
                 nowDate: new Date("2017-01-10"),
             },
@@ -1554,7 +1554,7 @@ describe(
                 nowDate: new Date("2017-07-17 08:56:35.000Z"),
                 expected: {
                     firstBillingDate: new Date("2017-08-17"),
-                    discount: false,
+                    discount: 10,
                 },
             },
             {

@@ -35,7 +35,7 @@ describe("Schema/Discount/PreviousSubscription", function() {
                 billingPeriodEndDate: new Date("2016-09-29"),
                 billingPeriodStartDate: new Date("2016-08-29"),
             },
-            expected: 0.0,
+            expected: 10,
         },
         {
             name: "half expired subscription",
@@ -46,7 +46,7 @@ describe("Schema/Discount/PreviousSubscription", function() {
                 billingPeriodEndDate: new Date("2016-09-29"),
                 billingPeriodStartDate: new Date("2016-08-29"),
             },
-            expected: 4.84,
+            expected: 10,
         },
         {
             name: "amoust expired subscription",
@@ -57,7 +57,7 @@ describe("Schema/Discount/PreviousSubscription", function() {
                 billingPeriodEndDate: new Date("2016-09-29"),
                 billingPeriodStartDate: new Date("2016-08-29"),
             },
-            expected: 0.65,
+            expected: 10,
         },
         {
             name: "already finished subscription",
