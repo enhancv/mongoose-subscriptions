@@ -410,9 +410,9 @@ mongodb@2.2.27:
     mongodb-core "2.1.11"
     readable-stream "2.2.7"
 
-mongoose-originals@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/mongoose-originals/-/mongoose-originals-2.0.0.tgz#3bd052f828a2bb09e2890793227f30439beae7b1"
+mongoose-originals@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/mongoose-originals/-/mongoose-originals-2.0.1.tgz#eb0388e02b986f4d82abd758029c6e50701d573a"
   dependencies:
     lodash "^4.17.4"
 
