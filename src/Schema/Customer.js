@@ -247,15 +247,17 @@ Customer.method("addSubscription", function addSubscription(plan, paymentMethod,
         .filter(item => item.plan.level < plan.level)
         .filter(item => item.processor.state !== ProcessorItem.LOCAL);
 
-    const subscription = this.subscriptions
-        .create({
-            plan,
-            firstBillingDate: waitForSubs.length ? waitForSubs[0].billingPeriodEndDate : null,
-            price: plan.price,
-        })
-        .addDiscounts(newSub => [
+    let subscription = this.subscriptions.create({
+        plan,
+        firstBillingDate: waitForSubs.length ? waitForSubs[0].billingPeriodEndDate : null,
+        price: plan.price,
+    });
+
+    if (!waitForSubs.length) {
+        subscription = subscription.addDiscounts(newSub => [
             DiscountPreviousSubscription.build(newSub, refundableSubs[0], activeDate),
         ]);
+    }
 
     if (paymentMethod) {
         subscription.paymentMethodId = paymentMethod._id;
