@@ -199,6 +199,10 @@ Subscription.path("discounts").discriminator("DiscountAmount", Discount.Discount
 Subscription.path("discounts").discriminator("DiscountPercent", Discount.DiscountPercent);
 Subscription.path("discounts").discriminator("DiscountCoupon", Discount.DiscountCoupon);
 Subscription.path("discounts").discriminator(
+    "DiscountCouponRestricted",
+    Discount.DiscountCouponRestricted
+);
+Subscription.path("discounts").discriminator(
     "DiscountPreviousSubscription",
     Discount.DiscountPreviousSubscription
 );

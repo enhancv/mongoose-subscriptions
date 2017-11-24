@@ -3,6 +3,8 @@ const CouponError = require("../CouponError");
 const CouponAmount = require("./Coupon/Amount");
 const CouponPercent = require("./Coupon/Percent");
 
+const Schema = mongoose.Schema;
+
 const Coupon = new mongoose.Schema({
     name: String,
     description: String,
@@ -19,6 +21,7 @@ const Coupon = new mongoose.Schema({
         default: 0,
         min: 0,
     },
+    uses: [{ _id: Schema.Types.ObjectId, createdAt: Date }],
     usedCountMax: {
         type: Number,
         min: 0,

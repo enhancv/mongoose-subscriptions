@@ -3,6 +3,7 @@ const ProcessorItem = require("./ProcessorItem");
 const DiscountAmount = require("./Discount/Amount");
 const DiscountPercent = require("./Discount/Percent");
 const DiscountCoupon = require("./Discount/Coupon");
+const DiscountCouponRestricted = require("./Discount/CouponRestricted");
 const DiscountPreviousSubscription = require("./Discount/PreviousSubscription");
 const originals = require("mongoose-originals");
 
@@ -36,6 +37,7 @@ const Discount = new mongoose.Schema(
 Discount.DiscountAmount = DiscountAmount;
 Discount.DiscountPercent = DiscountPercent;
 Discount.DiscountCoupon = DiscountCoupon;
+Discount.DiscountCouponRestricted = DiscountCouponRestricted;
 Discount.DiscountPreviousSubscription = DiscountPreviousSubscription;
 
 Discount.plugin(originals, { fields: ["processor"] });
