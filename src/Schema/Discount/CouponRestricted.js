@@ -16,7 +16,6 @@ const DiscountCouponRestricted = new Schema(
         },
         customerId: {
             type: Schema.Types.ObjectId,
-            required: true,
         },
     },
     { _id: false }
