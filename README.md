@@ -156,7 +156,7 @@ const gateway = braintree.connect({
     privateKey: ...,
 });
 
-const processor new Processor(gateway, plans);
+const processor = new Processor(gateway, plans);
 
 const address = customer.addAddress({ ... });
 const paymentMethod = customer.addPaymentMethodNonce(nonce, address);
