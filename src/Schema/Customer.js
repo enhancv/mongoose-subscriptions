@@ -35,7 +35,7 @@ const Customer = new mongoose.Schema({
     defaultPaymentMethodId: String,
     subscriptions: [Subscription],
     transactions: [Transaction],
-}, { versionKey: false });
+});
 
 Customer.TRANSACTION_TIMEOUT = 30;
 
@@ -95,6 +95,8 @@ Customer.method("markChanged", function markChanged() {
 });
 
 Customer.method("cancelProcessor", function cancelProcessor(processor, subscriptionId) {
+    delete this.__v;
+
     this.setSnapshotOriginal();
     return processor
         .cancelSubscription(this, subscriptionId)
@@ -102,6 +104,7 @@ Customer.method("cancelProcessor", function cancelProcessor(processor, subscript
 });
 
 Customer.method("refundProcessor", function refundProcessor(processor, transactionId, amount) {
+    delete this.__v;
     this.setSnapshotOriginal();
 
     return processor
@@ -110,6 +113,8 @@ Customer.method("refundProcessor", function refundProcessor(processor, transacti
 });
 
 Customer.method("loadProcessor", function loadProcessor(processor) {
+    delete this.__v;
+
     if (!this.processor.id) {
         return this.save();
     } else {
@@ -118,6 +123,8 @@ Customer.method("loadProcessor", function loadProcessor(processor) {
 });
 
 Customer.method("saveProcessor", function saveProcessor(processor) {
+    delete this.__v;
+
     this.setSnapshotOriginal().markChanged();
     return processor.save(this).then(customer => customer.save());
 });
