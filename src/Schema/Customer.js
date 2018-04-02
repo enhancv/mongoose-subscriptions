@@ -35,7 +35,7 @@ const Customer = new mongoose.Schema({
     defaultPaymentMethodId: String,
     subscriptions: [Subscription],
     transactions: [Transaction],
-});
+}, { versionKey: false });
 
 Customer.TRANSACTION_TIMEOUT = 30;
 
