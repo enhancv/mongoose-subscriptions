@@ -1605,7 +1605,7 @@ describe(
                 },
                 nowDate: new Date("2017-09-04T21:56:53.000Z"),
                 expected: {
-                    firstBillingDate: new Date("2017-09-28"),
+                    firstBillingDate: new Date("2017-08-29"),
                     discount: false,
                 },
             },
