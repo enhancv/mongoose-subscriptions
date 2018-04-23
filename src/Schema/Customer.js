@@ -239,7 +239,7 @@ Customer.method("addSubscription", function addSubscription(plan, paymentMethod,
         item => !(item.isTrial && item.processor.state === ProcessorItem.LOCAL)
     );
 
-    const waitForSubs = nonTrialSubs
+    const waitForSubs = this.validSubscriptions(date)
         .filter(
             item => item.plan.level >= plan.level && item.status !== SubscriptionStatus.PAST_DUE
         )
@@ -251,7 +251,11 @@ Customer.method("addSubscription", function addSubscription(plan, paymentMethod,
 
     let subscription = this.subscriptions.create({
         plan,
-        firstBillingDate: waitForSubs.length ? waitForSubs[0].billingPeriodEndDate : null,
+        firstBillingDate: waitForSubs.length
+            ? waitForSubs[0].isTrial
+              ? waitForSubs[0].firstBillingDate
+              : waitForSubs[0].billingPeriodEndDate
+            : null,
         price: plan.price,
     });
 
