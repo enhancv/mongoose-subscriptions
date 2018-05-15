@@ -18,7 +18,6 @@ const Customer = new mongoose.Schema({
     ipAddress: String,
     name: {
         type: String,
-        required: true,
         trim: true,
     },
     email: {
