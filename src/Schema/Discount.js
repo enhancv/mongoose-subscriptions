@@ -30,6 +30,10 @@ const Discount = new mongoose.Schema(
             default: false,
         },
         name: String,
+        createdAt: {
+            type: Date,
+            default: Date.now,
+        },
     },
     { _id: false }
 );
