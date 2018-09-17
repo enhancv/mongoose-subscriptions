@@ -120,7 +120,9 @@ Customer.method("loadProcessor", function loadProcessor(processor) {
 
 Customer.method("saveProcessor", function saveProcessor(processor) {
     this.setSnapshotOriginal().markChanged();
-    return processor.save(this).then(customer => customer.set({ lastProcessorSave: new Date() }).save());
+    return processor
+        .save(this)
+        .then(customer => customer.set({ lastProcessorSave: new Date() }).save());
 });
 
 Customer.method("cancelSubscriptions", function cancelSubscriptions() {
