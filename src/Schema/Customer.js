@@ -29,6 +29,7 @@ const Customer = new mongoose.Schema({
         match: /^([\w-.+]+@([\w-]+\.)+[\w-]{2,6})?$/,
     },
     transactionStartedAt: Date,
+    lastProcessorSave: Date,
     phone: String,
     addresses: [Address],
     paymentMethods: [PaymentMethod],
@@ -119,7 +120,7 @@ Customer.method("loadProcessor", function loadProcessor(processor) {
 
 Customer.method("saveProcessor", function saveProcessor(processor) {
     this.setSnapshotOriginal().markChanged();
-    return processor.save(this).then(customer => customer.save());
+    return processor.save(this).then(customer => customer.set({ lastProcessorSave: new Date() }).save());
 });
 
 Customer.method("cancelSubscriptions", function cancelSubscriptions() {
