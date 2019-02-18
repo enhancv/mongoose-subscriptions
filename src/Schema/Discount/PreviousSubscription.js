@@ -24,8 +24,8 @@ DiscountPreviousSubscription.build = function build(subscription, previous, curr
     const date = currentDate || new Date();
 
     const prevEnd = (previous.billingPeriodEndDate || date).getTime();
-    const prevStart = (previous.billingPeriodStartDate || date).getTime();
-    const subStart = (subscription.firstBillingDate || date).getTime();
+    const prevStart = (previous.createdAt || date).getTime();
+    const subStart = (subscription.createdAt || date).getTime();
 
     if (prevStart > subStart || prevEnd < subStart) {
         return null;
