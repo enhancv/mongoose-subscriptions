@@ -30,10 +30,12 @@ describe("Schema/Discount/PreviousSubscription", function() {
             name: "full refund subscription",
             subscription: {
                 firstBillingDate: new Date("2016-09-29"),
+                createdAt: new Date("2016-09-29"),
             },
             previous: {
                 billingPeriodEndDate: new Date("2016-09-29"),
                 billingPeriodStartDate: new Date("2016-08-29"),
+                createdAt: new Date("2016-08-29"),
             },
             expected: 10,
         },
@@ -41,10 +43,12 @@ describe("Schema/Discount/PreviousSubscription", function() {
             name: "half expired subscription",
             subscription: {
                 firstBillingDate: new Date("2016-09-14"),
+                createdAt: new Date("2016-09-14"),
             },
             previous: {
                 billingPeriodEndDate: new Date("2016-09-29"),
                 billingPeriodStartDate: new Date("2016-08-29"),
+                createdAt: new Date("2016-08-29"),
             },
             expected: 10,
         },
@@ -52,10 +56,12 @@ describe("Schema/Discount/PreviousSubscription", function() {
             name: "amoust expired subscription",
             subscription: {
                 firstBillingDate: new Date("2016-09-27"),
+                createdAt: new Date("2016-09-27"),
             },
             previous: {
                 billingPeriodEndDate: new Date("2016-09-29"),
                 billingPeriodStartDate: new Date("2016-08-29"),
+                createdAt: new Date("2016-08-29"),
             },
             expected: 10,
         },
@@ -74,10 +80,12 @@ describe("Schema/Discount/PreviousSubscription", function() {
             name: "not yet started subscription",
             subscription: {
                 firstBillingDate: new Date("2016-07-27"),
+                createdAt: new Date("2016-07-27"),
             },
             previous: {
                 billingPeriodEndDate: new Date("2016-09-29"),
                 billingPeriodStartDate: new Date("2016-08-29"),
+                createdAt: new Date("2016-08-29"),
             },
             expected: false,
         },
