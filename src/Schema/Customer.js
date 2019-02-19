@@ -260,6 +260,7 @@ Customer.method("addSubscription", function addSubscription(plan, paymentMethod,
               : waitForSubs[0].billingPeriodEndDate
             : null,
         price: plan.price,
+        createdAt: date,
     });
 
     if (!waitForSubs.length) {
