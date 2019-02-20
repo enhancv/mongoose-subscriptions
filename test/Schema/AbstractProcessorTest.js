@@ -10,6 +10,7 @@ describe("AbstractProcessor", function() {
         { method: "save", error: /Save customer/ },
         { method: "cancelSubscription", error: /Cancel subscription/ },
         { method: "refundTransaction", error: /Refund transaction/ },
+        { method: "voidTransaction", error: /Void transaction/ },
     ];
 
     methods.forEach(function(test) {

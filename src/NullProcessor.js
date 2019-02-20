@@ -19,6 +19,10 @@ class NullProcessor extends AbstractProcessor {
     refundTransaction(customer, transactionId, amount) {
         return Promise.resolve(customer);
     }
+
+    voidTransaction(customer, transactionId) {
+        return Promise.resolve(customer);
+    }
 }
 
 module.exports = NullProcessor;

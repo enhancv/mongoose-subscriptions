@@ -653,7 +653,7 @@ describe(
                 });
         });
 
-        it("Should correctly apply refundProcessor", function() {
+        it("Should correctly apply voidProcessor", function() {
             const spy = sinon.stub(this.processor, "voidTransaction").resolves(this.customer);
 
             return this.customer.voidProcessor(this.processor, "transaction-id").then(customer => {

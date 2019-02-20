@@ -23,6 +23,10 @@ class AbstractProcessor extends EventEmitter {
     refundTransaction(customer, transactionId, amount) {
         this.isNotImplemented("Refund transaction");
     }
+
+    voidTransaction(customer, transactionId) {
+        this.isNotImplemented("Void transaction");
+    }
 }
 
 module.exports = AbstractProcessor;
