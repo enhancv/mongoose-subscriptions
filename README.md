@@ -192,6 +192,7 @@ Methods that change the state in the processor (e.g. braintree). Take `processor
 | --------------------------------------------------------| ----------------------------------------|
 | `.cancelProcessor(processor, subscriptionId)`           | perform a subscription cancel and load the result into the current customer |
 | `.refundProcessor(processor, transactionId, [amount])`  | perform a full refund on a given transaciton, or a partial refund if "amount" is passed. |
+| `.voidProcessor(processor, transactionId)`              | perform a void on a given transaciton |
 | `.loadProcessor(processor)`                             | load all the data about the customer (subs, transactions, payment methods) from the processor |
 | `.saveProcessor(processor)`                             | save the current state of the customer object in the processor, creating addresses, payment methods and subscriptions, potentially doing transactions. |
 
