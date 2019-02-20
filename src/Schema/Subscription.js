@@ -170,7 +170,7 @@ Subscription.method("inBillingPeriod", function inBillingPeriod(activeDate) {
     const startOfDay = new XDate(date, true).clearTime();
     const endOfDay = new XDate(date, true).addDays(1).clearTime();
 
-    if (this.isTrial && startOfDay <= this.createdAt) {
+    if (this.isTrial && startOfDay <= this.firstBillingDate) {
         return true;
     } else if (this.createdAt && this.paidThroughDate) {
         const start = this.createdAt;
