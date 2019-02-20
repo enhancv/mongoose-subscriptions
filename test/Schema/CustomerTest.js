@@ -653,6 +653,16 @@ describe(
                 });
         });
 
+        it("Should correctly apply voidProcessor", function() {
+            const spy = sinon.stub(this.processor, "voidTransaction").resolves(this.customer);
+
+            return this.customer.voidProcessor(this.processor, "transaction-id").then(customer => {
+                assert.equal(customer, this.customer);
+                sinon.assert.calledOnce(spy);
+                sinon.assert.calledWith(spy, this.customer, "transaction-id");
+            });
+        });
+
         it("Should correctly apply loadProcessor", function() {
             const spy = sinon.stub(this.processor, "load").resolves(this.customer);
 

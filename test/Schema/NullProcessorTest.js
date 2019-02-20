@@ -6,7 +6,7 @@ const NullProcessor = main.NullProcessor;
 const Customer = main.Customer;
 
 describe("NullProcessor", function() {
-    const methods = ["load", "save", "cancelSubscription", "refundTransaction"];
+    const methods = ["load", "save", "cancelSubscription", "refundTransaction", "voidTransaction"];
 
     methods.forEach(function(method) {
         it(`Should have ${method} method`, function() {

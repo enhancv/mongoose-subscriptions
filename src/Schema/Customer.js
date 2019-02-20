@@ -110,6 +110,14 @@ Customer.method("refundProcessor", function refundProcessor(processor, transacti
         .then(customer => customer.clearSnapshotOriginal().save());
 });
 
+Customer.method("voidProcessor", function voidProcessor(processor, transactionId) {
+    this.setSnapshotOriginal();
+
+    return processor
+        .voidTransaction(this, transactionId)
+        .then(customer => customer.clearSnapshotOriginal().save());
+});
+
 Customer.method("loadProcessor", function loadProcessor(processor) {
     if (!this.processor.id) {
         return this.save();
