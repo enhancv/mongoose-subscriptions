@@ -745,8 +745,8 @@ describe(
                 ],
                 nowDate: new Date("2017-07-26:08:23.000Z"),
                 expectedActive: [],
-                expectedValid: ["one"],
-                expectedSubscription: "one",
+                expectedValid: [],
+                expectedSubscription: null,
             },
             {
                 name: "Paid through date different than billingPeriodEndDate",
@@ -1563,11 +1563,12 @@ describe(
                         paymentMethodId: "BJFRxkDS0QW",
                         paidThroughDate: new Date("2017-09-28T00:00:00.000Z"),
                         billingPeriodStartDate: new Date("2017-08-29T00:00:00.000Z"),
+                        createdAt: new Date("2017-08-29T00:00:00.000Z"),
                         billingPeriodEndDate: new Date("2017-09-28T00:00:00.000Z"),
                         nextBillingDate: new Date("2017-09-29T00:00:00.000Z"),
                         trialDuration: 3,
                         trialDurationUnit: "month",
-                        isTrial: true,
+                        isTrial: false,
                         statusHistory: [
                             {
                                 timestamp: new Date("2017-09-04T21:56:51.000Z"),
@@ -1593,7 +1594,7 @@ describe(
                 },
                 nowDate: new Date("2017-09-04T21:56:53.000Z"),
                 expected: {
-                    firstBillingDate: new Date("2017-08-29"),
+                    firstBillingDate: new Date("2017-09-28"),
                     discount: false,
                 },
             },
