@@ -653,16 +653,14 @@ describe(
                 });
         });
 
-         it("Should correctly apply refundProcessor", function() {
+        it("Should correctly apply refundProcessor", function() {
             const spy = sinon.stub(this.processor, "voidTransaction").resolves(this.customer);
 
-            return this.customer
-                .voidProcessor(this.processor, "transaction-id")
-                .then(customer => {
-                    assert.equal(customer, this.customer);
-                    sinon.assert.calledOnce(spy);
-                    sinon.assert.calledWith(spy, this.customer, "transaction-id");
-                });
+            return this.customer.voidProcessor(this.processor, "transaction-id").then(customer => {
+                assert.equal(customer, this.customer);
+                sinon.assert.calledOnce(spy);
+                sinon.assert.calledWith(spy, this.customer, "transaction-id");
+            });
         });
 
         it("Should correctly apply loadProcessor", function() {
