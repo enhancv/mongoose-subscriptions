@@ -1647,6 +1647,7 @@ describe(
                     const result = customer.addSubscription(
                         newPlan,
                         customer.defaultPaymentMethod(),
+                        null,
                         nowDate
                     );
                     const resultDiscount = result.discounts[0] ? result.discounts[0].amount : false;

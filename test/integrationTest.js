@@ -315,7 +315,7 @@ describe(
 
                     user.resetProcessor();
                     user.cancelSubscriptions();
-                    user.addSubscription(plan, user.defaultPaymentMethod(), now);
+                    user.addSubscription(plan, user.defaultPaymentMethod(), null, now);
 
                     return user.saveProcessor(processor);
                 })

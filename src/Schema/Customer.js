@@ -244,7 +244,12 @@ Customer.method("addPaymentMethodNonce", function addPaymentMethodNonce(nonce, a
     return paymentMethod;
 });
 
-Customer.method("addSubscription", function addSubscription(plan, paymentMethod, activeDate) {
+Customer.method("addSubscription", function addSubscription(
+    plan,
+    paymentMethod,
+    descriptor,
+    activeDate
+) {
     const date = activeDate || new Date();
     const nonTrialSubs = this.validSubscriptions(date).filter(
         item => !(item.isTrial && item.processor.state === ProcessorItem.LOCAL)
@@ -260,7 +265,7 @@ Customer.method("addSubscription", function addSubscription(plan, paymentMethod,
         .filter(item => item.plan.level < plan.level)
         .filter(item => item.processor.state !== ProcessorItem.LOCAL);
 
-    let subscription = this.subscriptions.create({
+    const newSubscription = {
         plan,
         firstBillingDate: waitForSubs.length
             ? waitForSubs[0].isTrial
@@ -269,7 +274,13 @@ Customer.method("addSubscription", function addSubscription(plan, paymentMethod,
             : null,
         price: plan.price,
         createdAt: date,
-    });
+    };
+
+    if (descriptor) {
+        newSubscription.descriptor = descriptor;
+    }
+
+    let subscription = this.subscriptions.create(newSubscription);
 
     if (!waitForSubs.length) {
         subscription = subscription.addDiscounts(newSub => [
