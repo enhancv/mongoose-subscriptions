@@ -244,7 +244,12 @@ Customer.method("addPaymentMethodNonce", function addPaymentMethodNonce(nonce, a
     return paymentMethod;
 });
 
-Customer.method("addSubscription", function addSubscription(plan, paymentMethod, descriptor, activeDate) {
+Customer.method("addSubscription", function addSubscription(
+    plan,
+    paymentMethod,
+    descriptor,
+    activeDate
+) {
     const date = activeDate || new Date();
     const nonTrialSubs = this.validSubscriptions(date).filter(
         item => !(item.isTrial && item.processor.state === ProcessorItem.LOCAL)
