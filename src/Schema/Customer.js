@@ -26,7 +26,7 @@ const Customer = new mongoose.Schema({
         required: true,
         lowercase: true,
         trim: true,
-        match: /^([\w-.+]+@([\w-]+\.)+[\w-]{2,6})?$/,
+        match: /^([\w-.+]+@([\w-]+\.)+[\w-]{2,10})?$/,
     },
     transactionStartedAt: Date,
     lastProcessorSave: Date,
