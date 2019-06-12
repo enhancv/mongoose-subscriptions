@@ -1,6 +1,6 @@
 {
     "name": "mongoose-subscriptions",
-    "version": "2.8.3",
+    "version": "2.8.4",
     "description": "Processor agnostic payment subscription backend",
     "main": "src/index.js",
     "repository": "git@github.com:enhancv/mongoose-subscriptions.git",
@@ -8,6 +8,8 @@
     "license": "MIT",
     "dependencies": {
         "mongoose-originals": "^2.0.1",
+        "mongoose-subscriptions": "^2.8.3",
+        "mongoose-subscriptions-braintree": "^1.8.3",
         "shortid": "^2.2.8",
         "xdate": "^0.8.2"
     },

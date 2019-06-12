@@ -257,7 +257,10 @@ Customer.method("addSubscription", function addSubscription(
 
     const waitForSubs = this.validSubscriptions(date)
         .filter(
-            item => item.plan.level >= plan.level && item.status !== SubscriptionStatus.PAST_DUE
+            item =>
+                item.plan.level >= plan.level &&
+                item.status !== SubscriptionStatus.PAST_DUE &&
+                item.deleted
         )
         .sort((a, b) => (b.billingPeriodEndDate < a.billingPeriodEndDate ? -1 : 1));
 
